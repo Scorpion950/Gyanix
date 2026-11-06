@@ -9,4 +9,5 @@ export * from './ai.js';
 export * from './coding.js';
 export * from './socialFeed.js';
 export * from './messaging.js';
+export * from './rooms.js';
 

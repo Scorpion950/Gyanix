@@ -13,6 +13,7 @@ import { aiRouter } from './routes/ai.js';
 import { codingRouter } from './routes/coding.js';
 import { socialFeedRouter } from './routes/socialFeed.js';
 import { messagingRouter } from './routes/messaging.js';
+import { roomsRouter } from './routes/rooms.js';
 import { env } from './config/env.js';
 
 export function createApp(): express.Application {
@@ -66,6 +67,7 @@ export function createApp(): express.Application {
   app.use('/api/coding', codingRouter);
   app.use('/api/feed', socialFeedRouter);
   app.use('/api/messages', messagingRouter);
+  app.use('/api/rooms', roomsRouter);
 
   // ─── Global error handler (must be last) ──────────────────────────────────
   app.use(errorHandler);

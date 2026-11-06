@@ -66,7 +66,7 @@ const navGroups: NavGroup[] = [
   {
     label: 'Together',
     items: [
-      { label: 'Study Rooms', to: '/rooms', icon: BookMarked, deferred: true },
+      { label: 'Study Rooms', to: '/rooms', icon: BookMarked },
       { label: 'Messages', to: '/messages', icon: MessageSquare },
     ],
   },

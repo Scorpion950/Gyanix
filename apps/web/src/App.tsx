@@ -21,6 +21,8 @@ import { FeedPage } from './features/feed/FeedPage.tsx';
 import { CommunitiesListPage } from './features/feed/CommunitiesListPage.tsx';
 import { ProjectShowcasePage } from './features/feed/ProjectShowcasePage.tsx';
 import { MessagesPage } from './features/messages/MessagesPage.tsx';
+import { StudyRoomsListPage } from './features/rooms/StudyRoomsListPage.tsx';
+import { StudyRoomWorkspace } from './features/rooms/StudyRoomWorkspace.tsx';
 import { DesignSystemPage } from './routes/DesignSystemPage.tsx';
 import { NotFoundPage } from './routes/NotFoundPage.tsx';
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx';
@@ -120,6 +122,8 @@ export default function App() {
         <Route path="/communities" element={<CommunitiesListPage />} />
         <Route path="/projects" element={<ProjectShowcasePage />} />
         <Route path="/messages" element={<MessagesPage />} />
+        <Route path="/rooms" element={<StudyRoomsListPage />} />
+        <Route path="/rooms/:id" element={<StudyRoomWorkspace />} />
       </Route>
 
       {/* Design system — dev only */}
