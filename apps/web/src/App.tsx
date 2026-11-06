@@ -24,6 +24,7 @@ import { MessagesPage } from './features/messages/MessagesPage.tsx';
 import { StudyRoomsListPage } from './features/rooms/StudyRoomsListPage.tsx';
 import { StudyRoomWorkspace } from './features/rooms/StudyRoomWorkspace.tsx';
 import { ChallengesPage } from './features/challenges/ChallengesPage.tsx';
+import { AdminDashboardPage } from './features/admin/AdminDashboardPage.tsx';
 import { DesignSystemPage } from './routes/DesignSystemPage.tsx';
 import { NotFoundPage } from './routes/NotFoundPage.tsx';
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx';
@@ -126,6 +127,7 @@ export default function App() {
         <Route path="/rooms" element={<StudyRoomsListPage />} />
         <Route path="/rooms/:id" element={<StudyRoomWorkspace />} />
         <Route path="/challenges" element={<ChallengesPage />} />
+        <Route path="/admin" element={<AdminDashboardPage />} />
       </Route>
 
       {/* Design system — dev only */}

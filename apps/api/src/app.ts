@@ -15,6 +15,7 @@ import { socialFeedRouter } from './routes/socialFeed.js';
 import { messagingRouter } from './routes/messaging.js';
 import { roomsRouter } from './routes/rooms.js';
 import { searchChallengesRouter } from './routes/searchChallenges.js';
+import { adminRouter } from './routes/admin.js';
 import { env } from './config/env.js';
 
 export function createApp(): express.Application {
@@ -70,6 +71,7 @@ export function createApp(): express.Application {
   app.use('/api/messages', messagingRouter);
   app.use('/api/rooms', roomsRouter);
   app.use('/api', searchChallengesRouter);
+  app.use('/api/admin', adminRouter);
 
   // ─── Global error handler (must be last) ──────────────────────────────────
   app.use(errorHandler);

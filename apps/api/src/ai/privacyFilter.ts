@@ -6,13 +6,15 @@ export const privacyFilter = {
    */
   sanitizeText(text: string): string {
     return text
-      // Replace emails
-      .replace(/[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/g, '[REDACTED_EMAIL]')
       // Replace JWT / token patterns
       .replace(/eyJ[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}\.[a-zA-Z0-9_-]{10,}/g, '[REDACTED_TOKEN]')
       // Replace API key patterns
-      .replace(/AIzaSy[a-zA-Z0-9_-]{33}/g, '[REDACTED_KEY]')
-      .replace(/sk-[a-zA-Z0-9]{32,}/g, '[REDACTED_KEY]');
+      .replace(/AIzaSy[a-zA-Z0-9_-]{20,}/g, '[REDACTED_KEY]')
+      .replace(/sk-[a-zA-Z0-9]{20,}/g, '[REDACTED_KEY]')
+      // Replace emails
+      .replace(/[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+/g, '[REDACTED_EMAIL]')
+      // Replace phone numbers (with word boundaries)
+      .replace(/\b(?:\+\d{1,3}[- ]?)?\(?\d{3}\)?[- ]?\d{3}[- ]?\d{4}\b/g, '[REDACTED_PHONE]');
   },
 
   /**
