@@ -4,4 +4,5 @@ export * from './common.js';
 export * from './social.js';
 export * from './notification.js';
 export * from './learning.js';
+export * from './notes.js';
 

@@ -7,6 +7,8 @@ import { authRouter } from './routes/auth.js';
 import { usersRouter } from './routes/users.js';
 import { notificationsRouter } from './routes/notifications.js';
 import { learningPathsRouter } from './routes/learningPaths.js';
+import { notesRouter } from './routes/notes.js';
+import { analyticsRouter } from './routes/analytics.js';
 import { env } from './config/env.js';
 
 export function createApp(): express.Application {
@@ -54,6 +56,8 @@ export function createApp(): express.Application {
   app.use('/api/users', usersRouter);
   app.use('/api/notifications', notificationsRouter);
   app.use('/api/learning-paths', learningPathsRouter);
+  app.use('/api/notes', notesRouter);
+  app.use('/api/analytics', analyticsRouter);
 
   // ─── Global error handler (must be last) ──────────────────────────────────
   app.use(errorHandler);

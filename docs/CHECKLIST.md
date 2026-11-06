@@ -168,11 +168,31 @@
   - `LecturePlayerView.tsx`: Focus mode player per Section 0.7 (16:9 official YouTube iframe player on left, resizable tabs on right for Notes/Doubts/Next, active timestamp "Add note at 12:34" button, status selector, post-lecture reflection field, subtle saved indicator, 15-min inactivity check modal, keyboard shortcuts dialog)
   - Sidebar updated: "My Learning" active and un-deferred
 
-## Phase 3 — Progress Tracking, Notes & Analytics ⏳
-- ⏳ Timestamp-linked notes library
-- ⏳ Pomodoro timer & active session tracking (heartbeat)
-- ⏳ Inactivity prompt (15 min pause modal)
-- ⏳ Daily rollup analytics tables & basic achievements
+## Phase 3 — Progress Tracking, Notes & Analytics ✅
+- ✅ Migration 004: `notes_collections`, `notes`, `learning_sessions`, `daily_learning_rollups`, `achievements`, `user_achievements`, RLS policies
+- ✅ Notes Service (`notesService.ts`):
+  - CRUD notes with priority levels (Low, Medium, High)
+  - Timestamp-linked lecture notes (clickable chip jumping to exact video position)
+  - Notes collections & color tagging
+  - Full-text search and filtering by collection or lecture
+  - Silent autosave with debounce
+- ✅ Analytics Service (`analyticsService.ts`):
+  - Active-session tracking calculated on server from validated heartbeats (capped at max 60s per heartbeat to prevent inflation)
+  - Daily rollup tables (`daily_learning_rollups`)
+  - Streak computation from consecutive active dates (never punishing, gentle wording)
+  - Pomodoro block recording
+  - Automatic achievement milestones evaluation & awards
+- ✅ Backend API Routes:
+  - `/api/notes` (list, create, update, delete)
+  - `/api/notes/collections` (list, create)
+  - `/api/analytics/heartbeat` (validated session heartbeat)
+  - `/api/analytics/pomodoro` (log completed focus block)
+  - `/api/analytics/summary` (today's study minutes, streak, 7-day progress bars)
+  - `/api/analytics/achievements` (unlocked milestones & badges)
+- ✅ Frontend Views:
+  - `NotesLibraryPage.tsx`: 3-pane desktop view per Section 0.7 (Collections rail, searchable notes list with priority badges and timestamp chips, Markdown preview editor with autosave)
+  - `AnalyticsPage.tsx`: Focus Pomodoro timer widget (custom intervals, dial display, sound-free state transitions), habit consistency cards, verified achievements showcase
+  - Sidebar updated: "Notes" active and un-deferred
 
 ## Phase 4 — AI Learning System ⏳
 - ⏳ AI provider registry with Gemini Flash adapter
