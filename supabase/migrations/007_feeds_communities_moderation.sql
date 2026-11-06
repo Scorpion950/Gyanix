@@ -177,3 +177,4 @@ SELECT
     id
 FROM auth.users LIMIT 1
 ON CONFLICT (slug) DO NOTHING;
+

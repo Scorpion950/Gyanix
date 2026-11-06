@@ -79,3 +79,4 @@ CREATE POLICY "ai_usage_own" ON ai_usage_logs FOR ALL USING (user_id = auth.uid(
 CREATE POLICY "ai_roadmaps_own" ON ai_roadmaps FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
 CREATE POLICY "assessments_read_all" ON assessments FOR SELECT USING (true);
 CREATE POLICY "attempts_own" ON assessment_attempts FOR ALL USING (user_id = auth.uid()) WITH CHECK (user_id = auth.uid());
+

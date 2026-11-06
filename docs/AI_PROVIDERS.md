@@ -46,3 +46,4 @@ If the active provider encounters:
 3. Temporary 5xx outage
 
 `AIService` automatically logs the incident to `audit_logs` and attempts fallback to the next enabled provider in configured priority order, while strictly applying identical privacy masking filters. If all providers are exhausted, a friendly "AI capacity currently reached, try again shortly" notice is returned while keeping all non-AI platform features fully usable.
+

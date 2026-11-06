@@ -561,3 +561,4 @@ function PriorityBadge({ priority }: { priority: NotePriority }) {
       return <span className="text-2xs font-mono text-text-muted bg-surface-subtle px-1.5 py-0.2 rounded">Low</span>;
   }
 }
+

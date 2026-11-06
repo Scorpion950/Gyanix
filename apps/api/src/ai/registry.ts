@@ -36,3 +36,4 @@ export class AIRegistry {
 }
 
 export const aiRegistry = new AIRegistry();
+

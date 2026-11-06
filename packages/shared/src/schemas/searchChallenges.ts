@@ -14,3 +14,4 @@ export const LogChallengeDaySchema = z.object({
 });
 
 export type LogChallengeDayInput = z.infer<typeof LogChallengeDaySchema>;
+

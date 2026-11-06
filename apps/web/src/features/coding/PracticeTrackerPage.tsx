@@ -528,3 +528,4 @@ export function PracticeTrackerPage() {
     </div>
   );
 }
+

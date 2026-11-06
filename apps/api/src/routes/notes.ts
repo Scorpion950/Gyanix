@@ -101,3 +101,4 @@ notesRouter.post('/collections', async (req: Request, res: Response, next: NextF
     next(err);
   }
 });
+

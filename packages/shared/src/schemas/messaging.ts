@@ -22,3 +22,4 @@ export const SendMessageSchema = z.object({
 });
 
 export type SendMessageInput = z.infer<typeof SendMessageSchema>;
+

@@ -72,3 +72,4 @@ SELECT
     6
 FROM auth.users LIMIT 1
 ON CONFLICT DO NOTHING;
+

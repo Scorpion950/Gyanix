@@ -737,3 +737,4 @@ function StatusBadge({ status }: { status: LectureStatus }) {
       return <Badge variant="secondary" className="text-2xs">Not Started</Badge>;
   }
 }
+

@@ -31,3 +31,4 @@ Users can disable AI personalisation in **Settings -> Privacy**. When disabled:
 - **Deactivation:** Instantly hides user profiles, social relationships, and posts from public search and feeds.
 - **Permanent Deletion:** Permanently deletes account record, clears storage assets, and unlinks all generated activity.
 - **Data Export:** Accessible from Settings, generating a machine-readable JSON archive of user paths, notes, and activity.
+

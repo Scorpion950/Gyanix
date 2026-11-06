@@ -55,3 +55,4 @@ searchChallengesRouter.post('/challenges/log', requireAuth, async (req: Request,
     next(err);
   }
 });
+

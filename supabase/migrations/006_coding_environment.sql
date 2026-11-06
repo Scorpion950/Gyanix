@@ -143,3 +143,4 @@ VALUES
     'Lazy refill calculates tokens added = (now - lastRefill) * refillRate / 1000. Clamp tokens to min(capacity, current + added). Deduct requested tokens if available and update lastRefill timestamp.'
 )
 ON CONFLICT (slug) DO NOTHING;
+

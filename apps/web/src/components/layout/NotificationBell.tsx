@@ -240,3 +240,4 @@ function NotificationRow({ item, onClick }: { item: NotificationItem; onClick: (
     </button>
   );
 }
+

@@ -24,3 +24,4 @@ export const SaveWhiteboardSchema = z.object({
 });
 
 export type SaveWhiteboardInput = z.infer<typeof SaveWhiteboardSchema>;
+

@@ -415,3 +415,4 @@ export function LearningPathsListPage() {
     </div>
   );
 }
+

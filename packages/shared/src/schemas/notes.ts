@@ -38,3 +38,4 @@ export type UpdateNoteInput = z.infer<typeof UpdateNoteSchema>;
 export type CreateCollectionInput = z.infer<typeof CreateCollectionSchema>;
 export type HeartbeatSessionInput = z.infer<typeof HeartbeatSessionSchema>;
 export type PomodoroLogInput = z.infer<typeof PomodoroLogSchema>;
+

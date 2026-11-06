@@ -32,3 +32,4 @@ export interface AIProviderAdapter {
   isAvailable(): Promise<boolean>;
   complete(options: AIRequestOptions): Promise<AIResponse>;
 }
+

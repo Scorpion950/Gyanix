@@ -224,3 +224,4 @@ export const searchChallengesService = {
     return { log, isCompleted, nextDay };
   },
 };
+

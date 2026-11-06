@@ -259,3 +259,4 @@ CREATE POLICY "path_progress_own"
   ON user_path_progress FOR ALL
   USING (user_id = auth.uid())
   WITH CHECK (user_id = auth.uid());
+

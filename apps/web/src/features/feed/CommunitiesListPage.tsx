@@ -146,3 +146,4 @@ export function CommunitiesListPage() {
     </div>
   );
 }
+

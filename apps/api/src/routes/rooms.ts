@@ -90,3 +90,4 @@ roomsRouter.post('/:id/whiteboard', requireAuth, async (req: Request, res: Respo
     next(err);
   }
 });
+

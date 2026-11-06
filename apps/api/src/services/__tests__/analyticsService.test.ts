@@ -23,3 +23,4 @@ describe('analyticsService - anti-inflation heartbeats', () => {
     expect(cappedSeconds).toBe(1);
   });
 });
+

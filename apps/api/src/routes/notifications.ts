@@ -64,3 +64,4 @@ notificationsRouter.post('/mark-all-read', async (req: Request, res: Response, n
     next(err);
   }
 });
+

@@ -37,3 +37,4 @@ export const MarkNotificationReadSchema = z.object({
 export type NotificationType = z.infer<typeof NotificationTypeSchema>;
 export type NotificationItem = z.infer<typeof NotificationItemSchema>;
 export type MarkNotificationReadInput = z.infer<typeof MarkNotificationReadSchema>;
+

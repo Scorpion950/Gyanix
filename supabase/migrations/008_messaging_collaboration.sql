@@ -96,3 +96,4 @@ CREATE POLICY "Users send messages to their conversations"
 CREATE POLICY "Authors update own messages"
     ON public.messages FOR UPDATE
     USING (auth.uid() = sender_id);
+

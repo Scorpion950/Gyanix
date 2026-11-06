@@ -64,3 +64,4 @@ export type AddLectureInput = z.infer<typeof AddLectureSchema>;
 export type ImportPlaylistInput = z.infer<typeof ImportPlaylistSchema>;
 export type UpdateLectureProgressInput = z.infer<typeof UpdateLectureProgressSchema>;
 export type ReorderItemsInput = z.infer<typeof ReorderItemsSchema>;
+

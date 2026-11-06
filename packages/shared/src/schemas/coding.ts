@@ -70,3 +70,4 @@ export const AICodingAssistSchema = z.object({
 });
 
 export type AICodingAssistInput = z.infer<typeof AICodingAssistSchema>;
+

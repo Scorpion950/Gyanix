@@ -136,3 +136,4 @@ CREATE POLICY "rollups_own" ON daily_learning_rollups FOR ALL USING (user_id = a
 CREATE POLICY "achievements_read_all" ON achievements FOR SELECT USING (true);
 CREATE POLICY "user_achievements_read" ON user_achievements FOR SELECT USING (true);
 CREATE POLICY "user_achievements_insert_own" ON user_achievements FOR INSERT WITH CHECK (user_id = auth.uid());
+

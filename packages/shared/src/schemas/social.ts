@@ -43,3 +43,4 @@ export interface SocialRelationshipStatus {
   isBlocked: boolean;
   isBlockedBy: boolean;
 }
+

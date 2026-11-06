@@ -204,3 +204,4 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
     </div>
   );
 }
+

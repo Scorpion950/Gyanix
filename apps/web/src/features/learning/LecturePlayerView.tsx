@@ -593,3 +593,4 @@ export function LecturePlayerView() {
     </div>
   );
 }
+

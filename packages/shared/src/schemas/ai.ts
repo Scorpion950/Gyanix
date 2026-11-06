@@ -37,3 +37,4 @@ export type GenerateRoadmapInput = z.infer<typeof GenerateRoadmapSchema>;
 export type AssessmentQuestionType = z.infer<typeof AssessmentQuestionTypeSchema>;
 export type AssessmentQuestion = z.infer<typeof AssessmentQuestionSchema>;
 export type SubmitAssessmentInput = z.infer<typeof SubmitAssessmentSchema>;
+

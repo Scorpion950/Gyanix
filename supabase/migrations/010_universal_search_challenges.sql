@@ -78,3 +78,4 @@ VALUES
     'frontend'
 )
 ON CONFLICT (slug) DO NOTHING;
+
