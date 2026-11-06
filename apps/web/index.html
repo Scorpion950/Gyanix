@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Gyanix — AI-powered social and collaborative learning platform for students, developers and self-learners." />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph / Social preview -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Gyanix — Learn Together, Grow Together" />
+    <meta property="og:description" content="AI-powered collaborative learning platform combining the productivity of Notion with the community energy of Discord." />
+    <meta property="og:image" content="/og-image.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <title>Gyanix</title>
+
+    <!--
+      ⚠️  CRITICAL: Theme initialisation script.
+      This script runs synchronously BEFORE the first paint to prevent
+      Flash Of Wrong Theme (FOWT). It reads the user's persisted preference
+      and applies the class before any CSS or React code runs.
+      Do NOT move this to a module script or defer it.
+    -->
+    <script>
+      (function () {
+        const STORAGE_KEY = 'gyanix-theme';
+        const DEFAULT_THEME = 'system';
+
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME;
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          const useDark =
+            stored === 'dark' || (stored === 'system' && prefersDark);
+
+          if (useDark) {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+          document.documentElement.setAttribute('data-theme', stored);
+        } catch (_e) {
+          // localStorage not available (private mode) — use system preference
+          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+          }
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <!-- Skip to main content — accessibility -->
+    <a href="#main-content" class="skip-nav">Skip to content</a>
+
+    <div id="root"></div>
+
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

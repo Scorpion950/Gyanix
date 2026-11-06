@@ -1,0 +1,31 @@
+name: Supabase Keep-Alive
+
+# Supabase free-tier projects pause after 1 week of inactivity.
+# This workflow pings the project weekly to prevent pausing.
+# IMPORTANT: Set SUPABASE_PROJECT_URL in GitHub repository secrets.
+
+on:
+  schedule:
+    # Every Sunday at 00:00 UTC
+    - cron: '0 0 * * 0'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  keep-alive:
+    name: Ping Supabase project
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Ping Supabase REST endpoint
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            "${{ secrets.SUPABASE_PROJECT_URL }}/rest/v1/")
+          echo "Response status: $STATUS"
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 500 ]; then
+            echo "✓ Supabase project is active"
+          else
+            echo "⚠ Unexpected status: $STATUS"
+            exit 1
+          fi

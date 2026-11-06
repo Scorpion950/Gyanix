@@ -1,0 +1,254 @@
+/* ============================================================
+   Gyanix Design System — Global Styles & Design Tokens
+   Phase 1A — Foundation
+   ============================================================ */
+
+/* ─── Self-hosted Fonts ───────────────────────────────────────────────────── */
+/* InterVariable — UI body text */
+@import '@fontsource-variable/inter/index.css';
+/* Plus Jakarta Sans Variable — headings */
+@import '@fontsource-variable/plus-jakarta-sans/index.css';
+/* JetBrains Mono — code and timestamps */
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
+/* ─── Tailwind Directives ────────────────────────────────────────────────── */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Design Tokens (CSS Custom Properties) ─────────────────────────────── */
+/* Light mode tokens */
+@layer base {
+  :root {
+    /* Surfaces */
+    --background: 220 20% 97%;          /* #F7F8FB */
+    --surface: 0 0% 100%;              /* #FFFFFF */
+    --surface-raised: 0 0% 100%;       /* #FFFFFF */
+    --surface-subtle: 220 20% 95%;     /* #F1F3F8 */
+    --border: 220 20% 91%;             /* #E3E6EE */
+
+    /* Text */
+    --text: 230 42% 11%;               /* #0F1424 */
+    --text-secondary: 225 18% 36%;     /* #4A5168 */
+    --text-muted: 225 12% 43%;         /* #5F657B */
+
+    /* Primary (blue) */
+    --primary: 221 83% 53%;            /* #2563EB */
+    --primary-foreground: 0 0% 100%;
+
+    /* AI (violet) */
+    --ai: 263 70% 50%;                 /* #7C3AED */
+    --ai-foreground: 0 0% 100%;
+
+    /* Status */
+    --success: 142 72% 29%;            /* #15803D */
+    --success-foreground: 0 0% 100%;
+    --warning: 32 95% 36%;             /* #B45309 */
+    --warning-foreground: 0 0% 100%;
+    --danger: 0 72% 51%;               /* #DC2626 */
+    --danger-foreground: 0 0% 100%;
+
+    /* Progress metrics */
+    --progress-learning: 221 83% 53%;  /* Primary blue */
+    --progress-knowledge: 173 80% 32%; /* Teal #0D9488 */
+    --progress-practical: 20 90% 48%; /* Orange #EA580C */
+
+    /* Streak / achievement (amber) */
+    --streak: 33 92% 44%;              /* #D97706 */
+
+    /* Focus ring */
+    --ring: var(--primary);
+    --ring-offset: 2px;
+
+    /* Radius — tokens referenced in tailwind.config */
+    --radius-control: 0.5rem;
+    --radius-card: 0.75rem;
+    --radius-modal: 1rem;
+  }
+
+  /* ─── Dark Mode Tokens ──────────────────────────────────────────────────── */
+  .dark {
+    /* Surfaces — raised by lightness, NOT by shadow */
+    --background: 222 32% 7%;           /* #0B0E14 */
+    --surface: 222 30% 11%;             /* #121723 */
+    --surface-raised: 222 28% 15%;      /* #182030 */
+    --surface-subtle: 222 26% 17%;      /* #1B2231 */
+    --border: 222 24% 20%;              /* #232B3B */
+
+    /* Text — slightly desaturated */
+    --text: 220 30% 93%;                /* #E8ECF4 */
+    --text-secondary: 220 20% 71%;      /* #A6AFC3 */
+    --text-muted: 220 16% 59%;          /* #8089A0 */
+
+    /* Primary — lighter for dark backgrounds, use dark text on it */
+    --primary: 221 100% 68%;            /* #5B8DFF */
+    --primary-foreground: 222 32% 7%;   /* dark background as text */
+
+    /* AI (violet) — lighter */
+    --ai: 265 83% 76%;                  /* #A78BFA */
+    --ai-foreground: 222 32% 7%;
+
+    /* Status */
+    --success: 142 69% 58%;             /* #4ADE80 */
+    --success-foreground: 222 32% 7%;
+    --warning: 48 96% 56%;              /* #FBBF24 */
+    --warning-foreground: 222 32% 7%;
+    --danger: 0 91% 71%;               /* #F87171 */
+    --danger-foreground: 222 32% 7%;
+
+    /* Progress metrics — lighter for dark */
+    --progress-learning: 221 100% 68%;  /* Matches primary */
+    --progress-knowledge: 172 76% 51%; /* Teal #2DD4BF */
+    --progress-practical: 20 97% 61%; /* Orange #FB923C */
+
+    /* Streak */
+    --streak: 48 96% 56%;               /* #FBBF24 */
+  }
+}
+
+/* ─── Base Styles ────────────────────────────────────────────────────────── */
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    /* Prevent layout shift from scrollbar appearing */
+    scrollbar-gutter: stable;
+    /* Smooth scrolling — but only if user hasn't requested reduced motion */
+    @media (prefers-reduced-motion: no-preference) {
+      scroll-behavior: smooth;
+    }
+  }
+
+  body {
+    @apply bg-background text-text-default font-sans text-sm antialiased;
+    line-height: 1.4;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Prevent horizontal overflow on mobile */
+    overflow-x: hidden;
+  }
+
+  /* Reading context — longer line height */
+  .reading-context {
+    line-height: 1.6;
+  }
+
+  /* ─── Typography ─────────────────────────────────────────────────────────── */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold tracking-tight;
+    line-height: 1.25;
+  }
+
+  h1 { @apply text-3xl; }
+  h2 { @apply text-2xl; }
+  h3 { @apply text-xl; }
+  h4 { @apply text-lg; }
+  h5 { @apply text-md; }
+  h6 { @apply text-sm font-semibold; }
+
+  /* ─── Focus Ring ────────────────────────────────────────────────────────── */
+  /* Visible, 2px, 2px offset — WCAG 2.2 requirement */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+
+  /* ─── Tabular numerals for metrics ─────────────────────────────────────── */
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ─── Code and timestamps ──────────────────────────────────────────────── */
+  code, kbd, .font-mono {
+    @apply font-mono;
+  }
+
+  /* ─── Scrollbar styling (consistent across light/dark) ─────────────────── */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-text-muted;
+  }
+
+  /* ─── Selection colour ──────────────────────────────────────────────────── */
+  ::selection {
+    background-color: hsl(var(--primary) / 0.2);
+    color: hsl(var(--text));
+  }
+}
+
+/* ─── Utility Classes ────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Skip to content link (accessibility) */
+  .skip-nav {
+    @apply sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50;
+    @apply bg-primary text-primary-foreground px-4 py-2 rounded-control font-medium;
+  }
+
+  /* AI spark badge — faint violet surface */
+  .ai-surface {
+    background-color: hsl(var(--ai) / 0.08);
+    border-color: hsl(var(--ai) / 0.2);
+  }
+
+  /* Timestamp chip — mono pill */
+  .timestamp-chip {
+    @apply font-mono text-2xs px-1.5 py-0.5 rounded-full bg-surface-subtle text-text-secondary tabular-nums;
+    @apply hover:bg-primary hover:text-primary-foreground cursor-pointer transition-colors duration-micro;
+  }
+
+  /* Progress bars */
+  .progress-bar {
+    @apply h-1 rounded-full bg-surface-subtle overflow-hidden;
+  }
+  .progress-bar-fill {
+    @apply h-full rounded-full transition-all duration-300;
+  }
+
+  /* Card hover effect — border colour only, no shadow */
+  .card-interactive {
+    @apply border border-border rounded-card transition-colors duration-micro;
+    @apply hover:border-primary/40 cursor-pointer;
+  }
+
+  /* Focus mode — hide non-essential chrome */
+  .focus-mode .sidebar { display: none; }
+  .focus-mode .top-bar-extras { display: none; }
+
+  /* Density modes */
+  .density-focus { --spacing-multiplier: 0.75; }
+  .density-explore { --spacing-multiplier: 1; }
+  .density-connect { --spacing-multiplier: 0.875; }
+
+  /* Difficulty dots */
+  .difficulty-dot {
+    @apply w-2 h-2 rounded-full inline-block;
+  }
+  .difficulty-dot-filled {
+    @apply bg-primary;
+  }
+  .difficulty-dot-empty {
+    @apply bg-border;
+  }
+}
+
+/* ─── Reduced Motion ────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
