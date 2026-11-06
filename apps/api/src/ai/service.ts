@@ -8,62 +8,8 @@ import type {
   GenerateRoadmapInput,
   AssessmentQuestion,
 } from '@gyanix/shared';
-
-export function cleanTopic(raw: string): string {
-  if (!raw || typeof raw !== 'string') return 'Software Engineering';
-
-  // Remove common conversational prefixes & prompts
-  let cleaned = raw
-    .replace(/^(please\s+)?(give\s+me|generate|create|build|make|prepare|show\s+me|start)(\s+a|\s+an)?\s+/i, '')
-    .replace(/^(quiz|assessment|test|exam|questions|roadmap|curriculum|guide|course|overview|practice)\s+(for|on|about|of|in)\s+/i, '')
-    .replace(/^(quiz|assessment|test|questions|roadmap)\s+/i, '')
-    .replace(/\s+(quiz|assessment|test|exam|roadmap|questions)$/i, '')
-    .trim();
-
-  if (!cleaned) cleaned = raw.trim();
-
-  // Normalize common engineering acronyms and names
-  const acronyms: Record<string, string> = {
-    'dsa': 'Data Structures & Algorithms',
-    'java dsa': 'Java Data Structures & Algorithms',
-    'python dsa': 'Python Data Structures & Algorithms',
-    'cpp dsa': 'C++ Data Structures & Algorithms',
-    'js': 'JavaScript',
-    'ts': 'TypeScript',
-    'fe': 'Frontend Engineering',
-    'be': 'Backend Engineering',
-    'ml': 'Machine Learning',
-    'ai': 'Artificial Intelligence',
-    'dl': 'Deep Learning',
-    'os': 'Operating Systems',
-    'dbms': 'Database Management Systems',
-    'sys design': 'System Design',
-    'system design': 'System Design',
-    'react': 'React.js',
-    'reactjs': 'React.js',
-    'vue': 'Vue.js',
-    'vuejs': 'Vue.js',
-    'node': 'Node.js',
-    'nodejs': 'Node.js',
-    'nextjs': 'Next.js',
-    'next': 'Next.js',
-  };
-
-  const lower = cleaned.toLowerCase();
-  if (acronyms[lower]) {
-    return acronyms[lower];
-  }
-
-  // Capitalize words nicely if all lowercase
-  if (cleaned === cleaned.toLowerCase()) {
-    cleaned = cleaned
-      .split(' ')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
-  }
-
-  return cleaned;
-}
+import { cleanTopic } from './cleanTopic.js';
+export { cleanTopic };
 
 export function buildStageYouTubeRecommendations(cleanSubj: string, stageTitle: string, stageNum: number) {
   const sLower = cleanSubj.toLowerCase();

@@ -40,3 +40,4 @@ export const Youtube: React.FC<IconProps> = ({ size = 20, className = '', ...pro
     <path d="m10 15 5-3-5-3z" />
   </svg>
 );
+

@@ -480,6 +480,80 @@ export const communityFeedService = {
     }
   },
 
+  async updateCommunity(userId: string, communityId: string, input: { name?: string; description?: string }) {
+    try {
+      const updateData: Record<string, any> = {};
+      if (input.name) updateData['name'] = input.name;
+      if (input.description) updateData['description'] = input.description;
+      await supabaseAdmin.from('communities').update(updateData).eq('id', communityId);
+    } catch (_err) {}
+
+    const comm = inMemoryCommunities.find((c) => c.id === communityId);
+    if (comm) {
+      if (input.name) comm.name = input.name;
+      if (input.description) comm.description = input.description;
+      return comm;
+    }
+    return { id: communityId, ...input };
+  },
+
+  async getCommunityMembers(communityId: string) {
+    const defaultMembers = [
+      {
+        id: 'user-c1',
+        username: 'dev_priya',
+        display_name: 'Priya Sharma',
+        avatar_url: null,
+        joined_at: new Date(Date.now() - 3600000 * 24 * 3).toISOString(),
+        learning_path: 'Distributed Systems & Go Fundamentals',
+        progress_pct: 68,
+      },
+      {
+        id: 'user-c2',
+        username: 'marcus_k',
+        display_name: 'Marcus Krause',
+        avatar_url: null,
+        joined_at: new Date(Date.now() - 3600000 * 24 * 7).toISOString(),
+        learning_path: 'PostgreSQL Internals & Query Optimization',
+        progress_pct: 42,
+      },
+      {
+        id: 'user-c3',
+        username: 'ananya_r',
+        display_name: 'Ananya Rao',
+        avatar_url: null,
+        joined_at: new Date(Date.now() - 3600000 * 24 * 12).toISOString(),
+        learning_path: 'Full-Stack Modern React & TypeScript',
+        progress_pct: 85,
+      },
+    ];
+
+    try {
+      const { data } = await supabaseAdmin
+        .from('community_members')
+        .select(`
+          user_id,
+          created_at,
+          profiles:user_id (id, username, display_name, avatar_url)
+        `)
+        .eq('community_id', communityId);
+
+      if (data && data.length > 0) {
+        return data.map((d: any) => ({
+          id: d.profiles?.id || d.user_id,
+          username: d.profiles?.username || 'member',
+          display_name: d.profiles?.display_name || 'Community Member',
+          avatar_url: d.profiles?.avatar_url || null,
+          joined_at: d.created_at,
+          learning_path: 'Active Learning Path',
+          progress_pct: 50,
+        }));
+      }
+    } catch (_err) {}
+
+    return defaultMembers;
+  },
+
   /**
    * Projects Showcase
    */

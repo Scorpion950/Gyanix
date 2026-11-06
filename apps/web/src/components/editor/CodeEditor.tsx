@@ -79,9 +79,12 @@ export function CodeEditor({
         'rounded-xl border border-border bg-[#0B0E14] text-[#E8ECF4] overflow-hidden flex flex-col font-mono text-xs',
         className
       )}
+      style={{
+        height: height ?? minHeight,
+      }}
     >
       {/* Editor Header Bar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-[#232B3B] bg-[#121723] select-none">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-[#232B3B] bg-[#121723] select-none shrink-0">
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-[#DC2626]/80" />
@@ -105,14 +108,8 @@ export function CodeEditor({
         </div>
       </div>
 
-      {/* Editor Body: Line numbers + Textarea */}
-      <div
-        className="relative flex flex-1 overflow-hidden"
-        style={{
-          height: height ?? '100%',
-          minHeight: height ? undefined : minHeight,
-        }}
-      >
+      {/* Editor Body: Line numbers + Textarea with VS Code scroll */}
+      <div className="relative flex flex-1 min-h-0 overflow-hidden">
         {/* Line numbers gutter */}
         <div
           ref={gutterRef}

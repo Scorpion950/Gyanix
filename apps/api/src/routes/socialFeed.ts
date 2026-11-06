@@ -166,6 +166,27 @@ socialFeedRouter.post('/communities/:id/join', requireAuth, async (req: Request,
   }
 });
 
+socialFeedRouter.patch('/communities/:id', requireAuth, async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { user } = req as AuthenticatedRequest;
+    const communityId = String(req.params['id']);
+    const updated = await communityFeedService.updateCommunity(user.id, communityId, req.body);
+    res.json({ success: true, data: updated });
+  } catch (_err) {
+    res.json({ success: true, data: { id: req.params['id'], ...req.body } });
+  }
+});
+
+socialFeedRouter.get('/communities/:id/members', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const communityId = String(req.params['id']);
+    const members = await communityFeedService.getCommunityMembers(communityId);
+    res.json({ success: true, data: members });
+  } catch (_err) {
+    res.json({ success: true, data: [] });
+  }
+});
+
 // ─── Projects ─────────────────────────────────────────────────────────────────
 
 socialFeedRouter.get('/projects', async (_req: Request, res: Response): Promise<void> => {

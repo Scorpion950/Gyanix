@@ -28,16 +28,15 @@
     <script>
       (function () {
         const STORAGE_KEY = 'gyanix-theme';
-        const DEFAULT_THEME = 'dark';
 
         try {
           const raw = localStorage.getItem(STORAGE_KEY);
-          let theme = DEFAULT_THEME;
+          let theme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
           if (raw) {
             if (raw.startsWith('{')) {
               const parsed = JSON.parse(raw);
-              theme = parsed?.state?.theme || DEFAULT_THEME;
-            } else {
+              if (parsed?.state?.theme) theme = parsed.state.theme;
+            } else if (raw === 'dark' || raw === 'light') {
               theme = raw;
             }
           }

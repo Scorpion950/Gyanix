@@ -186,7 +186,7 @@ export const searchChallengesService = {
       if (!error && challenges && challenges.length > 0) {
         challengesList = challenges;
       }
-    } catch (_err) {}
+    } catch (_err) { }
 
     let userParticipations: Record<string, any> = {};
 
@@ -202,7 +202,7 @@ export const searchChallengesService = {
             userParticipations[p.challenge_id] = p;
           }
         }
-      } catch (_err) {}
+      } catch (_err) { }
 
       // Fallback in-memory participations
       const userParts = inMemoryParticipants.get(userId) || [];
@@ -263,7 +263,7 @@ export const searchChallengesService = {
         inMemoryChallenges.unshift({ ...newChallenge, ...data });
         return { ...newChallenge, ...data };
       }
-    } catch (_err) {}
+    } catch (_err) { }
 
     inMemoryChallenges.unshift(newChallenge);
 
@@ -310,7 +310,7 @@ export const searchChallengesService = {
       if (input.category) updateData['category'] = input.category;
 
       await supabaseAdmin.from('challenges').update(updateData).eq('id', challengeId);
-    } catch (_err) {}
+    } catch (_err) { }
 
     return ch || { id: challengeId, ...input };
   },
@@ -392,7 +392,7 @@ export const searchChallengesService = {
           user_id: userId,
           current_day: 1,
         });
-    } catch (_err) {}
+    } catch (_err) { }
 
     return newPart;
   },

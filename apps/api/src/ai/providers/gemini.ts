@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import type { AIProviderAdapter, AIRequestOptions, AIResponse, AIProviderCapabilities } from '../types.js';
+import { cleanTopic } from '../cleanTopic.js';
 
 export class GeminiAdapter implements AIProviderAdapter {
   id = 'gemini';
@@ -30,7 +31,7 @@ export class GeminiAdapter implements AIProviderAdapter {
     }
 
     try {
-      const modelName = process.env['GEMINI_MODEL'] || 'gemini-1.5-flash';
+      const modelName = process.env['GEMINI_MODEL'] || 'gemini-1.5-flash-latest';
       const modelConfig: any = {
         model: modelName,
         generationConfig: {
@@ -67,15 +68,51 @@ export class GeminiAdapter implements AIProviderAdapter {
   private generateMockFallback(options: AIRequestOptions): AIResponse {
     const userMsg = options.messages.find((m) => m.role === 'user')?.content || '';
     const topicMatch = userMsg.match(/for\s+(.+)$/i);
-    const topic = (topicMatch && topicMatch[1]) ? topicMatch[1].trim() : 'Software Engineering';
+    const rawTopic = (topicMatch && topicMatch[1]) ? topicMatch[1].trim() : userMsg;
+    const topic = cleanTopic(rawTopic);
 
     if (options.jsonMode) {
       // If assessment requested
       if (options.systemPrompt?.includes('assessment') || userMsg.toLowerCase().includes('assessment')) {
+        const isDsa = topic.toLowerCase().includes('dsa') || topic.toLowerCase().includes('data structure') || topic.toLowerCase().includes('algorithm');
+        
         return {
           content: JSON.stringify({
             title: `${topic} Skill Assessment`,
-            questions: [
+            questions: isDsa ? [
+              {
+                id: 'q1',
+                type: 'mcq',
+                prompt: `In ${topic}, what is the worst-case time complexity of searching an element in a standard unbalanced Binary Search Tree (BST)?`,
+                options: [
+                  'O(n) when the tree degenerates into a linear linked list',
+                  'O(1) with constant cache lookup',
+                  'O(log n) guaranteed under all insertion orders',
+                  'O(n log n) due to internal heap rebalancing',
+                ],
+                correctOptionIndex: 0,
+                explanation: `In an unbalanced BST, inserting sorted elements results in a skewed tree equivalent to a linked list, degrading search time to O(n). Self-balancing trees like AVL or Red-Black trees prevent this.`,
+                difficulty: 3,
+                metricTarget: 'knowledge',
+              },
+              {
+                id: 'q2',
+                type: 'conceptual',
+                prompt: `Explain the fundamental trade-off between an Array-backed list (like ArrayList) and a Doubly-Linked List in ${topic}.`,
+                explanation: `Arrays provide O(1) random access via memory indexing and superior CPU cache locality, but incur O(n) resizing/shifting costs for middle insertions. Linked lists offer O(1) pointer updates at known nodes but have O(n) sequential traversal and per-node memory overhead.`,
+                difficulty: 3,
+                metricTarget: 'knowledge',
+              },
+              {
+                id: 'q3',
+                type: 'code_scenario',
+                prompt: `Review the following binary search snippet. How would you prevent 32-bit integer overflow when calculating the midpoint?`,
+                codeSnippet: `// Classic binary search midpoint\nint mid = (low + high) / 2;\nif (arr[mid] == target) return mid;`,
+                explanation: `When low + high exceeds Integer.MAX_VALUE (2^31 - 1), it overflows to a negative integer. Calculate the midpoint as: low + (high - low) / 2, or using the unsigned bitshift (low + high) >>> 1.`,
+                difficulty: 3,
+                metricTarget: 'practical',
+              },
+            ] : [
               {
                 id: 'q1',
                 type: 'mcq',

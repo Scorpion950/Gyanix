@@ -210,10 +210,10 @@ export function CodePlaygroundPage() {
         </div>
       </div>
 
-      {/* Main Split Grid: Editor + Terminal/Preview */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      {/* Main Split Grid: Editor + Terminal/Preview (50/50 equal window size) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* Left: Code Editor */}
-        <div className="lg:col-span-7 space-y-3">
+        <div className="space-y-3 flex flex-col">
           <div className="flex items-center justify-between text-xs text-text-muted px-1">
             <span className="font-semibold uppercase tracking-wider">Source Editor</span>
             <span className="font-mono text-[11px]">Press Ctrl+Enter to Run</span>
@@ -223,14 +223,14 @@ export function CodePlaygroundPage() {
             value={code}
             onChange={handleCodeChange}
             language={language === 'web' ? 'html' : 'javascript'}
-            height="560px"
+            height="580px"
             onRun={handleRun}
-            className="h-[560px]"
+            className="h-[580px]"
           />
         </div>
 
-        {/* Right: Output Console or Web Preview */}
-        <div className="lg:col-span-5 space-y-3">
+        {/* Right: Output Console or Web Preview (Exact same dimensions) */}
+        <div className="space-y-3 flex flex-col">
           <div className="flex items-center justify-between text-xs text-text-muted px-1">
             <span className="font-semibold uppercase tracking-wider flex items-center gap-1.5">
               {language === 'web' ? <Eye className="w-3.5 h-3.5" /> : <Terminal className="w-3.5 h-3.5" />}
@@ -244,16 +244,16 @@ export function CodePlaygroundPage() {
           </div>
 
           {language === 'web' ? (
-            <div className="rounded-xl border border-border bg-surface overflow-hidden h-[560px]">
+            <div className="rounded-xl border border-border bg-surface overflow-hidden h-[580px] flex flex-col shadow-xs">
               <iframe
                 title="Web Preview"
                 srcDoc={code}
                 sandbox="allow-scripts allow-modals"
-                className="w-full h-full border-none bg-white"
+                className="w-full h-full border-none bg-white flex-1"
               />
             </div>
           ) : (
-            <div className="rounded-xl border border-border bg-[#0B0E14] text-[#E8ECF4] h-[560px] p-4 font-mono text-xs overflow-auto flex flex-col justify-between">
+            <div className="rounded-xl border border-border bg-[#0B0E14] text-[#E8ECF4] h-[580px] p-4 font-mono text-xs overflow-auto flex flex-col justify-between shadow-xs">
               <pre className="whitespace-pre-wrap leading-relaxed text-[#A6AFC3] overflow-y-auto flex-1">
                 {output || '// Console output will appear here after execution.'}
               </pre>
