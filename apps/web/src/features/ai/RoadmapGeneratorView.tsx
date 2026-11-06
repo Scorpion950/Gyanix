@@ -101,7 +101,9 @@ export function RoadmapGeneratorView() {
         body: JSON.stringify({
           topic: topic.trim(),
           targetRole: targetRole.trim() || undefined,
-          currentSkillLevel: skillLevel,
+          currentSkillLevel: (
+            { 1: 'beginner', 2: 'beginner', 3: 'intermediate', 4: 'advanced', 5: 'expert' }[skillLevel] || 'intermediate'
+          ),
         }),
       });
 

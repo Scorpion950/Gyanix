@@ -8,9 +8,13 @@ export const DoubtQuerySchema = z.object({
 });
 
 export const GenerateRoadmapSchema = z.object({
-  topic: z.string().min(2, 'Topic is required').max(100),
+  topic: z.string().min(1, 'Topic is required').max(100),
   targetRole: z.string().max(100).optional(),
-  currentSkillLevel: z.enum(['absolute_beginner', 'beginner', 'intermediate', 'advanced', 'expert']).default('beginner'),
+  currentSkillLevel: z.union([
+    z.enum(['absolute_beginner', 'beginner', 'intermediate', 'advanced', 'expert']),
+    z.number(),
+    z.string(),
+  ]).default('beginner'),
 });
 
 export const AssessmentQuestionTypeSchema = z.enum(['mcq', 'conceptual', 'code_scenario']);

@@ -30,8 +30,9 @@ export class GeminiAdapter implements AIProviderAdapter {
     }
 
     try {
+      const modelName = process.env['GEMINI_MODEL'] || 'gemini-1.5-flash';
       const modelConfig: any = {
-        model: 'gemini-3.8-flash',
+        model: modelName,
         generationConfig: {
           temperature: options.temperature ?? 0.7,
           maxOutputTokens: options.maxTokens ?? 1024,
@@ -53,7 +54,7 @@ export class GeminiAdapter implements AIProviderAdapter {
 
       return {
         content: text,
-        model: 'gemini-3.8-flash',
+        model: modelName,
         provider: 'gemini',
         tokensUsed: result.response.usageMetadata?.totalTokenCount || 0,
       };
