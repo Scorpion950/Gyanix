@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '../config/supabase.js';
 import { aiRegistry } from '../ai/registry.js';
 import { privacyFilter } from '../ai/privacyFilter.js';
+import { DSA_PROBLEMS_CATALOG, type DSAProblem } from './dsaProblemsData.js';
 import type {
   CreatePracticeEntryInput,
   UpdatePracticeEntryInput,
@@ -37,38 +38,22 @@ export const codingService = {
       if (!error && data && data.length > 0) return data;
     } catch (_err) {}
 
-    return [
-      {
-        id: 'prob-two-sum',
-        title: 'Two Sum',
-        slug: 'two-sum',
-        category: 'Arrays & Hashing',
-        difficulty: 1,
-        acceptance_rate: 52.4,
-        tags: ['Array', 'Hash Table'],
-        is_daily_challenge: true,
-      },
-      {
-        id: 'prob-lru-cache',
-        title: 'LRU Cache Implementation',
-        slug: 'lru-cache',
-        category: 'Design & Data Structures',
-        difficulty: 3,
-        acceptance_rate: 41.2,
-        tags: ['Design', 'Hash Table', 'Linked List'],
-        is_daily_challenge: false,
-      },
-      {
-        id: 'prob-course-schedule',
-        title: 'Course Schedule Topological Sort',
-        slug: 'course-schedule',
-        category: 'Graphs',
-        difficulty: 3,
-        acceptance_rate: 46.8,
-        tags: ['Graph', 'Topological Sort', 'DFS'],
-        is_daily_challenge: false,
-      },
-    ];
+    let list = DSA_PROBLEMS_CATALOG;
+    if (filters?.category && filters.category !== 'all') {
+      list = list.filter((p) => p.category.toLowerCase() === filters.category!.toLowerCase());
+    }
+    if (filters?.difficulty) {
+      list = list.filter((p) => p.difficulty === filters.difficulty);
+    }
+    if (filters?.search) {
+      const q = filters.search.toLowerCase();
+      list = list.filter((p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.category.toLowerCase().includes(q) ||
+        p.tags.some((t) => t.toLowerCase().includes(q))
+      );
+    }
+    return list;
   },
 
   async getProblemBySlug(slug: string) {
@@ -81,6 +66,14 @@ export const codingService = {
 
       if (!error && data) return data;
     } catch (_err) {}
+
+    const found = DSA_PROBLEMS_CATALOG.find((p) => p.slug === slug);
+    if (found) {
+      return {
+        ...found,
+        starter_code: found.starter_templates,
+      };
+    }
 
     return {
       id: 'prob-' + slug,

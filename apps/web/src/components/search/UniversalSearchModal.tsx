@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -10,6 +11,7 @@ import {
   Loader2,
   Sparkles,
   FolderKanban,
+  ArrowRight,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore.ts';
 
@@ -39,6 +41,10 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
   useEffect(() => {
     if (!isOpen) return;
 
+    // Prevent background scrolling
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
     setTimeout(() => inputRef.current?.focus(), 50);
     setQuery('');
     setResults([]);
@@ -52,9 +58,14 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
       }
     };
 
-    // Use capture phase (true) so ESC is caught regardless of what element currently has focus
+    // Use capture phase (true) on both window and document so ESC is caught regardless of what element currently has focus
     window.addEventListener('keydown', handleGlobalKeyDown, true);
-    return () => window.removeEventListener('keydown', handleGlobalKeyDown, true);
+    document.addEventListener('keydown', handleGlobalKeyDown, true);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleGlobalKeyDown, true);
+      document.removeEventListener('keydown', handleGlobalKeyDown, true);
+    };
   }, [isOpen, onClose]);
 
   // Debounced search
@@ -134,10 +145,72 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
     }
   };
 
-  if (!isOpen) return null;
+  const scopePills = [
+    { label: 'Paths & Lectures', query: 'Path', url: '/learning' },
+    { label: 'Problems', query: 'Problem', url: '/practice' },
+    { label: 'Notes', query: 'Note', url: '/notes' },
+    { label: 'AI Roadmaps', query: 'Roadmap', url: '/roadmaps' },
+    { label: 'Communities', query: 'Community', url: '/communities' },
+    { label: 'Projects', query: 'Project', url: '/projects' },
+    { label: 'Users', query: 'User', url: '/communities' },
+  ];
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-16 px-4 bg-black/75 backdrop-blur-md">
+  const quickRecommendations = [
+    {
+      title: 'Curated Learning Paths & Courses',
+      subtitle: 'Browse interactive syllabi with structured YouTube lecture milestones',
+      icon: <BookOpen className="w-4 h-4 text-primary" />,
+      url: '/learning',
+      badge: 'Courses',
+    },
+    {
+      title: 'DSA & LeetCode Practice Tracker',
+      subtitle: 'Solve algorithmic challenges, track runtimes, and inspect solutions',
+      icon: <Code2 className="w-4 h-4 text-amber-400" />,
+      url: '/practice',
+      badge: 'Coding',
+    },
+    {
+      title: 'Notes Library & Code Snippets',
+      subtitle: 'Access your auto-saved markdown notes, lecture thoughts, and snippets',
+      icon: <FileText className="w-4 h-4 text-emerald-400" />,
+      url: '/notes',
+      badge: 'Notes',
+    },
+    {
+      title: 'AI Curriculum & Roadmap Synthesizer',
+      subtitle: 'Generate customized engineering roadmaps with curated video recommendations',
+      icon: <Sparkles className="w-4 h-4 text-purple-400" />,
+      url: '/roadmaps',
+      badge: 'AI Engine',
+    },
+    {
+      title: 'Engineering Topic Communities',
+      subtitle: 'Connect with peers in systems, full-stack, ML, and algorithms hubs',
+      icon: <Users className="w-4 h-4 text-sky-400" />,
+      url: '/communities',
+      badge: 'Community',
+    },
+    {
+      title: 'Open Source Capstone & Project Showcase',
+      subtitle: 'Publish code repositories and collect architectural peer reviews',
+      icon: <FolderKanban className="w-4 h-4 text-indigo-400" />,
+      url: '/projects',
+      badge: 'Showcase',
+    },
+  ];
+
+  if (!isOpen || typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-16 px-4 w-screen h-screen bg-black/40 backdrop-blur-md"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
       <div
         className="fixed inset-0"
         onClick={onClose}
@@ -149,6 +222,7 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: -10 }}
         className="relative w-full max-w-3xl rounded-2xl border border-border bg-surface-raised shadow-2xl overflow-hidden flex flex-col z-10"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Search Input Bar */}
         <div className="p-4 border-b border-border flex items-center gap-3">
@@ -167,7 +241,7 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
           ) : (
             <button
               onClick={onClose}
-              className="px-2 py-1 rounded text-2xs font-mono border border-border bg-surface-subtle text-text-muted hover:text-text-default hover:bg-surface transition-colors"
+              className="px-2 py-1 rounded text-2xs font-mono border border-border bg-surface-subtle text-text-muted hover:text-text-default hover:bg-surface transition-colors cursor-pointer"
               title="Press ESC to close"
             >
               ESC
@@ -175,13 +249,21 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
           )}
         </div>
 
-        {/* Quick Scope Pills */}
+        {/* Quick Clickable Scope Pills */}
         <div className="px-4 py-2 border-b border-border/50 bg-surface flex flex-wrap items-center gap-1.5 text-2xs text-text-muted">
-          <span className="font-semibold text-text-secondary">Search across:</span>
-          {['Paths & Lectures', 'Problems', 'Notes', 'AI Roadmaps', 'Communities', 'Projects', 'Users'].map((tag) => (
-            <span key={tag} className="px-2 py-0.5 rounded-full bg-surface-subtle border border-border/60 text-text-secondary">
-              {tag}
-            </span>
+          <span className="font-semibold text-text-secondary mr-1">Search across:</span>
+          {scopePills.map((pill) => (
+            <button
+              key={pill.label}
+              type="button"
+              onClick={() => {
+                setQuery(pill.query);
+                inputRef.current?.focus();
+              }}
+              className="px-2.5 py-0.5 rounded-full bg-surface-subtle border border-border/70 text-text-secondary hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer font-medium active:scale-95"
+            >
+              {pill.label}
+            </button>
           ))}
         </div>
 
@@ -189,14 +271,46 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
         <div className="max-h-96 overflow-y-auto p-2">
           {query.trim() && results.length === 0 && !loading && (
             <div className="p-8 text-center text-xs text-text-muted">
-              No matching learning resources found for "{query}".
+              No matching learning resources found for "{query}". Try a different keyword or click one of the pills above.
             </div>
           )}
 
           {!query.trim() && (
-            <div className="p-6 text-center text-xs text-text-muted space-y-1.5">
-              <p className="font-semibold text-text text-sm">Universal Command Palette</p>
-              <p className="text-xs">Type any keyword to immediately find lectures, practice problems, notes, or topics.</p>
+            <div className="p-3 space-y-2">
+              <div className="px-2 pt-1 pb-2 flex items-center justify-between text-2xs font-semibold text-text-muted uppercase tracking-wider">
+                <span>Recommended Quick Jumps</span>
+                <span className="font-normal lowercase">Click to open</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                {quickRecommendations.map((rec) => (
+                  <button
+                    key={rec.title}
+                    type="button"
+                    onClick={() => {
+                      navigate(rec.url);
+                      onClose();
+                    }}
+                    className="flex items-start gap-3 p-2.5 rounded-xl border border-border/60 bg-surface hover:bg-surface-subtle hover:border-primary/40 text-left transition-all cursor-pointer group"
+                  >
+                    <div className="w-8 h-8 rounded-lg bg-surface-subtle border border-border flex items-center justify-center shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
+                      {rec.icon}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-xs font-bold text-text group-hover:text-primary transition-colors truncate">
+                          {rec.title}
+                        </span>
+                        <span className="text-[10px] px-1.5 py-0.2 rounded bg-surface-subtle text-text-muted border border-border/50 shrink-0">
+                          {rec.badge}
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-text-secondary leading-snug line-clamp-2 mt-0.5">
+                        {rec.subtitle}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -208,7 +322,7 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
                 onClose();
               }}
               onMouseEnter={() => setSelectedIndex(idx)}
-              className={`w-full text-left p-3 rounded-xl flex items-center justify-between text-xs transition-colors ${
+              className={`w-full text-left p-3 rounded-xl flex items-center justify-between text-xs transition-colors cursor-pointer ${
                 selectedIndex === idx
                   ? 'bg-primary/10 text-primary border border-primary/20'
                   : 'hover:bg-surface-subtle text-text'
@@ -243,6 +357,7 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
           <span>Gyanix Universal Search</span>
         </div>
       </motion.div>
-    </div>
+    </div>,
+    document.body
   );
 }

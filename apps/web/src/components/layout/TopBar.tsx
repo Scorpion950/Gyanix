@@ -66,21 +66,21 @@ export function TopBar({ onSearchClick }: { onSearchClick?: () => void }) {
       </div>
 
       {/* Search — desktop */}
-      <div className="hidden md:flex flex-1 max-w-sm">
+      <div className="hidden md:flex flex-1 max-w-lg">
         <button
           onClick={onSearchClick}
           className={cn(
-            'flex items-center gap-2 w-full px-3 h-9 rounded-control',
+            'flex items-center gap-2 w-full px-3.5 h-9 rounded-control',
             'bg-surface-subtle border border-border text-text-muted text-xs',
-            'hover:border-primary/40 transition-colors duration-micro',
+            'hover:border-primary/40 transition-colors duration-micro cursor-pointer',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
           )}
           aria-label="Open search"
           aria-keyshortcuts="Control+K"
         >
-          <Search size={14} strokeWidth={1.5} />
-          <span>Search…</span>
-          <kbd className="ml-auto text-2xs font-mono px-1.5 py-0.5 rounded bg-background border border-border">
+          <Search size={14} strokeWidth={1.5} className="shrink-0" />
+          <span className="truncate text-text-muted">Search paths, problems, notes, roadmaps, communities...</span>
+          <kbd className="ml-auto text-2xs font-mono px-1.5 py-0.5 rounded bg-background border border-border shrink-0">
             ⌘K
           </kbd>
         </button>

@@ -18,6 +18,7 @@ import { Button } from '@/components/ui/Button.tsx';
 import { Card } from '@/components/ui/Card.tsx';
 import { Badge } from '@/components/ui/Badge.tsx';
 import { Input } from '@/components/ui/Input.tsx';
+import { Modal } from '@/components/ui/Modal.tsx';
 import { useAuthStore } from '@/stores/authStore.ts';
 import { cn } from '@/lib/utils.ts';
 import { toast } from 'sonner';
@@ -283,136 +284,132 @@ export function LearningPathsListPage() {
       )}
 
       {/* Create Path Modal */}
-      {isCreateOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
-            <h2 className="text-lg font-heading font-bold text-text-default mb-4">Create Learning Path</h2>
-            <div className="space-y-4 text-xs">
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">Path Title *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Distributed Systems & Raft Consensus"
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">Description</label>
-                <textarea
-                  rows={3}
-                  placeholder="What will learners master in this path?"
-                  value={newDesc}
-                  onChange={(e) => setNewDesc(e.target.value)}
-                  className="w-full p-2.5 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">Visibility</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { id: 'private', label: 'Private', icon: Lock },
-                    { id: 'friends', label: 'Friends', icon: Users },
-                    { id: 'public', label: 'Public', icon: Globe },
-                  ].map((v) => {
-                    const Icon = v.icon;
-                    const isSelected = newVisibility === v.id;
-                    return (
-                      <button
-                        key={v.id}
-                        type="button"
-                        onClick={() => setNewVisibility(v.id as PathVisibility)}
-                        className={cn(
-                          'flex items-center justify-center gap-1.5 p-2 rounded-control border text-xs font-medium transition-colors',
-                          isSelected
-                            ? 'bg-primary text-primary-foreground border-primary'
-                            : 'bg-surface-subtle border-border text-text-secondary hover:bg-surface',
-                        )}
-                      >
-                        <Icon size={12} />
-                        {v.label}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
+      <Modal isOpen={isCreateOpen} onClose={() => setIsCreateOpen(false)}>
+        <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
+          <h2 className="text-lg font-heading font-bold text-text-default mb-4">Create Learning Path</h2>
+          <div className="space-y-4 text-xs">
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Path Title *</label>
+              <input
+                type="text"
+                placeholder="e.g. Distributed Systems & Raft Consensus"
+                value={newTitle}
+                onChange={(e) => setNewTitle(e.target.value)}
+                className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+                autoFocus
+              />
             </div>
 
-            <div className="flex justify-end gap-2 mt-6">
-              <Button variant="ghost" size="sm" onClick={() => setIsCreateOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                disabled={!newTitle.trim()}
-                isLoading={createPathMutation.isPending}
-                onClick={() => createPathMutation.mutate()}
-              >
-                Create
-              </Button>
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Description</label>
+              <textarea
+                rows={3}
+                placeholder="What will learners master in this path?"
+                value={newDesc}
+                onChange={(e) => setNewDesc(e.target.value)}
+                className="w-full p-2.5 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none resize-none"
+              />
             </div>
-          </Card>
-        </div>
-      )}
+
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Visibility</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { id: 'private', label: 'Private', icon: Lock },
+                  { id: 'friends', label: 'Friends', icon: Users },
+                  { id: 'public', label: 'Public', icon: Globe },
+                ].map((v) => {
+                  const Icon = v.icon;
+                  const isSelected = newVisibility === v.id;
+                  return (
+                    <button
+                      key={v.id}
+                      type="button"
+                      onClick={() => setNewVisibility(v.id as PathVisibility)}
+                      className={cn(
+                        'flex items-center justify-center gap-1.5 p-2 rounded-control border text-xs font-medium transition-colors cursor-pointer',
+                        isSelected
+                          ? 'bg-primary text-primary-foreground border-primary'
+                          : 'bg-surface-subtle border-border text-text-secondary hover:bg-surface',
+                      )}
+                    >
+                      <Icon size={12} />
+                      {v.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <Button variant="ghost" size="sm" onClick={() => setIsCreateOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              disabled={!newTitle.trim()}
+              isLoading={createPathMutation.isPending}
+              onClick={() => createPathMutation.mutate()}
+            >
+              Create
+            </Button>
+          </div>
+        </Card>
+      </Modal>
 
       {/* Import YouTube Playlist Modal */}
-      {isImportOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
-            <h2 className="text-lg font-heading font-bold text-text-default mb-1">
-              Import YouTube Playlist
-            </h2>
-            <p className="text-xs text-text-secondary mb-4">
-              Paste any public YouTube playlist URL. Gyanix automatically extracts all lectures into your course.
-            </p>
+      <Modal isOpen={isImportOpen} onClose={() => setIsImportOpen(false)}>
+        <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
+          <h2 className="text-lg font-heading font-bold text-text-default mb-1">
+            Import YouTube Playlist
+          </h2>
+          <p className="text-xs text-text-secondary mb-4">
+            Paste any public YouTube playlist URL. Gyanix automatically extracts all lectures into your course.
+          </p>
 
-            <div className="space-y-4 text-xs">
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">Playlist URL *</label>
-                <input
-                  type="url"
-                  placeholder="https://www.youtube.com/playlist?list=PL..."
-                  value={playlistUrl}
-                  onChange={(e) => setPlaylistUrl(e.target.value)}
-                  className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">Custom Title (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="Defaults to original YouTube playlist title"
-                  value={importTitle}
-                  onChange={(e) => setImportTitle(e.target.value)}
-                  className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
-                />
-              </div>
+          <div className="space-y-4 text-xs">
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Playlist URL *</label>
+              <input
+                type="url"
+                placeholder="https://www.youtube.com/playlist?list=PL..."
+                value={playlistUrl}
+                onChange={(e) => setPlaylistUrl(e.target.value)}
+                className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+                autoFocus
+              />
             </div>
 
-            <div className="flex justify-end gap-2 mt-6">
-              <Button variant="ghost" size="sm" onClick={() => setIsImportOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                disabled={!playlistUrl.trim()}
-                isLoading={importPlaylistMutation.isPending}
-                onClick={() => importPlaylistMutation.mutate()}
-              >
-                Import Course
-              </Button>
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Custom Title (Optional)</label>
+              <input
+                type="text"
+                placeholder="Defaults to original YouTube playlist title"
+                value={importTitle}
+                onChange={(e) => setImportTitle(e.target.value)}
+                className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+              />
             </div>
-          </Card>
-        </div>
-      )}
+          </div>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <Button variant="ghost" size="sm" onClick={() => setIsImportOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              disabled={!playlistUrl.trim()}
+              isLoading={importPlaylistMutation.isPending}
+              onClick={() => importPlaylistMutation.mutate()}
+            >
+              Import Course
+            </Button>
+          </div>
+        </Card>
+      </Modal>
     </div>
   );
 }

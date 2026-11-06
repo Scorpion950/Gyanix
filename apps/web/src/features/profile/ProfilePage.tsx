@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/Button.tsx';
 import { Avatar } from '@/components/ui/Avatar.tsx';
 import { Badge } from '@/components/ui/Badge.tsx';
 import { Card, CardContent } from '@/components/ui/Card.tsx';
+import { Modal } from '@/components/ui/Modal.tsx';
 import { cn } from '@/lib/utils.ts';
 import { toast } from 'sonner';
 import type { SocialRelationshipStatus } from '@gyanix/shared';
@@ -405,15 +406,15 @@ export function ProfilePage() {
                   <div className="space-y-3">
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-text-secondary">Current Streak</span>
-                      <span className="font-mono text-streak font-medium">3 days 🔥</span>
+                      <span className="font-mono text-streak font-medium">0 days</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-text-secondary">Lectures Watched</span>
-                      <span className="font-mono text-text-default">18</span>
+                      <span className="font-mono text-text-default">0</span>
                     </div>
                     <div className="flex justify-between items-center text-xs">
                       <span className="text-text-secondary">Notes Authored</span>
-                      <span className="font-mono text-text-default">12</span>
+                      <span className="font-mono text-text-default">0</span>
                     </div>
                   </div>
                 </Card>
@@ -423,14 +424,18 @@ export function ProfilePage() {
                     Learning Focus
                   </h3>
                   <div className="flex flex-wrap gap-1.5 pt-1">
-                    {['React', 'TypeScript', 'Node.js', 'System Design'].map((s) => (
-                      <span
-                        key={s}
-                        className="text-2xs px-2 py-0.5 rounded-full bg-surface-subtle text-text-secondary border border-border"
-                      >
-                        {s}
-                      </span>
-                    ))}
+                    {(profile as any).interests && (profile as any).interests.length > 0 ? (
+                      (profile as any).interests.map((s: string) => (
+                        <span
+                          key={s}
+                          className="text-2xs px-2 py-0.5 rounded-full bg-surface-subtle text-text-secondary border border-border"
+                        >
+                          {s}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-2xs text-text-muted">No topics selected yet.</p>
+                    )}
                   </div>
                 </Card>
               </div>
@@ -439,35 +444,9 @@ export function ProfilePage() {
               <div className="md:col-span-2 space-y-4">
                 <Card className="p-5 border border-border bg-surface">
                   <h3 className="text-sm font-semibold text-text-default mb-3">Recent Learning Activity</h3>
-                  <div className="space-y-3">
-                    {[
-                      {
-                        title: 'Complete Web Development Bootcamp',
-                        lecture: 'CSS Grid & Flexbox Mastery',
-                        time: '2 hours ago',
-                        timestamp: '14:20',
-                      },
-                      {
-                        title: 'Distributed Systems & Microservices',
-                        lecture: 'Raft Consensus Algorithm Explained',
-                        time: 'Yesterday',
-                        timestamp: '08:45',
-                      },
-                    ].map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between p-3 rounded-control bg-surface-subtle border border-border/50 text-xs"
-                      >
-                        <div>
-                          <p className="font-medium text-text-default">{item.lecture}</p>
-                          <p className="text-2xs text-text-secondary mt-0.5">{item.title}</p>
-                        </div>
-                        <div className="text-right">
-                          <span className="timestamp-chip">{item.timestamp}</span>
-                          <p className="text-2xs text-text-muted mt-1">{item.time}</p>
-                        </div>
-                      </div>
-                    ))}
+                  <div className="py-8 text-center space-y-1">
+                    <p className="text-xs text-text-muted">No recent learning activity yet.</p>
+                    <p className="text-2xs text-text-secondary">Watch a lecture, take an assessment, or author a note to build your public record.</p>
                   </div>
                 </Card>
               </div>
@@ -507,71 +486,69 @@ export function ProfilePage() {
       )}
 
       {/* Edit Profile Modal */}
-      {isEditing && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
-            <h2 className="text-lg font-heading font-bold text-text-default mb-4">Edit Profile</h2>
+      <Modal isOpen={isEditing} onClose={() => setIsEditing(false)}>
+        <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
+          <h2 className="text-lg font-heading font-bold text-text-default mb-4">Edit Profile</h2>
 
-            <div className="space-y-4 text-xs">
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">Display Name</label>
-                <input
-                  type="text"
-                  value={editDisplayName}
-                  onChange={(e) => setEditDisplayName(e.target.value)}
-                  className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">Bio (max 500 characters)</label>
-                <textarea
-                  rows={3}
-                  value={editBio}
-                  onChange={(e) => setEditBio(e.target.value)}
-                  className="w-full p-2.5 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none resize-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">Location</label>
-                <input
-                  type="text"
-                  placeholder="e.g. San Francisco, CA"
-                  value={editLocation}
-                  onChange={(e) => setEditLocation(e.target.value)}
-                  className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">GitHub URL</label>
-                <input
-                  type="url"
-                  placeholder="https://github.com/username"
-                  value={editGithubUrl}
-                  onChange={(e) => setEditGithubUrl(e.target.value)}
-                  className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
-                />
-              </div>
+          <div className="space-y-4 text-xs">
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Display Name</label>
+              <input
+                type="text"
+                value={editDisplayName}
+                onChange={(e) => setEditDisplayName(e.target.value)}
+                className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+              />
             </div>
 
-            <div className="flex justify-end gap-2 mt-6">
-              <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                isLoading={updateProfileMutation.isPending}
-                onClick={() => updateProfileMutation.mutate()}
-              >
-                Save Changes
-              </Button>
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Bio (max 500 characters)</label>
+              <textarea
+                rows={3}
+                value={editBio}
+                onChange={(e) => setEditBio(e.target.value)}
+                className="w-full p-2.5 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none resize-none"
+              />
             </div>
-          </Card>
-        </div>
-      )}
+
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Location</label>
+              <input
+                type="text"
+                placeholder="e.g. San Francisco, CA"
+                value={editLocation}
+                onChange={(e) => setEditLocation(e.target.value)}
+                className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">GitHub URL</label>
+              <input
+                type="url"
+                placeholder="https://github.com/username"
+                value={editGithubUrl}
+                onChange={(e) => setEditGithubUrl(e.target.value)}
+                className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <Button variant="ghost" size="sm" onClick={() => setIsEditing(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              isLoading={updateProfileMutation.isPending}
+              onClick={() => updateProfileMutation.mutate()}
+            >
+              Save Changes
+            </Button>
+          </div>
+        </Card>
+      </Modal>
     </div>
   );
 }

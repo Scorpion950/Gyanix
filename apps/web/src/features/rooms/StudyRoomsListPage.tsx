@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/Button.tsx';
 import { Input } from '@/components/ui/Input.tsx';
 import { Badge } from '@/components/ui/Badge.tsx';
 import { Avatar } from '@/components/ui/Avatar.tsx';
+import { Modal } from '@/components/ui/Modal.tsx';
 import { useAuthStore } from '@/stores/authStore.ts';
 import { toast } from 'sonner';
 
@@ -195,102 +196,96 @@ export function StudyRoomsListPage() {
       )}
 
       {/* Modal: Create Room */}
-      {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md p-6 rounded-2xl border border-border bg-surface-raised space-y-4 shadow-xl"
-          >
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h3 className="text-base font-bold text-text">Create Study Room</h3>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-text-muted hover:text-text"
-              >
-                ✕
-              </button>
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+        <div className="w-full max-w-md p-6 rounded-2xl border border-border bg-surface-raised space-y-4 shadow-xl">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <h3 className="text-base font-bold text-text">Create Study Room</h3>
+            <button
+              onClick={() => setShowModal(false)}
+              className="text-text-muted hover:text-text cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+
+          <form onSubmit={handleCreateRoom} className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-text-secondary">Room Name *</label>
+              <Input
+                placeholder="e.g. Distributed Consensus Paper Review"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
             </div>
 
-            <form onSubmit={handleCreateRoom} className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-text-secondary">Study Topic *</label>
+              <Input
+                placeholder="e.g. Raft Algorithm, React Concurrency"
+                value={topic}
+                onChange={(e) => setTopic(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-text-secondary">
+                YouTube Video Link (Optional Watch Together)
+              </label>
+              <Input
+                placeholder="https://www.youtube.com/watch?v=..."
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+              />
+            </div>
+
+            <div className="flex items-center gap-2 pt-2">
+              <input
+                type="checkbox"
+                id="privateCheck"
+                checked={isPrivate}
+                onChange={(e) => setIsPrivate(e.target.checked)}
+                className="rounded border-border cursor-pointer"
+              />
+              <label htmlFor="privateCheck" className="text-xs text-text cursor-pointer">
+                Private Room (Requires Access Code)
+              </label>
+            </div>
+
+            {isPrivate && (
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-text-secondary">Room Name *</label>
+                <label className="text-xs font-semibold text-text-secondary">Access Code</label>
                 <Input
-                  placeholder="e.g. Distributed Consensus Paper Review"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
+                  placeholder="e.g. 1234"
+                  value={accessCode}
+                  onChange={(e) => setAccessCode(e.target.value)}
+                  required={isPrivate}
                 />
               </div>
+            )}
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-text-secondary">Study Topic *</label>
-                <Input
-                  placeholder="e.g. Raft Algorithm, React Concurrency"
-                  value={topic}
-                  onChange={(e) => setTopic(e.target.value)}
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-text-secondary">
-                  YouTube Video Link (Optional Watch Together)
-                </label>
-                <Input
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  value={videoUrl}
-                  onChange={(e) => setVideoUrl(e.target.value)}
-                />
-              </div>
-
-              <div className="flex items-center gap-2 pt-2">
-                <input
-                  type="checkbox"
-                  id="privateCheck"
-                  checked={isPrivate}
-                  onChange={(e) => setIsPrivate(e.target.checked)}
-                  className="rounded border-border"
-                />
-                <label htmlFor="privateCheck" className="text-xs text-text">
-                  Private Room (Requires Access Code)
-                </label>
-              </div>
-
-              {isPrivate && (
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-text-secondary">Access Code</label>
-                  <Input
-                    placeholder="e.g. 1234"
-                    value={accessCode}
-                    onChange={(e) => setAccessCode(e.target.value)}
-                    required={isPrivate}
-                  />
-                </div>
-              )}
-
-              <div className="flex justify-end gap-2 pt-2 border-t border-border">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  size="sm"
-                  disabled={isCreating || !name.trim() || !topic.trim()}
-                  className="bg-primary text-white"
-                >
-                  Launch Room
-                </Button>
-              </div>
-            </form>
-          </motion.div>
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isCreating || !name.trim() || !topic.trim()}
+                className="bg-primary text-white"
+              >
+                Launch Room
+              </Button>
+            </div>
+          </form>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

@@ -23,50 +23,8 @@ export interface ChallengeData {
   created_at: string;
 }
 
-// In-memory persistent challenges
-const defaultChallenges: ChallengeData[] = [
-  {
-    id: 'ch-30d-dsa',
-    creator_id: 'system',
-    slug: '30-days-of-dsa',
-    title: '30 Days of DSA & System Design',
-    description: 'Solve 1-2 curated algorithmic problems daily and document time complexity tradeoffs.',
-    duration_days: 30,
-    badge_icon: 'Flame',
-    category: 'Algorithms',
-    participant_count: 142,
-    learning_path_title: 'Full-Stack & Systems Architecture',
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'ch-14d-microservices',
-    creator_id: 'system',
-    slug: '14-days-distributed-systems',
-    title: '14 Days of Distributed Systems',
-    description: 'Build robust event-driven microservices with Kafka, gRPC, and Redis cache invalidation.',
-    duration_days: 14,
-    badge_icon: 'Zap',
-    category: 'Backend',
-    participant_count: 88,
-    learning_path_title: 'Backend Systems & Event Streams',
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'ch-7d-frontend',
-    creator_id: 'system',
-    slug: '7-days-clean-architecture',
-    title: '7 Days of React & TypeScript Patterns',
-    description: 'Master compound components, custom hooks, and state-machine driven forms.',
-    duration_days: 7,
-    badge_icon: 'Trophy',
-    category: 'Frontend',
-    participant_count: 215,
-    learning_path_title: 'Modern React & TypeScript',
-    created_at: new Date().toISOString(),
-  },
-];
-
-const inMemoryChallenges: ChallengeData[] = [...defaultChallenges];
+// In-memory persistent challenges — only real user-created challenges, no fake defaults
+const inMemoryChallenges: ChallengeData[] = [];
 const inMemoryParticipants = new Map<string, any[]>();
 const inMemoryLogs = new Map<string, any[]>();
 
@@ -215,6 +173,7 @@ export const searchChallengesService = {
 
     return challengesList.map((ch) => ({
       ...ch,
+      isCreator: userId ? ch.creator_id === userId : false,
       participation: userParticipations[ch.id] || null,
     }));
   },
@@ -294,6 +253,10 @@ export const searchChallengesService = {
     learningPathTitle?: string;
   }) {
     const ch = inMemoryChallenges.find((c) => c.id === challengeId);
+    if (ch && ch.creator_id && ch.creator_id !== userId) {
+      throw new Error('Unauthorized: Only the challenge creator can edit this challenge.');
+    }
+
     if (ch) {
       if (input.title) ch.title = input.title;
       if (input.description) ch.description = input.description;
@@ -316,47 +279,58 @@ export const searchChallengesService = {
   },
 
   /**
-   * Get enrolled participants for a challenge
+   * Get enrolled participants for a challenge — only real participants, no fake defaults
    */
   async getChallengeParticipants(challengeId: string) {
     const targetChallenge = inMemoryChallenges.find((c) => c.id === challengeId);
-    const pathName = targetChallenge?.learning_path_title || 'Systems Architecture & Algorithms';
+    const pathName = targetChallenge?.learning_path_title || 'Target Curriculum';
 
-    // Mock/in-memory participants enriched with progress and path
-    const fallbackParticipants = [
-      {
-        userId: 'usr-1',
-        username: 'alex_codes',
-        displayName: 'Alex Chen',
-        avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80',
-        currentDay: 12,
-        progressPercent: 40,
-        pathTitle: pathName,
-        joinedAt: new Date(Date.now() - 12 * 86400000).toISOString(),
-      },
-      {
-        userId: 'usr-2',
-        username: 'rohit_dev',
-        displayName: 'Rohit Sharma',
-        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&auto=format&fit=crop&q=80',
-        currentDay: 19,
-        progressPercent: 63,
-        pathTitle: pathName,
-        joinedAt: new Date(Date.now() - 19 * 86400000).toISOString(),
-      },
-      {
-        userId: 'usr-3',
-        username: 'priya_m',
-        displayName: 'Priya Mehta',
-        avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80',
-        currentDay: 28,
-        progressPercent: 93,
-        pathTitle: pathName,
-        joinedAt: new Date(Date.now() - 28 * 86400000).toISOString(),
-      },
-    ];
+    try {
+      const { data } = await supabaseAdmin
+        .from('challenge_participants')
+        .select(`
+          id,
+          user_id,
+          current_day,
+          is_completed,
+          created_at,
+          profiles:user_id (id, username, display_name, avatar_url)
+        `)
+        .eq('challenge_id', challengeId);
 
-    return fallbackParticipants;
+      if (data && data.length > 0) {
+        return data.map((p: any) => ({
+          userId: p.profiles?.id || p.user_id,
+          username: p.profiles?.username || 'learner',
+          displayName: p.profiles?.display_name || 'Gyanix Learner',
+          avatarUrl: p.profiles?.avatar_url || null,
+          currentDay: p.current_day || 1,
+          progressPercent: Math.round(((p.current_day || 1) / (targetChallenge?.duration_days || 14)) * 100),
+          pathTitle: pathName,
+          joinedAt: p.created_at || new Date().toISOString(),
+        }));
+      }
+    } catch (_err) {}
+
+    // In-memory enrolled participants
+    const realParticipants: any[] = [];
+    for (const [userId, parts] of inMemoryParticipants.entries()) {
+      const part = parts.find((p) => p.challenge_id === challengeId);
+      if (part) {
+        realParticipants.push({
+          userId: userId,
+          username: 'learner',
+          displayName: 'Current User',
+          avatarUrl: null,
+          currentDay: part.current_day || 1,
+          progressPercent: Math.round(((part.current_day || 1) / (targetChallenge?.duration_days || 14)) * 100),
+          pathTitle: pathName,
+          joinedAt: part.started_at || new Date().toISOString(),
+        });
+      }
+    }
+
+    return realParticipants;
   },
 
   /**

@@ -25,6 +25,7 @@ import {
 import { Button } from '@/components/ui/Button.tsx';
 import { Card } from '@/components/ui/Card.tsx';
 import { Badge } from '@/components/ui/Badge.tsx';
+import { Modal } from '@/components/ui/Modal.tsx';
 import { useAuthStore } from '@/stores/authStore.ts';
 import { cn, formatDuration } from '@/lib/utils.ts';
 import { toast } from 'sonner';
@@ -506,150 +507,144 @@ export function LearningPathDetailView() {
       </div>
 
       {/* Add Lecture Modal */}
-      {isAddLectureOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
-            <h2 className="text-lg font-heading font-bold text-text-default mb-1">Add Lecture</h2>
-            <p className="text-xs text-text-secondary mb-4">
-              Enter any YouTube video URL. Metadata is automatically resolved.
-            </p>
+      <Modal isOpen={isAddLectureOpen} onClose={() => setIsAddLectureOpen(false)}>
+        <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
+          <h2 className="text-lg font-heading font-bold text-text-default mb-1">Add Lecture</h2>
+          <p className="text-xs text-text-secondary mb-4">
+            Enter any YouTube video URL. Metadata is automatically resolved.
+          </p>
 
-            <div className="space-y-4 text-xs">
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">YouTube URL *</label>
-                <input
-                  type="url"
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  value={lectureUrl}
-                  onChange={(e) => setLectureUrl(e.target.value)}
-                  className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
-                  autoFocus
-                />
-              </div>
-
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">Custom Title (Optional)</label>
-                <input
-                  type="text"
-                  placeholder="Defaults to YouTube video title"
-                  value={lectureCustomTitle}
-                  onChange={(e) => setLectureCustomTitle(e.target.value)}
-                  className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
-                />
-              </div>
-
-              {folders.length > 0 && (
-                <div>
-                  <label className="block font-medium text-text-secondary mb-1">Folder (Optional)</label>
-                  <select
-                    value={lectureFolderId}
-                    onChange={(e) => setLectureFolderId(e.target.value)}
-                    className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
-                  >
-                    <option value="">No folder (Root course level)</option>
-                    {folders.map((f) => (
-                      <option key={f.id} value={f.id}>{f.title}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
+          <div className="space-y-4 text-xs">
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">YouTube URL *</label>
+              <input
+                type="url"
+                placeholder="https://www.youtube.com/watch?v=..."
+                value={lectureUrl}
+                onChange={(e) => setLectureUrl(e.target.value)}
+                className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+                autoFocus
+              />
             </div>
 
-            <div className="flex justify-end gap-2 mt-6">
-              <Button variant="ghost" size="sm" onClick={() => setIsAddLectureOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                disabled={!lectureUrl.trim()}
-                isLoading={addLectureMutation.isPending}
-                onClick={() => addLectureMutation.mutate()}
-              >
-                Add
-              </Button>
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Custom Title (Optional)</label>
+              <input
+                type="text"
+                placeholder="Defaults to YouTube video title"
+                value={lectureCustomTitle}
+                onChange={(e) => setLectureCustomTitle(e.target.value)}
+                className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+              />
             </div>
-          </Card>
-        </div>
-      )}
+
+            {folders.length > 0 && (
+              <div>
+                <label className="block font-medium text-text-secondary mb-1">Folder (Optional)</label>
+                <select
+                  value={lectureFolderId}
+                  onChange={(e) => setLectureFolderId(e.target.value)}
+                  className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+                >
+                  <option value="">No folder (Root course level)</option>
+                  {folders.map((f) => (
+                    <option key={f.id} value={f.id}>{f.title}</option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <Button variant="ghost" size="sm" onClick={() => setIsAddLectureOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              disabled={!lectureUrl.trim()}
+              isLoading={addLectureMutation.isPending}
+              onClick={() => addLectureMutation.mutate()}
+            >
+              Add
+            </Button>
+          </div>
+        </Card>
+      </Modal>
 
       {/* Add Folder Modal */}
-      {isAddFolderOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <Card className="w-full max-w-sm border border-border bg-surface p-6 shadow-popover">
-            <h2 className="text-lg font-heading font-bold text-text-default mb-4">Create Folder</h2>
-            <div className="space-y-4 text-xs">
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">Folder Title *</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Module 1: Foundations"
-                  value={folderTitle}
-                  onChange={(e) => setFolderTitle(e.target.value)}
-                  className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
-                  autoFocus
-                />
-              </div>
+      <Modal isOpen={isAddFolderOpen} onClose={() => setIsAddFolderOpen(false)}>
+        <Card className="w-full max-w-sm border border-border bg-surface p-6 shadow-popover">
+          <h2 className="text-lg font-heading font-bold text-text-default mb-4">Create Folder</h2>
+          <div className="space-y-4 text-xs">
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Folder Title *</label>
+              <input
+                type="text"
+                placeholder="e.g. Module 1: Foundations"
+                value={folderTitle}
+                onChange={(e) => setFolderTitle(e.target.value)}
+                className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+                autoFocus
+              />
             </div>
+          </div>
 
-            <div className="flex justify-end gap-2 mt-6">
-              <Button variant="ghost" size="sm" onClick={() => setIsAddFolderOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                disabled={!folderTitle.trim()}
-                isLoading={addFolderMutation.isPending}
-                onClick={() => addFolderMutation.mutate()}
-              >
-                Create Folder
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )}
+          <div className="flex justify-end gap-2 mt-6">
+            <Button variant="ghost" size="sm" onClick={() => setIsAddFolderOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              disabled={!folderTitle.trim()}
+              isLoading={addFolderMutation.isPending}
+              onClick={() => addFolderMutation.mutate()}
+            >
+              Create Folder
+            </Button>
+          </div>
+        </Card>
+      </Modal>
 
       {/* Replace Video Modal */}
-      {isReplaceOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
-            <h2 className="text-lg font-heading font-bold text-text-default mb-1">Replace Video</h2>
-            <p className="text-xs text-text-secondary mb-4">
-              Enter a new YouTube URL. The position, custom title, user notes, and completion progress will remain completely preserved.
-            </p>
+      <Modal isOpen={isReplaceOpen} onClose={() => setIsReplaceOpen(false)}>
+        <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
+          <h2 className="text-lg font-heading font-bold text-text-default mb-1">Replace Video</h2>
+          <p className="text-xs text-text-secondary mb-4">
+            Enter a new YouTube URL. The position, custom title, user notes, and completion progress will remain completely preserved.
+          </p>
 
-            <div className="space-y-4 text-xs">
-              <div>
-                <label className="block font-medium text-text-secondary mb-1">Replacement YouTube URL *</label>
-                <input
-                  type="url"
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  value={replacementUrl}
-                  onChange={(e) => setReplacementUrl(e.target.value)}
-                  className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
-                  autoFocus
-                />
-              </div>
+          <div className="space-y-4 text-xs">
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Replacement YouTube URL *</label>
+              <input
+                type="url"
+                placeholder="https://www.youtube.com/watch?v=..."
+                value={replacementUrl}
+                onChange={(e) => setReplacementUrl(e.target.value)}
+                className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+                autoFocus
+              />
             </div>
+          </div>
 
-            <div className="flex justify-end gap-2 mt-6">
-              <Button variant="ghost" size="sm" onClick={() => setIsReplaceOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                disabled={!replacementUrl.trim()}
-                isLoading={replaceVideoMutation.isPending}
-                onClick={() => replaceVideoMutation.mutate()}
-              >
-                Replace
-              </Button>
-            </div>
-          </Card>
-        </div>
-      )}
+          <div className="flex justify-end gap-2 mt-6">
+            <Button variant="ghost" size="sm" onClick={() => setIsReplaceOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              disabled={!replacementUrl.trim()}
+              isLoading={replaceVideoMutation.isPending}
+              onClick={() => replaceVideoMutation.mutate()}
+            >
+              Confirm Replacement
+            </Button>
+          </div>
+        </Card>
+      </Modal>
     </div>
   );
 }

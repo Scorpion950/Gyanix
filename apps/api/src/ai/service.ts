@@ -319,42 +319,82 @@ Output strict JSON format:
       });
       parsed = JSON.parse(response.content);
     } catch (_e) {
-      parsed = {
-        title: `${cleanSubj} Skill Assessment`,
-        questions: [
-          {
-            id: 'q1',
-            type: 'mcq',
-            prompt: `In ${cleanSubj}, what is the primary consideration when scaling concurrent workloads?`,
-            options: [
-              'Minimizing shared state contention and optimizing memory locality',
-              'Increasing number of CSS rules',
-              'Decreasing variable name lengths',
-              'Running on a single physical CPU core without clustering',
-            ],
-            correctOptionIndex: 0,
-            explanation: 'Contention on shared mutable state and lock synchronization are the primary bottlenecks in concurrent systems.',
-            difficulty,
-            metricTarget: 'knowledge',
-          },
-          {
-            id: 'q2',
-            type: 'conceptual',
-            prompt: `Explain the fundamental trade-off between throughput and latency in ${cleanSubj} system architecture.`,
-            explanation: 'Batching operations increases overall throughput at the cost of higher individual request latency.',
-            difficulty,
-            metricTarget: 'knowledge',
-          },
-          {
-            id: 'q3',
-            type: 'code_scenario',
-            prompt: `Review the following ${cleanSubj} pattern. How would you ensure deterministic resource cleanup and error propagation?`,
-            codeSnippet: `// Resource lifecycle example\ntry {\n  const resource = acquire();\n  process(resource);\n} finally {\n  cleanup();\n}`,
-            difficulty,
-            metricTarget: 'practical',
-          },
-        ],
-      };
+      const isDSA = /dsa|data\s*structure|algorithm/i.test(cleanSubj);
+      if (isDSA) {
+        parsed = {
+          title: `${cleanSubj} Skill Assessment`,
+          questions: [
+            {
+              id: 'q1',
+              type: 'mcq',
+              prompt: `In ${cleanSubj}, what is the time complexity of searching an element in a Balanced Binary Search Tree (such as AVL or Red-Black Tree)?`,
+              options: [
+                'O(log n) average and worst-case',
+                'O(1) average and O(n) worst-case',
+                'O(n) average and O(n log n) worst-case',
+                'O(n log n) average and O(n^2) worst-case',
+              ],
+              correctOptionIndex: 0,
+              explanation: 'Self-balancing binary search trees maintain an O(log n) height invariant, guaranteeing logarithmic search, insertion, and deletion.',
+              difficulty,
+              metricTarget: 'knowledge',
+            },
+            {
+              id: 'q2',
+              type: 'conceptual',
+              prompt: `When solving array and string problems in ${cleanSubj}, in what scenarios is the Two-Pointer approach preferred over a Hash Map or brute-force search?`,
+              explanation: 'The Two-Pointer technique operates with O(1) auxiliary space on sorted arrays or monotonic sequences, avoiding the O(n) memory allocation of Hash Maps.',
+              difficulty,
+              metricTarget: 'knowledge',
+            },
+            {
+              id: 'q3',
+              type: 'code_scenario',
+              prompt: `Review the following cycle-detection implementation in ${cleanSubj}. What is the algorithm called, and why does fast move at twice the speed of slow?`,
+              codeSnippet: `// Cycle Detection\npublic boolean hasCycle(ListNode head) {\n    if (head == null || head.next == null) return false;\n    ListNode slow = head;\n    ListNode fast = head.next;\n    while (slow != fast) {\n        if (fast == null || fast.next == null) return false;\n        slow = slow.next;\n        fast = fast.next.next;\n    }\n    return true;\n}`,
+              difficulty,
+              metricTarget: 'practical',
+            },
+          ],
+        };
+      } else {
+        parsed = {
+          title: `${cleanSubj} Skill Assessment`,
+          questions: [
+            {
+              id: 'q1',
+              type: 'mcq',
+              prompt: `In ${cleanSubj}, what is the primary consideration when scaling concurrent workloads?`,
+              options: [
+                'Minimizing shared state contention and optimizing memory locality',
+                'Increasing number of CSS rules',
+                'Decreasing variable name lengths',
+                'Running on a single physical CPU core without clustering',
+              ],
+              correctOptionIndex: 0,
+              explanation: 'Contention on shared mutable state and lock synchronization are the primary bottlenecks in concurrent systems.',
+              difficulty,
+              metricTarget: 'knowledge',
+            },
+            {
+              id: 'q2',
+              type: 'conceptual',
+              prompt: `Explain the fundamental trade-off between throughput and latency in ${cleanSubj} architecture.`,
+              explanation: 'Batching operations increases overall throughput at the cost of higher individual request latency.',
+              difficulty,
+              metricTarget: 'knowledge',
+            },
+            {
+              id: 'q3',
+              type: 'code_scenario',
+              prompt: `Review the following ${cleanSubj} pattern. How would you ensure deterministic resource cleanup and error propagation?`,
+              codeSnippet: `// Resource lifecycle example\ntry {\n  const resource = acquire();\n  process(resource);\n} finally {\n  cleanup();\n}`,
+              difficulty,
+              metricTarget: 'practical',
+            },
+          ],
+        };
+      }
     }
 
     try {

@@ -21,25 +21,25 @@
 /* Default dark tokens for calm Notion+Discord feel */
 @layer base {
   :root {
-    /* Surfaces — Clean Notion/Discord Light Theme */
-    --background: 0 0% 100%;
-    /* #FFFFFF */
-    --surface: 220 20% 98%;
+    /* Surfaces — Soft Off-White Light Theme (Calm & Non-glaring) */
+    --background: 216 20% 97%;
+    /* #F4F6F9 - Soft warm off-white */
+    --surface: 0 0% 100%;
+    /* #FFFFFF - Crisp white cards */
+    --surface-raised: 220 20% 98%;
     /* #F8FAFC */
-    --surface-raised: 220 14% 96%;
-    /* #F1F5F9 */
-    --surface-subtle: 220 13% 91%;
-    /* #E2E8F0 */
-    --border: 220 13% 86%;
-    /* #CBD5E1 */
+    --surface-subtle: 220 16% 93%;
+    /* #EBEEF4 */
+    --border: 220 14% 87%;
+    /* #D7DDE6 */
 
     /* Text */
     --text: 222 47% 11%;
     /* #0F172A */
-    --text-secondary: 215 16% 40%;
-    /* #475569 */
-    --text-muted: 215 16% 56%;
-    /* #64748B */
+    --text-secondary: 215 16% 38%;
+    /* #435064 */
+    --text-muted: 215 16% 54%;
+    /* #5F6E83 */
 
     /* Primary (blue) */
     --primary: 221 83% 53%;

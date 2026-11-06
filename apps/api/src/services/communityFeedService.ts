@@ -10,32 +10,7 @@ import type {
 // In-memory fallbacks when Supabase tables are not migrated
 const inMemoryPosts: any[] = [];
 const inMemoryProjects: any[] = [];
-const inMemoryCommunities: any[] = [
-  {
-    id: 'comm-systems',
-    name: 'Systems Engineering',
-    slug: 'systems-engineering',
-    description: 'Kernel internals, compilers, distributed systems, and low-level optimization.',
-    member_count: 42,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'comm-frontend',
-    name: 'Frontend & UI Architecture',
-    slug: 'frontend-architecture',
-    description: 'Design systems, rendering lifecycles, CSS architectures, and performant web apps.',
-    member_count: 88,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 'comm-distributed',
-    name: 'Distributed Systems & Cloud',
-    slug: 'distributed-systems',
-    description: 'Consensus algorithms, event-driven architectures, Kafka, and Kubernetes.',
-    member_count: 65,
-    created_at: new Date().toISOString(),
-  },
-];
+const inMemoryCommunities: any[] = [];
 const inMemoryMemberships = new Set<string>(); // "userId:communityId"
 const inMemoryPostLikes = new Set<string>(); // "userId:postId"
 const inMemoryComments: Record<string, any[]> = {};
@@ -366,6 +341,7 @@ export const communityFeedService = {
 
         return data.map((c) => ({
           ...c,
+          isCreator: userId ? c.creator_id === userId : false,
           isMember: joinedSet.has(c.id),
         }));
       }
@@ -373,6 +349,7 @@ export const communityFeedService = {
 
     return inMemoryCommunities.map((c) => ({
       ...c,
+      isCreator: userId ? c.creator_id === userId : false,
       isMember: userId ? inMemoryMemberships.has(`${userId}:${c.id}`) : false,
     }));
   },
@@ -396,17 +373,23 @@ export const communityFeedService = {
             .maybeSingle();
           isMember = !!mem;
         }
-        return { ...community, isMember };
+        return {
+          ...community,
+          isCreator: userId ? community.creator_id === userId : false,
+          isMember,
+        };
       }
     } catch (_err) {}
 
     const comm = inMemoryCommunities.find((c) => c.slug === slug);
     return {
       id: comm?.id || 'comm-' + slug,
+      creator_id: comm?.creator_id,
+      isCreator: userId ? comm?.creator_id === userId : false,
       name: comm?.name || slug.replace(/-/g, ' '),
       slug,
       description: comm?.description || 'Collaborative engineering hub',
-      member_count: comm?.member_count || 10,
+      member_count: comm?.member_count || 1,
       isMember: userId ? inMemoryMemberships.has(`${userId}:${comm?.id || ''}`) : false,
     };
   },
@@ -415,6 +398,7 @@ export const communityFeedService = {
     const slug = input.slug || input.name.toLowerCase().replace(/[^a-z0-9-]+/g, '-');
     const newComm = {
       id: 'comm-' + Date.now(),
+      creator_id: userId,
       name: input.name,
       slug,
       description: input.description,
@@ -471,16 +455,21 @@ export const communityFeedService = {
     const comm = inMemoryCommunities.find((c) => c.id === communityId);
     if (inMemoryMemberships.has(key)) {
       inMemoryMemberships.delete(key);
-      if (comm) comm.member_count = Math.max(1, comm.member_count - 1);
+      if (comm) comm.member_count = Math.max(0, (comm.member_count || 1) - 1);
       return { joined: false };
     } else {
       inMemoryMemberships.add(key);
-      if (comm) comm.member_count = (comm.member_count || 1) + 1;
+      if (comm) comm.member_count = (comm.member_count || 0) + 1;
       return { joined: true };
     }
   },
 
   async updateCommunity(userId: string, communityId: string, input: { name?: string; description?: string }) {
+    const comm = inMemoryCommunities.find((c) => c.id === communityId);
+    if (comm && comm.creator_id && comm.creator_id !== userId) {
+      throw new Error('Unauthorized: Only the community creator can edit this community.');
+    }
+
     try {
       const updateData: Record<string, any> = {};
       if (input.name) updateData['name'] = input.name;
@@ -488,7 +477,6 @@ export const communityFeedService = {
       await supabaseAdmin.from('communities').update(updateData).eq('id', communityId);
     } catch (_err) {}
 
-    const comm = inMemoryCommunities.find((c) => c.id === communityId);
     if (comm) {
       if (input.name) comm.name = input.name;
       if (input.description) comm.description = input.description;
@@ -498,36 +486,6 @@ export const communityFeedService = {
   },
 
   async getCommunityMembers(communityId: string) {
-    const defaultMembers = [
-      {
-        id: 'user-c1',
-        username: 'dev_priya',
-        display_name: 'Priya Sharma',
-        avatar_url: null,
-        joined_at: new Date(Date.now() - 3600000 * 24 * 3).toISOString(),
-        learning_path: 'Distributed Systems & Go Fundamentals',
-        progress_pct: 68,
-      },
-      {
-        id: 'user-c2',
-        username: 'marcus_k',
-        display_name: 'Marcus Krause',
-        avatar_url: null,
-        joined_at: new Date(Date.now() - 3600000 * 24 * 7).toISOString(),
-        learning_path: 'PostgreSQL Internals & Query Optimization',
-        progress_pct: 42,
-      },
-      {
-        id: 'user-c3',
-        username: 'ananya_r',
-        display_name: 'Ananya Rao',
-        avatar_url: null,
-        joined_at: new Date(Date.now() - 3600000 * 24 * 12).toISOString(),
-        learning_path: 'Full-Stack Modern React & TypeScript',
-        progress_pct: 85,
-      },
-    ];
-
     try {
       const { data } = await supabaseAdmin
         .from('community_members')
@@ -551,7 +509,24 @@ export const communityFeedService = {
       }
     } catch (_err) {}
 
-    return defaultMembers;
+    // In-memory memberships
+    const realMembers: any[] = [];
+    for (const membership of inMemoryMemberships) {
+      const [userId, commId] = membership.split(':');
+      if (commId === communityId && userId) {
+        realMembers.push({
+          id: userId,
+          username: 'learner',
+          display_name: 'Community Member',
+          avatar_url: null,
+          joined_at: new Date().toISOString(),
+          learning_path: 'Active Learning Path',
+          progress_pct: 0,
+        });
+      }
+    }
+
+    return realMembers;
   },
 
   /**

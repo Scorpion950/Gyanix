@@ -71,6 +71,7 @@ const FEED_TABS = [
 export function FeedPage() {
   const { session } = useAuthStore();
   const [activeTab, setActiveTab] = useState<string>('all');
+  const [selectedCommunity, setSelectedCommunity] = useState<any | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [communities, setCommunities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -91,9 +92,9 @@ export function FeedPage() {
   const [submittingComment, setSubmittingComment] = useState(false);
 
   useEffect(() => {
-    loadPosts(activeTab);
+    loadPosts(activeTab, selectedCommunity?.id);
     loadCommunities();
-  }, [activeTab]);
+  }, [activeTab, selectedCommunity]);
 
   const loadCommunities = async () => {
     try {
@@ -109,10 +110,14 @@ export function FeedPage() {
     }
   };
 
-  const loadPosts = async (feedType: string) => {
+  const loadPosts = async (feedType: string, communityId?: string) => {
     setLoading(true);
     try {
-      const res = await fetch(`/api/feed/posts?feedType=${feedType}`, {
+      let url = `/api/feed/posts?feedType=${feedType}`;
+      if (communityId) {
+        url += `&communityId=${encodeURIComponent(communityId)}`;
+      }
+      const res = await fetch(url, {
         headers: { Authorization: `Bearer ${session?.access_token}` },
       });
       const data = await res.json();
@@ -310,6 +315,37 @@ export function FeedPage() {
               </button>
             ))}
           </div>
+
+          {/* Active Community Banner */}
+          {selectedCommunity && (
+            <div className="p-4 rounded-xl border border-primary/30 bg-primary/5 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0">
+                  {selectedCommunity.name?.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-bold text-text truncate">{selectedCommunity.name}</h2>
+                    <Badge variant="outline" className="text-[10px] text-primary border-primary/30 shrink-0">
+                      Community Feed
+                    </Badge>
+                  </div>
+                  <p className="text-xs text-text-secondary mt-0.5 line-clamp-1">
+                    {selectedCommunity.description || 'Community discussion, doubts, and engineering posts'}
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setSelectedCommunity(null)}
+                className="px-2.5 py-1 rounded-lg text-xs font-medium border border-border bg-surface text-text-muted hover:text-text hover:bg-surface-subtle transition-colors shrink-0 cursor-pointer"
+                title="Return to global feed"
+              >
+                Show All
+              </button>
+            </div>
+          )}
 
           {/* Post Composer Card */}
           <div className="p-4 rounded-xl border border-border bg-surface space-y-3 shadow-xs">
@@ -582,13 +618,21 @@ export function FeedPage() {
             {communities.length > 0 ? (
               <div className="space-y-2.5">
                 {communities.map((c) => (
-                  <div key={c.id || c.slug} className="flex items-center justify-between text-xs py-1">
-                    <Link to="/communities" className="hover:underline truncate max-w-[170px]">
-                      <h4 className="font-semibold text-text truncate">{c.name}</h4>
-                      <span className="text-[11px] text-text-muted">{c.members_count || 0} members</span>
-                    </Link>
-                    <Badge variant="outline" className="text-[10px] text-primary">
-                      {c.isJoined ? 'Joined' : 'Join'}
+                  <div
+                    key={c.id || c.slug}
+                    onClick={() => setSelectedCommunity(c)}
+                    className="flex items-start justify-between gap-2 p-2 rounded-lg border border-border/60 bg-surface-subtle/50 hover:bg-surface-subtle hover:border-primary/40 transition-all cursor-pointer group"
+                  >
+                    <div className="flex-1 min-w-0 pr-1">
+                      <h4 className="font-semibold text-text text-xs group-hover:text-primary transition-colors leading-snug">
+                        {c.name}
+                      </h4>
+                      <span className="text-[11px] text-text-muted mt-0.5 block">
+                        {c.member_count ?? c.members_count ?? 1} members
+                      </span>
+                    </div>
+                    <Badge variant="outline" className="text-[10px] text-primary border-primary/30 shrink-0 mt-0.5">
+                      {c.isMember || c.isJoined ? 'Joined' : 'Join'}
                     </Badge>
                   </div>
                 ))}

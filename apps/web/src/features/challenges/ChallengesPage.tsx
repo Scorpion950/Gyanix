@@ -17,12 +17,14 @@ import { Button } from '@/components/ui/Button.tsx';
 import { Input } from '@/components/ui/Input.tsx';
 import { Badge } from '@/components/ui/Badge.tsx';
 import { Avatar } from '@/components/ui/Avatar.tsx';
+import { Modal } from '@/components/ui/Modal.tsx';
 import { useAuthStore } from '@/stores/authStore.ts';
 import { toast } from 'sonner';
 
 interface Challenge {
   id: string;
   creator_id?: string;
+  isCreator?: boolean;
   slug: string;
   title: string;
   description: string;
@@ -311,13 +313,15 @@ export function ChallengesPage() {
                       <Badge variant="outline" className="text-2xs uppercase tracking-wider">
                         {ch.category}
                       </Badge>
-                      <button
-                        onClick={() => handleOpenEdit(ch)}
-                        className="p-1 rounded text-text-muted hover:text-text-default hover:bg-surface-subtle transition-colors"
-                        title="Edit Challenge"
-                      >
-                        <Edit2 size={13} />
-                      </button>
+                      {(ch.isCreator || (ch.creator_id && ch.creator_id === session?.user?.id)) && (
+                        <button
+                          onClick={() => handleOpenEdit(ch)}
+                          className="p-1 rounded text-text-muted hover:text-text-default hover:bg-surface-subtle transition-colors cursor-pointer"
+                          title="Edit Challenge (Creator only)"
+                        >
+                          <Edit2 size={13} />
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -403,13 +407,8 @@ export function ChallengesPage() {
       )}
 
       {/* Modal: Create or Edit Challenge */}
-      {showCreateModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg p-6 rounded-2xl border border-border bg-surface-raised space-y-4 shadow-xl"
-          >
+      <Modal isOpen={showCreateModal} onClose={() => setShowCreateModal(false)}>
+        <div className="w-full max-w-lg p-6 rounded-2xl border border-border bg-surface-raised space-y-4 shadow-xl">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-base font-bold text-text">
                 {editingChallenge ? 'Edit Challenge' : 'Create New Challenge'}
@@ -502,18 +501,13 @@ export function ChallengesPage() {
                 </Button>
               </div>
             </form>
-          </motion.div>
         </div>
-      )}
+      </Modal>
 
       {/* Modal: View Enrolled Participants & Paths */}
-      {inspectingChallenge && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-xl p-6 rounded-2xl border border-border bg-surface-raised space-y-4 shadow-xl max-h-[85vh] flex flex-col"
-          >
+      <Modal isOpen={!!inspectingChallenge} onClose={() => setInspectingChallenge(null)}>
+        {inspectingChallenge && (
+          <div className="w-full max-w-xl p-6 rounded-2xl border border-border bg-surface-raised space-y-4 shadow-xl max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <div>
                 <h3 className="text-base font-bold text-text flex items-center gap-2">
@@ -581,18 +575,14 @@ export function ChallengesPage() {
                 Close
               </Button>
             </div>
-          </motion.div>
-        </div>
-      )}
+          </div>
+        )}
+      </Modal>
 
       {/* Modal: Log Day */}
-      {activeChallenge && activeChallenge.participation && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-md p-6 rounded-2xl border border-border bg-surface-raised space-y-4 shadow-xl"
-          >
+      <Modal isOpen={!!activeChallenge} onClose={() => setActiveChallenge(null)}>
+        {activeChallenge && activeChallenge.participation && (
+          <div className="w-full max-w-md p-6 rounded-2xl border border-border bg-surface-raised space-y-4 shadow-xl">
             <div className="flex items-center justify-between border-b border-border pb-3">
               <h3 className="text-base font-bold text-text">
                 Log Day {activeChallenge.participation.current_day} of {activeChallenge.duration_days}
@@ -650,9 +640,9 @@ export function ChallengesPage() {
                 </Button>
               </div>
             </form>
-          </motion.div>
-        </div>
-      )}
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

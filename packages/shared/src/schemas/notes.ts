@@ -5,9 +5,9 @@ export const NotePrioritySchema = z.enum(['low', 'medium', 'high']);
 export const CreateNoteSchema = z.object({
   title: z.string().min(1, 'Title is required').max(200),
   contentMarkdown: z.string().default(''),
-  collectionId: z.string().uuid().optional().nullable(),
-  pathId: z.string().uuid().optional().nullable(),
-  pathItemId: z.string().uuid().optional().nullable(),
+  collectionId: z.string().optional().nullable(),
+  pathId: z.string().optional().nullable(),
+  pathItemId: z.string().optional().nullable(),
   timestampSeconds: z.number().int().min(0).optional().nullable(),
   priority: NotePrioritySchema.default('medium'),
   deadlineAt: z.string().datetime().optional().nullable(),

@@ -161,8 +161,8 @@ socialFeedRouter.post('/communities/:id/join', requireAuth, async (req: Request,
     const communityId = String(req.params['id']);
     const result = await communityFeedService.toggleJoinCommunity(user.id, communityId);
     res.json({ success: true, data: result });
-  } catch (_err) {
-    res.json({ success: true, data: { joined: true } });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err?.message || 'Failed to toggle membership' });
   }
 });
 

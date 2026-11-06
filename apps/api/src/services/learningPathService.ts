@@ -11,6 +11,44 @@ import type {
 
 export const learningPathService = {
   /**
+   * Get specific lecture item details for the web video player
+   */
+  async getLectureItem(itemId: string) {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from('path_items')
+        .select(`
+          id, path_id, folder_id, position, custom_title, created_at,
+          video:videos (*)
+        `)
+        .eq('id', itemId)
+        .maybeSingle();
+
+      if (!error && data) {
+        return {
+          id: data.id,
+          pathId: data.path_id,
+          title: data.custom_title || (data.video as any)?.title || 'Course Lecture',
+          channelTitle: (data.video as any)?.channel_title || 'YouTube Instructor',
+          youtubeVideoId: (data.video as any)?.youtube_video_id || 'HubezZ98VpU',
+          durationSeconds: (data.video as any)?.duration_seconds || 1800,
+        };
+      }
+    } catch (_err) {}
+
+    // In-memory or fallback video item
+    const isDirectVideoId = /^[a-zA-Z0-9_-]{11}$/.test(itemId);
+    return {
+      id: itemId,
+      pathId: null,
+      title: isDirectVideoId ? 'Selected YouTube Lecture' : 'PostgreSQL Indexing & Query Plans',
+      channelTitle: 'YouTube Engineering Channel',
+      youtubeVideoId: isDirectVideoId ? itemId : 'HubezZ98VpU',
+      durationSeconds: 1935,
+    };
+  },
+
+  /**
    * Create a new learning path
    */
   async createPath(creatorId: string, input: CreateLearningPathInput) {

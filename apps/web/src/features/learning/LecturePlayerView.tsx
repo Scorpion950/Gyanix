@@ -22,6 +22,7 @@ import {
 import { Button } from '@/components/ui/Button.tsx';
 import { Card } from '@/components/ui/Card.tsx';
 import { Badge } from '@/components/ui/Badge.tsx';
+import { Modal } from '@/components/ui/Modal.tsx';
 import { useAuthStore } from '@/stores/authStore.ts';
 import { useUIStore } from '@/stores/uiStore.ts';
 import { cn, formatTimestamp } from '@/lib/utils.ts';
@@ -88,13 +89,31 @@ export function LecturePlayerView() {
     return () => setFocusMode(false);
   }, [setFocusMode]);
 
-  // Demo item details (or fetched from backend)
+  // Fetch real lecture item details from backend
+  const { data: itemData } = useQuery({
+    queryKey: ['lecture-item', itemId],
+    queryFn: async () => {
+      try {
+        const res = await fetch(`${apiUrl}/learning-paths/items/${itemId}`);
+        const json = await res.json();
+        return json.data;
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!itemId,
+  });
+
+  const activeVideoId = itemData?.youtubeVideoId || (itemId && itemId.length === 11 ? itemId : 'HubezZ98VpU');
+  const lectureTitle = itemData?.title || 'Course Lecture Video';
+  const lectureChannel = itemData?.channelTitle || 'YouTube Instructor';
+
   const lectureData = {
-    id: itemId || 'demo-lecture',
-    youtubeVideoId: 'HubezZ98VpU', // PostgreSQL query plan & indexing video
-    title: 'PostgreSQL Indexing & Query Execution Plans',
-    channelTitle: 'Hussein Nasser',
-    durationSeconds: 1935,
+    id: itemId || 'lecture',
+    youtubeVideoId: activeVideoId,
+    title: lectureTitle,
+    channelTitle: lectureChannel,
+    durationSeconds: itemData?.durationSeconds || 1800,
   };
 
   // Update progress mutation
@@ -261,12 +280,18 @@ export function LecturePlayerView() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start flex-1">
         {/* Left: 16:9 Player & Lecture Controls (7-8 cols) */}
         <div className="lg:col-span-8 space-y-4">
-          {/* 16:9 Video Player Container */}
+          {/* 16:9 Video Player Container — Plays directly in-website */}
           <div
             ref={iframeContainerRef}
             className="w-full aspect-video rounded-card overflow-hidden bg-black shadow-lg relative border border-border"
           >
-            <div id="yt-player" className="w-full h-full" />
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${lectureData.youtubeVideoId}?autoplay=0&enablejsapi=1&rel=0`}
+              title={lectureData.title}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full border-none"
+            />
           </div>
 
           {/* Player Bottom Control Strip */}
@@ -526,70 +551,77 @@ export function LecturePlayerView() {
       </div>
 
       {/* Inactivity Prompt Modal (15-min idle pause check) */}
-      {showInactivityPrompt && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <Card className="w-full max-w-sm border border-border bg-surface p-6 shadow-popover text-center space-y-4">
-            <Clock size={36} className="mx-auto text-primary animate-pulse" />
-            <h2 className="text-base font-heading font-bold text-text-default">
-              Are you still studying?
-            </h2>
-            <p className="text-xs text-text-secondary leading-relaxed">
-              Video playback has been paused so your learning hours and streaks aren't artificially inflated.
-            </p>
-            <Button
-              variant="default"
-              size="md"
-              className="w-full"
-              onClick={() => {
-                setShowInactivityPrompt(false);
-                lastActivityRef.current = Date.now();
-                if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
-                  playerRef.current.playVideo();
-                }
-              }}
-            >
-              I'm still here!
-            </Button>
-          </Card>
+      <Modal
+        isOpen={showInactivityPrompt}
+        onClose={() => {
+          setShowInactivityPrompt(false);
+          lastActivityRef.current = Date.now();
+        }}
+        maxWidth="max-w-sm"
+      >
+        <div className="p-6 text-center space-y-4">
+          <Clock size={36} className="mx-auto text-primary animate-pulse" />
+          <h2 className="text-base font-heading font-bold text-text-default">
+            Are you still studying?
+          </h2>
+          <p className="text-xs text-text-secondary leading-relaxed">
+            Video playback has been paused so your learning hours and streaks aren't artificially inflated.
+          </p>
+          <Button
+            variant="default"
+            size="md"
+            className="w-full"
+            onClick={() => {
+              setShowInactivityPrompt(false);
+              lastActivityRef.current = Date.now();
+              if (playerRef.current && typeof playerRef.current.playVideo === 'function') {
+                playerRef.current.playVideo();
+              }
+            }}
+          >
+            I'm still here!
+          </Button>
         </div>
-      )}
+      </Modal>
 
       {/* Keyboard Shortcuts Dialog */}
-      {showShortcutsHelp && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Keyboard size={18} className="text-primary" />
-                <h2 className="text-sm font-heading font-bold text-text-default">Keyboard Shortcuts</h2>
-              </div>
-              <button
-                onClick={() => setShowShortcutsHelp(false)}
-                className="text-text-muted hover:text-text-default"
-              >
-                <X size={16} />
-              </button>
+      <Modal
+        isOpen={showShortcutsHelp}
+        onClose={() => setShowShortcutsHelp(false)}
+        maxWidth="max-w-md"
+      >
+        <div className="p-6 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Keyboard size={18} className="text-primary" />
+              <h2 className="text-sm font-heading font-bold text-text-default">Keyboard Shortcuts</h2>
             </div>
+            <button
+              onClick={() => setShowShortcutsHelp(false)}
+              className="text-text-muted hover:text-text-default"
+            >
+              <X size={16} />
+            </button>
+          </div>
 
-            <div className="divide-y divide-border text-xs">
-              {[
-                { key: 'Space / K', desc: 'Play / Pause lecture' },
-                { key: 'J / L', desc: 'Rewind 10s / Fast forward 10s' },
-                { key: 'N', desc: 'Focus note composer' },
-                { key: 'M', desc: 'Mute / unmute audio' },
-                { key: 'Esc', desc: 'Exit player focus mode' },
-              ].map((item, idx) => (
-                <div key={idx} className="py-2 flex items-center justify-between">
-                  <span className="text-text-secondary">{item.desc}</span>
-                  <kbd className="px-2 py-0.5 rounded bg-surface-subtle border border-border font-mono text-2xs text-text-default">
-                    {item.key}
-                  </kbd>
-                </div>
-              ))}
-            </div>
-          </Card>
+          <div className="divide-y divide-border text-xs">
+            {[
+              { key: 'Space / K', desc: 'Play / Pause lecture' },
+              { key: 'J / L', desc: 'Rewind 10s / Fast forward 10s' },
+              { key: 'N', desc: 'Focus note composer' },
+              { key: 'M', desc: 'Mute / unmute audio' },
+              { key: 'Esc', desc: 'Exit player focus mode' },
+            ].map((item, idx) => (
+              <div key={idx} className="py-2 flex items-center justify-between">
+                <span className="text-text-secondary">{item.desc}</span>
+                <kbd className="px-2 py-0.5 rounded bg-surface-subtle border border-border font-mono text-2xs text-text-default">
+                  {item.key}
+                </kbd>
+              </div>
+            ))}
+          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

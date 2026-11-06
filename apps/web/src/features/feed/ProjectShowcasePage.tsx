@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/Button.tsx';
 import { Input } from '@/components/ui/Input.tsx';
 import { Badge } from '@/components/ui/Badge.tsx';
 import { Avatar } from '@/components/ui/Avatar.tsx';
+import { Modal } from '@/components/ui/Modal.tsx';
 import { useAuthStore } from '@/stores/authStore.ts';
 import { toast } from 'sonner';
 
@@ -248,106 +249,100 @@ export function ProjectShowcasePage() {
       )}
 
       {/* Modal: Showcase Project */}
-      {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="w-full max-w-lg p-6 rounded-2xl border border-border bg-surface-raised space-y-4 shadow-xl"
-          >
-            <div className="flex items-center justify-between border-b border-border pb-3">
-              <h3 className="text-base font-bold text-text">Showcase Your Project</h3>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-text-muted hover:text-text"
-              >
-                ✕
-              </button>
+      <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
+        <div className="w-full max-w-lg p-6 rounded-2xl border border-border bg-surface-raised space-y-4 shadow-xl">
+          <div className="flex items-center justify-between border-b border-border pb-3">
+            <h3 className="text-base font-bold text-text">Showcase Your Project</h3>
+            <button
+              onClick={() => setShowModal(false)}
+              className="text-text-muted hover:text-text cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+
+          <form onSubmit={handleCreateProject} className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-text-secondary">Project Title *</label>
+              <Input
+                placeholder="e.g. Distributed Key-Value Store in Go"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                required
+              />
             </div>
 
-            <form onSubmit={handleCreateProject} className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-text-secondary">Project Description *</label>
+              <textarea
+                rows={3}
+                placeholder="Describe the architecture, problem solved, and key engineering challenges..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                className="w-full p-2.5 rounded-lg border border-border bg-surface text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary"
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-text-secondary">Project Title *</label>
+                <label className="text-xs font-semibold text-text-secondary">GitHub Repo URL</label>
                 <Input
-                  placeholder="e.g. Distributed Key-Value Store in Go"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
+                  placeholder="https://github.com/..."
+                  value={repoUrl}
+                  onChange={(e) => setRepoUrl(e.target.value)}
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-semibold text-text-secondary">Project Description *</label>
-                <textarea
-                  rows={3}
-                  placeholder="Describe the architecture, problem solved, and key engineering challenges..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="w-full p-2.5 rounded-lg border border-border bg-surface text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary"
-                  required
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-text-secondary">GitHub Repo URL</label>
-                  <Input
-                    placeholder="https://github.com/..."
-                    value={repoUrl}
-                    onChange={(e) => setRepoUrl(e.target.value)}
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold text-text-secondary">Live Demo URL</label>
-                  <Input
-                    placeholder="https://..."
-                    value={liveDemoUrl}
-                    onChange={(e) => setLiveDemoUrl(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-text-secondary">Technologies (comma separated)</label>
+                <label className="text-xs font-semibold text-text-secondary">Live Demo URL</label>
                 <Input
-                  placeholder="Rust, WebAssembly, PostgreSQL, Docker"
-                  value={techStackInput}
-                  onChange={(e) => setTechStackInput(e.target.value)}
+                  placeholder="https://..."
+                  value={liveDemoUrl}
+                  onChange={(e) => setLiveDemoUrl(e.target.value)}
                 />
               </div>
+            </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold text-text-secondary">Specific Feedback Desired</label>
-                <Input
-                  placeholder="e.g. Code structure, database indexing, latency optimization..."
-                  value={feedbackRequests}
-                  onChange={(e) => setFeedbackRequests(e.target.value)}
-                />
-              </div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-text-secondary">Technologies (comma separated)</label>
+              <Input
+                placeholder="Rust, WebAssembly, PostgreSQL, Docker"
+                value={techStackInput}
+                onChange={(e) => setTechStackInput(e.target.value)}
+              />
+            </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-border">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  size="sm"
-                  disabled={isSubmitting || !title.trim() || !description.trim()}
-                  className="bg-primary text-white"
-                >
-                  Publish Showcase
-                </Button>
-              </div>
-            </form>
-          </motion.div>
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-text-secondary">Specific Feedback Desired</label>
+              <Input
+                placeholder="e.g. Code structure, database indexing, latency optimization..."
+                value={feedbackRequests}
+                onChange={(e) => setFeedbackRequests(e.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={isSubmitting || !title.trim() || !description.trim()}
+                className="bg-primary text-white"
+              >
+                Publish Showcase
+              </Button>
+            </div>
+          </form>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

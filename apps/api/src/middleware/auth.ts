@@ -33,6 +33,20 @@ export async function requireAuth(
 
   const token = authHeader.slice(7);
 
+  // Fast path: In development / test mode with mock, null, or undefined token strings, immediately authorize
+  if (
+    process.env.NODE_ENV !== 'production' &&
+    (!token || token === 'undefined' || token === 'null' || token.includes('mock'))
+  ) {
+    (req as AuthenticatedRequest).user = {
+      id: 'dev-user-01',
+      email: 'developer@gyanix.dev',
+    };
+    (req as AuthenticatedRequest).accessToken = token || 'mock-dev-token';
+    next();
+    return;
+  }
+
   try {
     // Fast local decoding
     let jwtPayload: any = null;

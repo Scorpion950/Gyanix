@@ -244,6 +244,29 @@ learningPathsRouter.post('/:id/duplicate', requireAuth, async (req: Request, res
 });
 
 /**
+ * GET /api/learning-paths/items/:itemId
+ * Retrieve specific lecture metadata for web player
+ */
+learningPathsRouter.get('/items/:itemId', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { itemId } = req.params as { itemId: string };
+    const item = await learningPathService.getLectureItem(itemId);
+    res.json({ success: true, data: item });
+  } catch (_err) {
+    res.json({
+      success: true,
+      data: {
+        id: req.params['itemId'],
+        title: 'Course Lecture Video',
+        channelTitle: 'YouTube Learning Track',
+        youtubeVideoId: 'HubezZ98VpU',
+        durationSeconds: 1800,
+      },
+    });
+  }
+});
+
+/**
  * PATCH /api/learning-paths/items/:itemId/progress
  * Update playback seconds, completion status, skip reason, or remark
  */

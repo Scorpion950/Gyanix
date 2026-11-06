@@ -18,6 +18,7 @@ import {
 import { Button } from '@/components/ui/Button.tsx';
 import { Card } from '@/components/ui/Card.tsx';
 import { Badge } from '@/components/ui/Badge.tsx';
+import { Modal } from '@/components/ui/Modal.tsx';
 import { useAuthStore } from '@/stores/authStore.ts';
 import { cn, formatTimestamp } from '@/lib/utils.ts';
 import { toast } from 'sonner';
@@ -85,7 +86,20 @@ export function NotesLibraryPage() {
     enabled: !!token,
   });
 
-  // Fetch notes
+  // Fetch all notes (unfiltered, to maintain accurate "All Notes" count)
+  const { data: allNotes = [] } = useQuery<NoteItem[]>({
+    queryKey: ['notes-all'],
+    queryFn: async () => {
+      const res = await fetch(`${apiUrl}/notes`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json() as any;
+      return json.data || [];
+    },
+    enabled: !!token,
+  });
+
+  // Fetch notes (filtered by collection or search query)
   const { data: notes = [], isLoading } = useQuery<NoteItem[]>({
     queryKey: ['notes-list', selectedCollectionId, searchQuery],
     queryFn: async () => {
@@ -101,6 +115,21 @@ export function NotesLibraryPage() {
     },
     enabled: !!token,
   });
+
+  // Helper to persist draft locally on every keystroke
+  function saveDraft(noteId: string | null, title: string, content: string) {
+    if (!noteId || typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(
+        `gyanix-note-draft-${noteId}`,
+        JSON.stringify({
+          title,
+          content,
+          updatedAt: Date.now(),
+        })
+      );
+    } catch (_e) {}
+  }
 
   // Create note mutation
   const createNoteMutation = useMutation({
@@ -124,11 +153,13 @@ export function NotesLibraryPage() {
     },
     onSuccess: (newNote) => {
       queryClient.invalidateQueries({ queryKey: ['notes-list'] });
+      queryClient.invalidateQueries({ queryKey: ['notes-all'] });
       setSelectedNoteId(newNote.id);
       setActiveTitle(newNote.title);
       setActiveContent(newNote.content_markdown);
       setActivePriority(newNote.priority);
       setActiveIsPinned(newNote.is_pinned);
+      saveDraft(newNote.id, newNote.title, newNote.content_markdown);
       toast.success('Note created');
     },
   });
@@ -163,15 +194,18 @@ export function NotesLibraryPage() {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(`gyanix-note-draft-${noteId}`);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['notes-list'] });
+      queryClient.invalidateQueries({ queryKey: ['notes-all'] });
       setSelectedNoteId(null);
       toast.success('Note deleted', {
         action: {
           label: 'Undo',
           onClick: () => {
-            // Re-create note if requested
             createNoteMutation.mutate();
           },
         },
@@ -179,21 +213,39 @@ export function NotesLibraryPage() {
     },
   });
 
-  // Synchronise selected note into form fields
+  const prevSelectedNoteIdRef = useRef<string | null>(null);
+
+  // Synchronise selected note into form fields & restore unsaved drafts
   useEffect(() => {
-    if (!selectedNoteId && notes.length > 0) {
-      const first = notes[0]!;
-      setSelectedNoteId(first.id);
-      setActiveTitle(first.title);
-      setActiveContent(first.content_markdown);
-      setActivePriority(first.priority);
-      setActiveIsPinned(first.is_pinned);
-      setActiveDeadline(first.deadline_at ? first.deadline_at.split('T')[0]! : '');
-    } else if (selectedNoteId) {
+    if (!selectedNoteId) {
+      if (notes.length > 0) {
+        setSelectedNoteId(notes[0]!.id);
+      }
+      return;
+    }
+
+    if (prevSelectedNoteIdRef.current !== selectedNoteId) {
+      prevSelectedNoteIdRef.current = selectedNoteId;
+
+      // Restore uncommitted draft if available in localStorage
+      let draft: { title?: string; content?: string } | null = null;
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = localStorage.getItem(`gyanix-note-draft-${selectedNoteId}`);
+          if (raw) draft = JSON.parse(raw);
+        } catch (_e) {}
+      }
+
       const current = notes.find((n) => n.id === selectedNoteId);
-      if (current) {
+      if (draft && typeof draft.content === 'string') {
+        setActiveTitle(draft.title ?? (current?.title || ''));
+        setActiveContent(draft.content);
+      } else if (current) {
         setActiveTitle(current.title);
         setActiveContent(current.content_markdown);
+      }
+
+      if (current) {
         setActivePriority(current.priority);
         setActiveIsPinned(current.is_pinned);
         setActiveDeadline(current.deadline_at ? current.deadline_at.split('T')[0]! : '');
@@ -201,10 +253,20 @@ export function NotesLibraryPage() {
     }
   }, [selectedNoteId, notes]);
 
-  // Silent Autosave with 1.2s debounce
+  // Silent Autosave with 600ms debounce (updates query cache directly without reset)
   function triggerAutosave(updatedFields: Partial<NoteItem>) {
     if (!selectedNoteId) return;
     setSaveStatus('saving');
+
+    // Optimistically update query client state in memory
+    queryClient.setQueryData<NoteItem[]>(['notes-list', selectedCollectionId, searchQuery], (old) => {
+      if (!old) return [];
+      return old.map((n) => (n.id === selectedNoteId ? { ...n, ...updatedFields } : n));
+    });
+    queryClient.setQueryData<NoteItem[]>(['notes-all'], (old) => {
+      if (!old) return [];
+      return old.map((n) => (n.id === selectedNoteId ? { ...n, ...updatedFields } : n));
+    });
 
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     autosaveTimerRef.current = setTimeout(async () => {
@@ -218,12 +280,11 @@ export function NotesLibraryPage() {
           body: JSON.stringify(updatedFields),
         });
         setSaveStatus('saved');
-        queryClient.invalidateQueries({ queryKey: ['notes-list'] });
         setTimeout(() => setSaveStatus('idle'), 2000);
       } catch (_err) {
         setSaveStatus('idle');
       }
-    }, 1200);
+    }, 600);
   }
 
   const selectedNote = notes.find((n) => n.id === selectedNoteId);
@@ -290,7 +351,7 @@ export function NotesLibraryPage() {
               <span className="flex items-center gap-2">
                 <FileText size={14} /> All Notes
               </span>
-              <span className="text-2xs font-mono text-text-muted">{notes.length}</span>
+              <span className="text-2xs font-mono text-text-muted">{allNotes.length}</span>
             </button>
 
             {collections.map((col) => (
@@ -472,8 +533,10 @@ export function NotesLibraryPage() {
                 placeholder="Note Title"
                 value={activeTitle}
                 onChange={(e) => {
-                  setActiveTitle(e.target.value);
-                  triggerAutosave({ title: e.target.value });
+                  const val = e.target.value;
+                  setActiveTitle(val);
+                  saveDraft(selectedNoteId, val, activeContent);
+                  triggerAutosave({ title: val });
                 }}
                 className="w-full text-base font-heading font-bold bg-transparent text-text-default border-none focus:outline-none placeholder:text-text-muted"
               />
@@ -494,8 +557,10 @@ export function NotesLibraryPage() {
                     placeholder="Write Markdown notes, code snippets, or key insights…"
                     value={activeContent}
                     onChange={(e) => {
-                      setActiveContent(e.target.value);
-                      triggerAutosave({ content_markdown: e.target.value });
+                      const val = e.target.value;
+                      setActiveContent(val);
+                      saveDraft(selectedNoteId, activeTitle, val);
+                      triggerAutosave({ content_markdown: val });
                     }}
                     className="w-full h-full p-0 bg-transparent text-xs text-text-default placeholder:text-text-muted border-none focus:outline-none resize-none font-sans leading-relaxed"
                   />
@@ -512,40 +577,42 @@ export function NotesLibraryPage() {
       </div>
 
       {/* New Collection Modal */}
-      {isNewCollectionOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
-          <Card className="w-full max-w-sm border border-border bg-surface p-6 shadow-popover space-y-4">
-            <h2 className="text-sm font-heading font-bold text-text-default">Create Collection</h2>
-            <div>
-              <label className="block text-2xs font-medium text-text-secondary mb-1">
-                Collection Name *
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Distributed Systems Notes"
-                value={collectionTitle}
-                onChange={(e) => setCollectionTitle(e.target.value)}
-                className="w-full h-8 px-3 rounded-control text-xs border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
-                autoFocus
-              />
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="ghost" size="sm" onClick={() => setIsNewCollectionOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                disabled={!collectionTitle.trim()}
-                isLoading={createCollectionMutation.isPending}
-                onClick={() => createCollectionMutation.mutate()}
-              >
-                Create
-              </Button>
-            </div>
-          </Card>
+      <Modal
+        isOpen={isNewCollectionOpen}
+        onClose={() => setIsNewCollectionOpen(false)}
+        maxWidth="max-w-sm"
+      >
+        <div className="p-6 space-y-4">
+          <h2 className="text-sm font-heading font-bold text-text-default">Create Collection</h2>
+          <div>
+            <label className="block text-2xs font-medium text-text-secondary mb-1">
+              Collection Name *
+            </label>
+            <input
+              type="text"
+              placeholder="e.g. Distributed Systems Notes"
+              value={collectionTitle}
+              onChange={(e) => setCollectionTitle(e.target.value)}
+              className="w-full h-8 px-3 rounded-control text-xs border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+              autoFocus
+            />
+          </div>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="ghost" size="sm" onClick={() => setIsNewCollectionOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              variant="default"
+              size="sm"
+              disabled={!collectionTitle.trim()}
+              isLoading={createCollectionMutation.isPending}
+              onClick={() => createCollectionMutation.mutate()}
+            >
+              Create
+            </Button>
+          </div>
         </div>
-      )}
+      </Modal>
     </div>
   );
 }

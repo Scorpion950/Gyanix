@@ -56,8 +56,8 @@ describe('Comprehensive End-to-End API Workflows', () => {
 
     const body = await res.json() as any;
     expect(body.success).toBe(true);
-    expect(body.data.username).toBe('alex_chen');
-    expect(body.data.display_name).toBe('Alex Chen');
+    expect(body.data.username).toBe('developer');
+    expect(body.data.display_name).toBe('developer');
     expect(body.data.roles).toBeDefined();
   });
 
