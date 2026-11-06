@@ -12,8 +12,8 @@ export const LectureStatusSchema = z.enum([
 
 export const CreateLearningPathSchema = z.object({
   title: z.string().min(1, 'Title is required').max(150),
-  description: z.string().max(2000).optional(),
-  coverUrl: z.string().url().optional().nullable(),
+  description: z.string().max(2000).optional().nullable(),
+  coverUrl: z.union([z.string().url(), z.literal(''), z.null()]).optional(),
   visibility: PathVisibilitySchema.default('private'),
 });
 
@@ -21,13 +21,13 @@ export const UpdateLearningPathSchema = CreateLearningPathSchema.partial();
 
 export const CreateFolderSchema = z.object({
   title: z.string().min(1, 'Folder title is required').max(100),
-  parentFolderId: z.string().uuid().optional().nullable(),
+  parentFolderId: z.string().optional().nullable(),
   position: z.number().int().default(0),
 });
 
 export const AddLectureSchema = z.object({
   youtubeUrl: z.string().min(1, 'YouTube URL is required'),
-  folderId: z.string().uuid().optional().nullable(),
+  folderId: z.string().optional().nullable(),
   customTitle: z.string().max(150).optional(),
   position: z.number().int().default(0),
 });

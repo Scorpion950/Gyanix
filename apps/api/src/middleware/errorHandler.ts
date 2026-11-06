@@ -10,11 +10,22 @@ export interface AppError extends Error {
  * Never exposes stack traces or internal details to the client.
  */
 export function errorHandler(
-  err: AppError,
+  err: any,
   _req: Request,
   res: Response,
   _next: NextFunction,
 ): void {
+  // Gracefully handle Zod validation errors
+  if (err?.name === 'ZodError' || Array.isArray(err?.issues)) {
+    const firstIssue = err.issues?.[0];
+    const validationMsg = firstIssue ? `${firstIssue.path?.join('.') || 'Field'}: ${firstIssue.message}` : 'Validation error';
+    res.status(400).json({
+      success: false,
+      error: { code: 'VALIDATION_ERROR', message: validationMsg },
+    });
+    return;
+  }
+
   const statusCode = err.statusCode ?? 500;
   const code = err.code ?? 'INTERNAL_ERROR';
 

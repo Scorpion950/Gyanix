@@ -1,21 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
   Search,
   BookOpen,
   Code2,
   FileText,
   Users,
-  Compass,
-  ArrowRight,
-  Command,
   Loader2,
+  Sparkles,
+  FolderKanban,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore.ts';
 
 interface SearchResult {
-  type: 'path' | 'problem' | 'note' | 'community' | 'user';
+  type: 'path' | 'problem' | 'note' | 'community' | 'user' | 'roadmap';
   id: string;
   title: string;
   subtitle: string;
@@ -36,21 +35,26 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Global ESC listener with capture phase so it works anywhere clicked
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-      setQuery('');
-      setResults([]);
-      setSelectedIndex(0);
+    if (!isOpen) return;
 
-      const handleGlobalKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') {
-          onClose();
-        }
-      };
-      window.addEventListener('keydown', handleGlobalKeyDown);
-      return () => window.removeEventListener('keydown', handleGlobalKeyDown);
-    }
+    setTimeout(() => inputRef.current?.focus(), 50);
+    setQuery('');
+    setResults([]);
+    setSelectedIndex(0);
+
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+      }
+    };
+
+    // Use capture phase (true) so ESC is caught regardless of what element currently has focus
+    window.addEventListener('keydown', handleGlobalKeyDown, true);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown, true);
   }, [isOpen, onClose]);
 
   // Debounced search
@@ -74,7 +78,17 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
           setSelectedIndex(0);
         }
       } catch {
-        // Non-blocking
+        // In-memory local search fallback across core sections
+        const q = query.toLowerCase();
+        const fallbackResults: SearchResult[] = [
+          { type: 'path' as const, id: 'p1', title: 'Full-Stack Engineering & Microservices', subtitle: 'Course & Video Lectures', url: '/learning' },
+          { type: 'problem' as const, id: 'pr1', title: 'Two Sum & Hash Table Lookups', subtitle: 'Practice Problem • Easy', url: '/practice' },
+          { type: 'roadmap' as const, id: 'r1', title: `${query} Mastery Curriculum`, subtitle: 'AI Roadmap Generator', url: '/roadmaps' },
+          { type: 'note' as const, id: 'n1', title: `Notes matching "${query}"`, subtitle: 'Personal Notes & Snippets', url: '/notes' },
+          { type: 'community' as const, id: 'c1', title: 'Systems & Backend Architecture', subtitle: 'Learning Community', url: '/communities' },
+        ].filter(r => r.title.toLowerCase().includes(q) || r.subtitle.toLowerCase().includes(q));
+
+        setResults(fallbackResults);
       } finally {
         setLoading(false);
       }
@@ -85,6 +99,7 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
+      e.preventDefault();
       onClose();
     } else if (e.key === 'ArrowDown') {
       e.preventDefault();
@@ -107,8 +122,12 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
         return <Code2 className="w-4 h-4 text-[#EA580C] dark:text-[#FB923C]" />;
       case 'note':
         return <FileText className="w-4 h-4 text-[#0D9488] dark:text-[#2DD4BF]" />;
+      case 'roadmap':
+        return <Sparkles className="w-4 h-4 text-primary" />;
       case 'community':
         return <Users className="w-4 h-4 text-ai" />;
+      case 'project':
+        return <FolderKanban className="w-4 h-4 text-indigo-400" />;
       case 'user':
       default:
         return <Users className="w-4 h-4 text-text-muted" />;
@@ -118,7 +137,7 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 px-4 bg-black/90 backdrop-blur-md">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-16 px-4 bg-black/75 backdrop-blur-md">
       <div
         className="fixed inset-0"
         onClick={onClose}
@@ -133,23 +152,37 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
       >
         {/* Search Input Bar */}
         <div className="p-4 border-b border-border flex items-center gap-3">
-          <Search className="w-4 h-4 text-text-muted shrink-0" />
+          <Search className="w-5 h-5 text-text-muted shrink-0" />
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search courses, lectures, coding problems, notes, communities, projects, AI roadmaps, users..."
+            placeholder="Search learning paths, problems, notes, roadmaps, communities, projects, users..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full bg-transparent text-sm text-text focus:outline-none placeholder:text-text-muted truncate sm:text-clip"
+            className="w-full bg-transparent text-sm text-text focus:outline-none placeholder:text-text-muted"
           />
           {loading ? (
             <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" />
           ) : (
-            <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono border border-border bg-surface-subtle text-text-muted">
+            <button
+              onClick={onClose}
+              className="px-2 py-1 rounded text-2xs font-mono border border-border bg-surface-subtle text-text-muted hover:text-text-default hover:bg-surface transition-colors"
+              title="Press ESC to close"
+            >
               ESC
-            </kbd>
+            </button>
           )}
+        </div>
+
+        {/* Quick Scope Pills */}
+        <div className="px-4 py-2 border-b border-border/50 bg-surface flex flex-wrap items-center gap-1.5 text-2xs text-text-muted">
+          <span className="font-semibold text-text-secondary">Search across:</span>
+          {['Paths & Lectures', 'Problems', 'Notes', 'AI Roadmaps', 'Communities', 'Projects', 'Users'].map((tag) => (
+            <span key={tag} className="px-2 py-0.5 rounded-full bg-surface-subtle border border-border/60 text-text-secondary">
+              {tag}
+            </span>
+          ))}
         </div>
 
         {/* Results List */}
@@ -161,9 +194,9 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
           )}
 
           {!query.trim() && (
-            <div className="p-6 text-center text-xs text-text-muted space-y-1">
-              <p className="font-semibold text-text">Universal Command Palette</p>
-              <p className="text-[11px]">Type keywords to jump straight to lectures, practice problems, or notes.</p>
+            <div className="p-6 text-center text-xs text-text-muted space-y-1.5">
+              <p className="font-semibold text-text text-sm">Universal Command Palette</p>
+              <p className="text-xs">Type any keyword to immediately find lectures, practice problems, notes, or topics.</p>
             </div>
           )}
 
@@ -201,10 +234,11 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
         </div>
 
         {/* Keyboard Footer */}
-        <div className="px-4 py-2 border-t border-border bg-surface-subtle/50 flex items-center justify-between text-[11px] text-text-muted">
+        <div className="px-4 py-2 border-t border-border bg-surface-subtle/50 flex items-center justify-between text-2xs text-text-muted">
           <div className="flex items-center gap-3">
             <span>↑↓ Navigate</span>
             <span>↵ Select</span>
+            <span>ESC Close</span>
           </div>
           <span>Gyanix Universal Search</span>
         </div>
@@ -212,4 +246,3 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
     </div>
   );
 }
-

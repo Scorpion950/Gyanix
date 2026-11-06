@@ -12,8 +12,8 @@ import {
   Calendar,
   Loader2,
   ExternalLink,
-  Youtube,
 } from 'lucide-react';
+import { Youtube } from '@/components/icons/BrandIcons.tsx';
 import { Button } from '@/components/ui/Button.tsx';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card.tsx';
 import { Input } from '@/components/ui/Input.tsx';

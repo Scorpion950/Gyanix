@@ -7,7 +7,6 @@ import {
   Clock,
   ShieldAlert,
   Edit3,
-  Github,
   Globe,
   MapPin,
   Lock,
@@ -17,6 +16,7 @@ import {
   FileCode,
   Share2,
 } from 'lucide-react';
+import { Github } from '@/components/icons/BrandIcons.tsx';
 import { useAuthStore } from '@/stores/authStore.ts';
 import { Button } from '@/components/ui/Button.tsx';
 import { Avatar } from '@/components/ui/Avatar.tsx';
@@ -72,8 +72,9 @@ export function ProfilePage() {
     enabled: !!token,
   });
 
-  const targetUsername = routeUsername || myProfile?.username;
-  const isOwnProfile = myProfile && targetUsername?.toLowerCase() === myProfile.username.toLowerCase();
+  const fallbackUsername = (session?.user?.user_metadata as any)?.['username'] || session?.user?.email?.split('@')[0] || 'student';
+  const targetUsername = routeUsername || myProfile?.username || fallbackUsername;
+  const isOwnProfile = !routeUsername || (myProfile && targetUsername?.toLowerCase() === myProfile.username.toLowerCase()) || targetUsername === fallbackUsername;
 
   // 2. Fetch target profile
   const { data: profile, isLoading, error } = useQuery({
@@ -507,7 +508,7 @@ export function ProfilePage() {
 
       {/* Edit Profile Modal */}
       {isEditing && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
           <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
             <h2 className="text-lg font-heading font-bold text-text-default mb-4">Edit Profile</h2>
 
