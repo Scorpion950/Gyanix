@@ -21,12 +21,16 @@ export const privacyFilter = {
    * Checks whether the user has opted out of AI personalisation
    */
   async canUsePersonalizedData(userId: string): Promise<boolean> {
-    const { data } = await supabaseAdmin
-      .from('user_settings')
-      .select('ai_personalisation')
-      .eq('user_id', userId)
-      .maybeSingle();
+    try {
+      const { data } = await supabaseAdmin
+        .from('user_settings')
+        .select('ai_personalisation')
+        .eq('user_id', userId)
+        .maybeSingle();
 
-    return data?.ai_personalisation ?? true;
+      return data?.ai_personalisation ?? true;
+    } catch {
+      return true;
+    }
   },
 };

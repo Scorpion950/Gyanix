@@ -22,40 +22,57 @@
 @layer base {
   :root {
     /* Surfaces — dark palette by default */
-    --background: 222 32% 7%;           /* #0B0E14 */
-    --surface: 222 30% 11%;             /* #121723 */
-    --surface-raised: 222 28% 15%;      /* #182030 */
-    --surface-subtle: 222 26% 17%;      /* #1B2231 */
-    --border: 222 24% 20%;              /* #232B3B */
+    --background: 222 32% 7%;
+    /* #0B0E14 */
+    --surface: 222 30% 11%;
+    /* #121723 */
+    --surface-raised: 222 28% 15%;
+    /* #182030 */
+    --surface-subtle: 222 26% 17%;
+    /* #1B2231 */
+    --border: 222 24% 20%;
+    /* #232B3B */
 
     /* Text */
-    --text: 220 30% 93%;                /* #E8ECF4 */
-    --text-secondary: 220 20% 71%;      /* #A6AFC3 */
-    --text-muted: 220 16% 59%;          /* #8089A0 */
+    --text: 220 30% 93%;
+    /* #E8ECF4 */
+    --text-secondary: 220 20% 71%;
+    /* #A6AFC3 */
+    --text-muted: 220 16% 59%;
+    /* #8089A0 */
 
     /* Primary (blue) */
-    --primary: 221 100% 68%;            /* #5B8DFF */
+    --primary: 221 100% 68%;
+    /* #5B8DFF */
     --primary-foreground: 222 32% 7%;
 
     /* AI (violet) */
-    --ai: 265 83% 76%;                  /* #A78BFA */
+    --ai: 265 83% 76%;
+    /* #A78BFA */
     --ai-foreground: 222 32% 7%;
 
     /* Status */
-    --success: 142 69% 58%;             /* #4ADE80 */
+    --success: 142 69% 58%;
+    /* #4ADE80 */
     --success-foreground: 222 32% 7%;
-    --warning: 48 96% 56%;              /* #FBBF24 */
+    --warning: 48 96% 56%;
+    /* #FBBF24 */
     --warning-foreground: 222 32% 7%;
-    --danger: 0 91% 71%;               /* #F87171 */
+    --danger: 0 91% 71%;
+    /* #F87171 */
     --danger-foreground: 222 32% 7%;
 
     /* Progress metrics */
-    --progress-learning: 221 100% 68%;  /* Primary blue */
-    --progress-knowledge: 172 76% 51%; /* Teal #2DD4BF */
-    --progress-practical: 20 97% 61%; /* Orange #FB923C */
+    --progress-learning: 221 100% 68%;
+    /* Primary blue */
+    --progress-knowledge: 172 76% 51%;
+    /* Teal #2DD4BF */
+    --progress-practical: 20 97% 61%;
+    /* Orange #FB923C */
 
     /* Streak / achievement (amber) */
-    --streak: 48 96% 56%;              /* #FBBF24 */
+    --streak: 48 96% 56%;
+    /* #FBBF24 */
 
     /* Focus ring */
     --ring: var(--primary);
@@ -70,31 +87,44 @@
   /* ─── Dark Mode Tokens (Matches root) ─────────────────────────────────── */
   .dark {
     /* Surfaces — raised by lightness, NOT by shadow */
-    --background: 222 32% 7%;           /* #0B0E14 */
-    --surface: 222 30% 11%;             /* #121723 */
-    --surface-raised: 222 28% 15%;      /* #182030 */
-    --surface-subtle: 222 26% 17%;      /* #1B2231 */
-    --border: 222 24% 20%;              /* #232B3B */
+    --background: 222 32% 7%;
+    /* #0B0E14 */
+    --surface: 222 30% 11%;
+    /* #121723 */
+    --surface-raised: 222 28% 15%;
+    /* #182030 */
+    --surface-subtle: 222 26% 17%;
+    /* #1B2231 */
+    --border: 222 24% 20%;
+    /* #232B3B */
 
     /* Text — slightly desaturated */
-    --text: 220 30% 93%;                /* #E8ECF4 */
-    --text-secondary: 220 20% 71%;      /* #A6AFC3 */
-    --text-muted: 220 16% 59%;          /* #8089A0 */
+    --text: 220 30% 93%;
+    /* #E8ECF4 */
+    --text-secondary: 220 20% 71%;
+    /* #A6AFC3 */
+    --text-muted: 220 16% 59%;
+    /* #8089A0 */
 
     /* Primary — lighter for dark backgrounds */
-    --primary: 221 100% 68%;            /* #5B8DFF */
+    --primary: 221 100% 68%;
+    /* #5B8DFF */
     --primary-foreground: 222 32% 7%;
 
     /* AI (violet) */
-    --ai: 265 83% 76%;                  /* #A78BFA */
+    --ai: 265 83% 76%;
+    /* #A78BFA */
     --ai-foreground: 222 32% 7%;
 
     /* Status */
-    --success: 142 69% 58%;             /* #4ADE80 */
+    --success: 142 69% 58%;
+    /* #4ADE80 */
     --success-foreground: 222 32% 7%;
-    --warning: 48 96% 56%;              /* #FBBF24 */
+    --warning: 48 96% 56%;
+    /* #FBBF24 */
     --warning-foreground: 222 32% 7%;
-    --danger: 0 91% 71%;               /* #F87171 */
+    --danger: 0 91% 71%;
+    /* #F87171 */
     --danger-foreground: 222 32% 7%;
 
     /* Progress metrics */
@@ -116,6 +146,7 @@
   html {
     /* Prevent layout shift from scrollbar appearing */
     scrollbar-gutter: stable;
+
     /* Smooth scrolling — but only if user hasn't requested reduced motion */
     @media (prefers-reduced-motion: no-preference) {
       scroll-behavior: smooth;
@@ -137,17 +168,39 @@
   }
 
   /* ─── Typography ─────────────────────────────────────────────────────────── */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-heading font-semibold tracking-tight;
     line-height: 1.25;
   }
 
-  h1 { @apply text-3xl; }
-  h2 { @apply text-2xl; }
-  h3 { @apply text-xl; }
-  h4 { @apply text-lg; }
-  h5 { @apply text-md; }
-  h6 { @apply text-sm font-semibold; }
+  h1 {
+    @apply text-3xl;
+  }
+
+  h2 {
+    @apply text-2xl;
+  }
+
+  h3 {
+    @apply text-xl;
+  }
+
+  h4 {
+    @apply text-lg;
+  }
+
+  h5 {
+    @apply text-md;
+  }
+
+  h6 {
+    @apply text-sm font-semibold;
+  }
 
   /* ─── Focus Ring ────────────────────────────────────────────────────────── */
   /* Visible, 2px, 2px offset — WCAG 2.2 requirement */
@@ -161,7 +214,8 @@
   }
 
   /* ─── Code and timestamps ──────────────────────────────────────────────── */
-  code, kbd {
+  code,
+  kbd {
     font-family: var(--font-mono), monospace;
   }
 
@@ -170,12 +224,15 @@
     width: 6px;
     height: 6px;
   }
+
   ::-webkit-scrollbar-track {
     background: transparent;
   }
+
   ::-webkit-scrollbar-thumb {
     @apply bg-border rounded-full;
   }
+
   ::-webkit-scrollbar-thumb:hover {
     @apply bg-text-muted;
   }
@@ -188,7 +245,7 @@
 
   /* ─── Anti-White Box Overrides (Browser Autofill, Paste & Form Cache) ─────── */
   input:-webkit-autofill,
-  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:hover,
   input:-webkit-autofill:focus,
   input:-webkit-autofill:active,
   textarea:-webkit-autofill,
@@ -212,18 +269,22 @@
     -webkit-appearance: none;
     margin: 0;
   }
+
   input[type='number'] {
     -moz-appearance: textfield;
   }
 
   /* ─── Dark Baseline for Form Controls ────────────────────────────────────── */
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     color-scheme: dark;
   }
 }
 
 /* ─── Utility Classes ────────────────────────────────────────────────────── */
 @layer utilities {
+
   /* Skip to content link (accessibility) */
   .skip-nav {
     @apply sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50;
@@ -246,6 +307,7 @@
   .progress-bar {
     @apply h-1 rounded-full bg-surface-subtle overflow-hidden;
   }
+
   .progress-bar-fill {
     @apply h-full rounded-full transition-all duration-300;
   }
@@ -257,21 +319,36 @@
   }
 
   /* Focus mode — hide non-essential chrome */
-  .focus-mode .sidebar { display: none; }
-  .focus-mode .top-bar-extras { display: none; }
+  .focus-mode .sidebar {
+    display: none;
+  }
+
+  .focus-mode .top-bar-extras {
+    display: none;
+  }
 
   /* Density modes */
-  .density-focus { --spacing-multiplier: 0.75; }
-  .density-explore { --spacing-multiplier: 1; }
-  .density-connect { --spacing-multiplier: 0.875; }
+  .density-focus {
+    --spacing-multiplier: 0.75;
+  }
+
+  .density-explore {
+    --spacing-multiplier: 1;
+  }
+
+  .density-connect {
+    --spacing-multiplier: 0.875;
+  }
 
   /* Difficulty dots */
   .difficulty-dot {
     @apply w-2 h-2 rounded-full inline-block;
   }
+
   .difficulty-dot-filled {
     @apply bg-primary;
   }
+
   .difficulty-dot-empty {
     @apply bg-border;
   }
@@ -279,6 +356,7 @@
 
 /* ─── Reduced Motion ────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {

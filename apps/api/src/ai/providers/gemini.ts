@@ -31,7 +31,7 @@ export class GeminiAdapter implements AIProviderAdapter {
 
     try {
       const modelConfig: any = {
-        model: 'gemini-1.5-flash',
+        model: 'gemini-3.8-flash',
         generationConfig: {
           temperature: options.temperature ?? 0.7,
           maxOutputTokens: options.maxTokens ?? 1024,
@@ -53,7 +53,7 @@ export class GeminiAdapter implements AIProviderAdapter {
 
       return {
         content: text,
-        model: 'gemini-1.5-flash',
+        model: 'gemini-3.8-flash',
         provider: 'gemini',
         tokensUsed: result.response.usageMetadata?.totalTokenCount || 0,
       };
@@ -64,32 +64,80 @@ export class GeminiAdapter implements AIProviderAdapter {
   }
 
   private generateMockFallback(options: AIRequestOptions): AIResponse {
-    const lastMsg = options.messages[options.messages.length - 1]?.content || '';
+    const userMsg = options.messages.find((m) => m.role === 'user')?.content || '';
+    const topicMatch = userMsg.match(/for\s+(.+)$/i);
+    const topic = (topicMatch && topicMatch[1]) ? topicMatch[1].trim() : 'Software Engineering';
 
     if (options.jsonMode) {
-      // Structured JSON mock
+      // If assessment requested
+      if (options.systemPrompt?.includes('assessment') || userMsg.toLowerCase().includes('assessment')) {
+        return {
+          content: JSON.stringify({
+            title: `${topic} Skill Assessment`,
+            questions: [
+              {
+                id: 'q1',
+                type: 'mcq',
+                prompt: `In ${topic}, which of the following best describes memory management and concurrency safety?`,
+                options: [
+                  `Automatic garbage collection with concurrent thread synchronization primitives`,
+                  `Manual pointer arithmetic with raw memory deallocation`,
+                  `Single-threaded event loops only with no multi-threading support`,
+                  `Static global buffers with no runtime dynamic allocation`,
+                ],
+                correctOptionIndex: 0,
+                explanation: `${topic} handles memory automatically while providing standard synchronization mechanisms for thread safety.`,
+                difficulty: 3,
+                metricTarget: 'knowledge',
+              },
+              {
+                id: 'q2',
+                type: 'conceptual',
+                prompt: `What is the primary architectural trade-off when designing scalable systems in ${topic}?`,
+                explanation: `Balancing thread contention, CPU cache locality, and garbage collection pauses against ease of development.`,
+                difficulty: 3,
+                metricTarget: 'knowledge',
+              },
+              {
+                id: 'q3',
+                type: 'code_scenario',
+                prompt: `Review the following ${topic} pattern. How would you refactor it to prevent resource leaks or race conditions?`,
+                codeSnippet: `// Example ${topic} resource pattern\ntry {\n  Resource res = acquireResource();\n  res.process();\n} finally {\n  res.close();\n}`,
+                explanation: `Ensure structured resource cleanup (such as try-with-resources or automatic disposal) to guarantee release even if exceptions occur.`,
+                difficulty: 3,
+                metricTarget: 'practical',
+              },
+            ],
+          }),
+          model: 'local-fallback',
+          provider: 'gemini',
+          tokensUsed: 0,
+        };
+      }
+
+      // Default roadmap fallback
       return {
         content: JSON.stringify({
-          summary: 'Concept Explanation',
+          summary: `${topic} Mastery Roadmap`,
+          prerequisites: ['Basic programming fundamentals', 'Terminal & Git basics'],
           stages: [
             {
-              title: 'Core Fundamentals',
-              lectures: ['Foundational Principles & Architecture', 'Syntax and Memory Model'],
+              stageNumber: 1,
+              title: `${topic} Fundamentals`,
+              topics: ['Language syntax & data structures', 'Object model & standard libraries'],
+              searchTerms: [`${topic} full beginner course`],
             },
             {
-              title: 'Intermediate Patterns',
-              lectures: ['Concurrency & State Management', 'Performance Optimization'],
+              stageNumber: 2,
+              title: 'Production Architecture & Patterns',
+              topics: ['Concurrency, streams & asynchronous I/O', 'Database persistence & testing'],
+              searchTerms: [`${topic} enterprise architectural patterns`],
             },
           ],
-          questions: [
+          suggestedProjects: [
             {
-              id: 'q1',
-              type: 'mcq',
-              prompt: 'Which data structure does a standard PostgreSQL index use by default?',
-              options: ['Hash Map', 'B-Tree', 'Splay Tree', 'Skip List'],
-              correctOptionIndex: 1,
-              explanation: 'PostgreSQL uses B-Tree indexes by default for equality and range queries.',
-              difficulty: 3,
+              title: `High-Throughput ${topic} Backend Service`,
+              description: `Build a modular production service using modern ${topic} idioms.`,
             },
           ],
         }),
@@ -100,7 +148,7 @@ export class GeminiAdapter implements AIProviderAdapter {
     }
 
     return {
-      content: `### Concept Explanation\n\nRegarding your question: *"${lastMsg.slice(0, 80)}..."*\n\n1. **Core Principle:** In modern software architecture, breaking down complexity into discrete, testable components prevents cascading failures.\n2. **Practical Example:** Consider database query optimization: always run \`EXPLAIN ANALYZE\` before adding indexes to measure true execution cost.\n\n*Note: Running in offline fallback mode. Configure GEMINI_API_KEY in apps/api/.env for live model responses.*`,
+      content: `### Concept Explanation\n\nRegarding your question: *"${userMsg.slice(0, 80)}..."*\n\n1. **Core Principle:** In modern software architecture, breaking down complexity into discrete, testable components prevents cascading failures.\n2. **Practical Example:** Consider database query optimization: always run \`EXPLAIN ANALYZE\` before adding indexes to measure true execution cost.\n\n*Note: Running in offline fallback mode. Configure GEMINI_API_KEY in apps/api/.env for live model responses.*`,
       model: 'local-fallback',
       provider: 'gemini',
       tokensUsed: 0,
