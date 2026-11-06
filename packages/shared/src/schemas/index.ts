@@ -7,4 +7,5 @@ export * from './learning.js';
 export * from './notes.js';
 export * from './ai.js';
 export * from './coding.js';
+export * from './socialFeed.js';
 

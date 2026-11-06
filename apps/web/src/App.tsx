@@ -17,6 +17,9 @@ import { AssessmentRunnerView } from './features/assessments/AssessmentRunnerVie
 import { CodePlaygroundPage } from './features/coding/CodePlaygroundPage.tsx';
 import { PracticeTrackerPage } from './features/coding/PracticeTrackerPage.tsx';
 import { ProblemSolvingWorkspace } from './features/coding/ProblemSolvingWorkspace.tsx';
+import { FeedPage } from './features/feed/FeedPage.tsx';
+import { CommunitiesListPage } from './features/feed/CommunitiesListPage.tsx';
+import { ProjectShowcasePage } from './features/feed/ProjectShowcasePage.tsx';
 import { DesignSystemPage } from './routes/DesignSystemPage.tsx';
 import { NotFoundPage } from './routes/NotFoundPage.tsx';
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx';
@@ -112,6 +115,9 @@ export default function App() {
         <Route path="/code" element={<CodePlaygroundPage />} />
         <Route path="/practice" element={<PracticeTrackerPage />} />
         <Route path="/practice/problems/:slug" element={<ProblemSolvingWorkspace />} />
+        <Route path="/feed" element={<FeedPage />} />
+        <Route path="/communities" element={<CommunitiesListPage />} />
+        <Route path="/projects" element={<ProjectShowcasePage />} />
       </Route>
 
       {/* Design system — dev only */}
