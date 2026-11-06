@@ -8,8 +8,8 @@
     "pnpm": ">=9.0.0"
   },
   "scripts": {
-    "dev": "pnpm --parallel --filter './apps/*' dev",
-    "build": "pnpm --filter './packages/*' build && pnpm --filter './apps/*' build",
+    "dev": "pnpm --parallel --filter @gyanix/api --filter @gyanix/web dev",
+    "build": "pnpm --filter @gyanix/shared build && pnpm --filter @gyanix/api build && pnpm --filter @gyanix/web build",
     "lint": "pnpm --recursive --parallel lint",
     "typecheck": "pnpm --recursive --parallel typecheck",
     "test": "pnpm --recursive --parallel test",
@@ -18,18 +18,20 @@
     "clean": "pnpm --recursive --parallel clean && rimraf node_modules"
   },
   "devDependencies": {
+    "@eslint/js": "^9.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-jsx-a11y": "^6.10.0",
     "eslint-plugin-react": "^7.37.0",
     "eslint-plugin-react-hooks": "^5.0.0",
-    "eslint-plugin-jsx-a11y": "^6.10.0",
+    "globals": "^17.14.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0",
     "prettier": "^3.3.0",
     "rimraf": "^6.0.0",
-    "typescript": "^5.5.0",
-    "husky": "^9.0.0",
-    "lint-staged": "^15.0.0"
+    "typescript": "^5.5.0"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

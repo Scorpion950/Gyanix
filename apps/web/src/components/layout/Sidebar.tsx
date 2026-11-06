@@ -121,7 +121,7 @@ export function Sidebar() {
                   {group.label}
                 </p>
               )}
-              <ul role="list" className="space-y-0.5">
+              <ul className="space-y-0.5">
                 {group.items.map((item) => (
                   <SidebarNavItem
                     key={item.to}
