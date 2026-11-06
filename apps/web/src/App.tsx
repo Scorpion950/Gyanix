@@ -7,6 +7,9 @@ import { RegisterPage } from './features/auth/RegisterPage.tsx';
 import { DashboardPage } from './features/dashboard/DashboardPage.tsx';
 import { OnboardingPage } from './features/onboarding/OnboardingPage.tsx';
 import { ProfilePage } from './features/profile/ProfilePage.tsx';
+import { LearningPathsListPage } from './features/learning/LearningPathsListPage.tsx';
+import { LearningPathDetailView } from './features/learning/LearningPathDetailView.tsx';
+import { LecturePlayerView } from './features/learning/LecturePlayerView.tsx';
 import { DesignSystemPage } from './routes/DesignSystemPage.tsx';
 import { NotFoundPage } from './routes/NotFoundPage.tsx';
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx';
@@ -91,6 +94,9 @@ export default function App() {
         <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/u/:username" element={<ProfilePage />} />
+        <Route path="/learning" element={<LearningPathsListPage />} />
+        <Route path="/learning/paths/:pathId" element={<LearningPathDetailView />} />
+        <Route path="/learning/player/:itemId" element={<LecturePlayerView />} />
       </Route>
 
       {/* Design system — dev only */}

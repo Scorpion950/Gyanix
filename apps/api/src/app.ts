@@ -6,6 +6,7 @@ import { healthRouter } from './routes/health.js';
 import { authRouter } from './routes/auth.js';
 import { usersRouter } from './routes/users.js';
 import { notificationsRouter } from './routes/notifications.js';
+import { learningPathsRouter } from './routes/learningPaths.js';
 import { env } from './config/env.js';
 
 export function createApp(): express.Application {
@@ -52,6 +53,7 @@ export function createApp(): express.Application {
   app.use('/api/auth', authRouter);
   app.use('/api/users', usersRouter);
   app.use('/api/notifications', notificationsRouter);
+  app.use('/api/learning-paths', learningPathsRouter);
 
   // ─── Global error handler (must be last) ──────────────────────────────────
   app.use(errorHandler);

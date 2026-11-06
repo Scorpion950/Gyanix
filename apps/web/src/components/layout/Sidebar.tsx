@@ -40,7 +40,7 @@ const navGroups: NavGroup[] = [
     label: 'Learn',
     items: [
       { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
-      { label: 'My Learning', to: '/learning', icon: BookOpen, deferred: true },
+      { label: 'My Learning', to: '/learning', icon: BookOpen },
       { label: 'Notes', to: '/notes', icon: FileText, deferred: true },
       { label: 'Assessments', to: '/assessments', icon: ClipboardCheck, deferred: true },
     ],

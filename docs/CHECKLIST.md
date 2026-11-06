@@ -136,12 +136,37 @@
 
 ---
 
-## Phase 2 — Learning Management & YouTube Integration ⏳
-- ⏳ YouTube URL and playlist import
-- ⏳ Video metadata caching (`videos` table) & oEmbed fallback
-- ⏳ Learning path builder with nested folders and drag-and-drop
-- ⏳ Lecture status tracking (Not Started, Watching, Completed, On Hold, Skipped)
-- ⏳ Video player view (Focus Mode) with resizable tabs
+## Phase 2 — Learning Management & YouTube Integration ✅
+- ✅ Migration 003: `videos`, `learning_paths`, `path_folders`, `path_items`, `user_lecture_progress`, `user_path_progress`, RLS policies
+- ✅ YouTube Service (`youtubeService.ts`):
+  - URL parser (videos & playlists)
+  - Zero-quota oEmbed fallback (title, thumbnail, channel)
+  - YouTube Data API v3 integration with quota awareness & DB caching
+  - ISO-8601 duration parser
+  - Unavailable video handling & detection
+- ✅ Learning Path Service (`learningPathService.ts`):
+  - Create / list / detail learning paths
+  - Nested folders & subfolders hierarchy
+  - Adding lectures linking to shared `videos` table
+  - Recalculating path progress percentage & lecture counts
+  - Preserved lecture replacement for unavailable videos
+  - Duplication / forking of public paths into personal library
+- ✅ API Endpoints (`/api/learning-paths`):
+  - `GET /api/learning-paths` (My Paths & Public Discoverable)
+  - `POST /api/learning-paths` (Create Path)
+  - `GET /api/learning-paths/:id` (Full folder tree & item progress)
+  - `POST /api/learning-paths/:id/folders` (Create Folder)
+  - `POST /api/learning-paths/:id/lectures` (Add Lecture)
+  - `POST /api/learning-paths/:id/duplicate` (Fork Path)
+  - `POST /api/learning-paths/resolve-video` (Zero-quota preview)
+  - `POST /api/learning-paths/import-playlist` (Automatic course import)
+  - `PATCH /api/learning-paths/items/:itemId/progress` (Playback & status)
+  - `POST /api/learning-paths/items/:itemId/replace-video` (Preserve notes & structure)
+- ✅ Frontend Views:
+  - `LearningPathsListPage.tsx`: Grid of personal & discoverable paths with progress bars, visibility badges, create & import modals
+  - `LearningPathDetailView.tsx`: 2-pane view per Section 0.7 (Folder tree with status icons on left, lecture details & preview on right, unavailable alert, replace video modal)
+  - `LecturePlayerView.tsx`: Focus mode player per Section 0.7 (16:9 official YouTube iframe player on left, resizable tabs on right for Notes/Doubts/Next, active timestamp "Add note at 12:34" button, status selector, post-lecture reflection field, subtle saved indicator, 15-min inactivity check modal, keyboard shortcuts dialog)
+  - Sidebar updated: "My Learning" active and un-deferred
 
 ## Phase 3 — Progress Tracking, Notes & Analytics ⏳
 - ⏳ Timestamp-linked notes library

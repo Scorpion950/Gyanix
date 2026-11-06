@@ -127,6 +127,85 @@ User privacy preferences, notification choices, and AI opt-out.
 
 ---
 
+## Migration 003: Learning Management & YouTube Integration (Phase 2)
+
+#### `videos`
+Shared YouTube metadata cache table. Multiple learning paths reference the same video record.
+- `id` (UUID PK)
+- `youtube_video_id` (TEXT UNIQUE NOT NULL)
+- `title` (TEXT NOT NULL)
+- `channel_title` (TEXT NOT NULL)
+- `thumbnail_url` (TEXT)
+- `duration_seconds` (INTEGER DEFAULT 0)
+- `is_available` (BOOLEAN DEFAULT true)
+- `last_refreshed_at` (TIMESTAMPTZ)
+- `raw_metadata` (JSONB)
+- `created_at` (TIMESTAMPTZ)
+
+**Indexes:**
+- `idx_videos_youtube_id` (btree)
+- `idx_videos_available` (btree)
+
+#### `learning_paths`
+- `id` (UUID PK)
+- `creator_id` (UUID FK -> auth.users.id ON DELETE CASCADE)
+- `title` (TEXT NOT NULL, 1-150 chars)
+- `description` (TEXT, max 2000 chars)
+- `cover_url` (TEXT)
+- `visibility` (ENUM: 'private', 'public', 'friends')
+- `is_featured` (BOOLEAN DEFAULT false)
+- `fork_from_id` (UUID FK -> learning_paths.id ON DELETE SET NULL)
+- `created_at`, `updated_at` (TIMESTAMPTZ)
+
+**Indexes:**
+- `idx_learning_paths_creator`
+- `idx_learning_paths_visibility`
+- `idx_learning_paths_fts` (gin full-text search)
+
+#### `path_folders`
+Nested folders and subfolders.
+- `id` (UUID PK)
+- `path_id` (UUID FK -> learning_paths.id ON DELETE CASCADE)
+- `parent_folder_id` (UUID FK -> path_folders.id ON DELETE CASCADE)
+- `title` (TEXT NOT NULL, 1-100 chars)
+- `position` (INTEGER DEFAULT 0)
+- `created_at`, `updated_at` (TIMESTAMPTZ)
+
+#### `path_items`
+Lectures placed inside paths or folders.
+- `id` (UUID PK)
+- `path_id` (UUID FK -> learning_paths.id ON DELETE CASCADE)
+- `folder_id` (UUID FK -> path_folders.id ON DELETE CASCADE)
+- `video_id` (UUID FK -> videos.id ON DELETE RESTRICT)
+- `custom_title` (TEXT)
+- `position` (INTEGER DEFAULT 0)
+- `created_at`, `updated_at` (TIMESTAMPTZ)
+
+#### `user_lecture_progress`
+Individual lecture tracking.
+- `id` (UUID PK)
+- `user_id` (UUID FK -> auth.users.id ON DELETE CASCADE)
+- `path_item_id` (UUID FK -> path_items.id ON DELETE CASCADE)
+- `status` (ENUM: 'not_started', 'watching', 'completed', 'on_hold', 'skipped')
+- `playback_seconds` (INTEGER DEFAULT 0)
+- `skip_reason` (TEXT)
+- `post_lecture_remark` (TEXT)
+- `completed_at` (TIMESTAMPTZ)
+- `updated_at` (TIMESTAMPTZ)
+
+#### `user_path_progress`
+Denormalized summary table for instant dashboard load.
+- `id` (UUID PK)
+- `user_id` (UUID FK -> auth.users.id ON DELETE CASCADE)
+- `path_id` (UUID FK -> learning_paths.id ON DELETE CASCADE)
+- `completed_lectures` (INTEGER DEFAULT 0)
+- `total_lectures` (INTEGER DEFAULT 0)
+- `progress_percent` (INTEGER DEFAULT 0)
+- `last_watched_item_id` (UUID FK -> path_items.id)
+- `last_activity_at` (TIMESTAMPTZ)
+
+---
+
 ## Triggers & Helper Functions
 
 1. `set_updated_at()`: updates `updated_at` timestamp before any `UPDATE`.
