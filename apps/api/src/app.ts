@@ -5,6 +5,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import { healthRouter } from './routes/health.js';
 import { authRouter } from './routes/auth.js';
 import { usersRouter } from './routes/users.js';
+import { notificationsRouter } from './routes/notifications.js';
 import { env } from './config/env.js';
 
 export function createApp(): express.Application {
@@ -50,6 +51,7 @@ export function createApp(): express.Application {
   app.use('/api', healthRouter);
   app.use('/api/auth', authRouter);
   app.use('/api/users', usersRouter);
+  app.use('/api/notifications', notificationsRouter);
 
   // ─── Global error handler (must be last) ──────────────────────────────────
   app.use(errorHandler);

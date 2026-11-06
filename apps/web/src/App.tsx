@@ -5,6 +5,8 @@ import { AuthLayout } from './components/layout/AuthLayout.tsx';
 import { LoginPage } from './features/auth/LoginPage.tsx';
 import { RegisterPage } from './features/auth/RegisterPage.tsx';
 import { DashboardPage } from './features/dashboard/DashboardPage.tsx';
+import { OnboardingPage } from './features/onboarding/OnboardingPage.tsx';
+import { ProfilePage } from './features/profile/ProfilePage.tsx';
 import { DesignSystemPage } from './routes/DesignSystemPage.tsx';
 import { NotFoundPage } from './routes/NotFoundPage.tsx';
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx';
@@ -67,6 +69,16 @@ export default function App() {
         />
       </Route>
 
+      {/* Onboarding route */}
+      <Route
+        path="/onboarding"
+        element={
+          <ProtectedRoute>
+            <OnboardingPage />
+          </ProtectedRoute>
+        }
+      />
+
       {/* App routes */}
       <Route
         element={
@@ -77,6 +89,8 @@ export default function App() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/u/:username" element={<ProfilePage />} />
       </Route>
 
       {/* Design system — dev only */}

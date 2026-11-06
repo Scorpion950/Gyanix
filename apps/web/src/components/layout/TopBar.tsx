@@ -1,13 +1,16 @@
-import { Bell, Search, Plus, Menu } from 'lucide-react';
+import { Search, Plus, Menu } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore.ts';
 import { useUIStore } from '@/stores/uiStore.ts';
 import { ThemeToggle } from '@/components/ui/ThemeToggle.tsx';
+import { NotificationBell } from './NotificationBell.tsx';
 import { cn } from '@/lib/utils.ts';
 import { GyanixLogoMark } from '@/assets/Logo.tsx';
+import { useNavigate } from 'react-router-dom';
 
 export function TopBar() {
   const { session } = useAuthStore();
   const { toggleSidebar } = useUIStore();
+  const navigate = useNavigate();
 
   return (
     <header className="h-14 flex items-center gap-3 px-4 border-b border-border bg-surface flex-shrink-0 z-10">
@@ -81,33 +84,21 @@ export function TopBar() {
         </button>
 
         {/* Notifications */}
-        <button
-          className={cn(
-            'relative flex items-center justify-center w-9 h-9 rounded-control',
-            'text-text-secondary hover:text-text-default hover:bg-surface-subtle',
-            'transition-colors duration-micro',
-          )}
-          aria-label="Notifications"
-          title="Notifications"
-        >
-          <Bell size={18} strokeWidth={1.5} />
-          {/* Unread dot — hidden when no notifications */}
-          {/* <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-primary" /> */}
-        </button>
+        <NotificationBell />
 
         {/* Theme toggle */}
         <ThemeToggle />
 
         {/* Profile avatar */}
         <button
+          onClick={() => navigate('/profile')}
           className={cn(
             'flex items-center justify-center w-9 h-9 rounded-full',
             'bg-primary/10 text-primary text-xs font-semibold',
             'hover:bg-primary/20 transition-colors duration-micro',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
           )}
-          aria-label="Open profile menu"
-          aria-haspopup="true"
+          aria-label="View your profile"
         >
           {session?.user.email?.[0]?.toUpperCase() ?? 'U'}
         </button>
