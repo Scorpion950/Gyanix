@@ -12,6 +12,7 @@ import {
   Calendar,
   Loader2,
   ExternalLink,
+  Youtube,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button.tsx';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card.tsx';
@@ -20,11 +21,19 @@ import { Badge } from '@/components/ui/Badge.tsx';
 import { useAuthStore } from '@/stores/authStore.ts';
 import { toast } from 'sonner';
 
+export interface YouTubeRecommendation {
+  title: string;
+  url: string;
+  type: 'video' | 'playlist';
+  channel?: string;
+}
+
 interface RoadmapStage {
   stageNumber: number;
   title: string;
   topics: string[];
   searchTerms: string[];
+  recommendations?: YouTubeRecommendation[];
 }
 
 interface SuggestedProject {
@@ -393,20 +402,76 @@ export function RoadmapGeneratorView() {
                             ))}
                           </ul>
 
-                          {/* Recommended Searches */}
-                          {stage.searchTerms && stage.searchTerms.length > 0 && (
-                            <div className="mt-3 pt-3 border-t border-border/40">
-                              <span className="text-[11px] text-text-muted block mb-1">
-                                Curated Query Reference:
-                              </span>
-                              <div className="flex flex-wrap gap-1.5">
-                                {stage.searchTerms.map((term, sIdx) => (
-                                  <span
-                                    key={sIdx}
-                                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] bg-surface-subtle text-text-secondary border border-border font-mono"
+                          {/* Recommended YouTube Courses & Playlists */}
+                          {((stage.recommendations && stage.recommendations.length > 0) || (stage.searchTerms && stage.searchTerms.length > 0)) && (
+                            <div className="mt-4 pt-3 border-t border-border/50 space-y-2">
+                              <div className="flex items-center justify-between">
+                                <span className="text-xs font-semibold text-text flex items-center gap-1.5">
+                                  <Youtube className="w-4 h-4 text-red-500 fill-current" />
+                                  Recommended YouTube Playlists & Lectures:
+                                </span>
+                                <span className="text-[10px] text-text-muted">Direct YouTube Links</span>
+                              </div>
+
+                              <div className="space-y-2 pt-1">
+                                {(stage.recommendations && stage.recommendations.length > 0
+                                  ? stage.recommendations
+                                  : (stage.searchTerms || [`${activeRoadmap.topic} course`]).map((term) => ({
+                                      title: `${activeRoadmap.topic}: ${term}`,
+                                      channel: 'Curated YouTube Educators',
+                                      url: `https://www.youtube.com/results?search_query=${encodeURIComponent(term)}`,
+                                      type: 'playlist' as const,
+                                    }))
+                                ).map((rec, rIdx) => (
+                                  <div
+                                    key={rIdx}
+                                    className="p-3 rounded-lg bg-surface-subtle border border-border/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-primary/50 transition-colors"
                                   >
-                                    {term}
-                                  </span>
+                                    <div className="flex items-start gap-2.5">
+                                      <div className="w-8 h-8 rounded-lg bg-red-600/10 text-red-500 flex items-center justify-center shrink-0 mt-0.5">
+                                        <Youtube className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <a
+                                          href={rec.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-xs font-semibold text-text hover:text-primary hover:underline flex items-center gap-1"
+                                        >
+                                          {rec.title}
+                                          <ExternalLink className="w-3 h-3 text-text-muted inline shrink-0" />
+                                        </a>
+                                        <div className="flex items-center gap-2 mt-0.5 text-[11px] text-text-muted">
+                                          <span>{rec.channel || 'Verified Educator'}</span>
+                                          <span>•</span>
+                                          <span className="capitalize px-1.5 py-0.2 rounded bg-surface border border-border text-[10px] font-mono">
+                                            {rec.type || 'playlist'}
+                                          </span>
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 shrink-0 pt-1 sm:pt-0">
+                                      <a
+                                        href={rec.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-md bg-surface border border-border hover:bg-surface-raised text-text font-medium transition-colors"
+                                      >
+                                        Watch Video <ExternalLink className="w-3 h-3" />
+                                      </a>
+                                      <Button
+                                        variant="default"
+                                        size="sm"
+                                        onClick={() => {
+                                          navigate(`/learning?import=true&url=${encodeURIComponent(rec.url)}`);
+                                        }}
+                                        className="text-xs h-7 px-2.5"
+                                      >
+                                        + Import Course
+                                      </Button>
+                                    </div>
+                                  </div>
                                 ))}
                               </div>
                             </div>

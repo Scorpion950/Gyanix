@@ -59,18 +59,65 @@ console.log("Fibonacci(25):", calculateFibonacci(25));
 
 export function CodePlaygroundPage() {
   const { session } = useAuthStore();
-  const [language, setLanguage] = useState<'javascript' | 'web'>('javascript');
-  const [code, setCode] = useState(DEFAULT_SNIPPETS['javascript'] || '');
+
+  // Load initial language and saved code from localStorage
+  const [language, setLanguage] = useState<'javascript' | 'web'>(() => {
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('gyanix-code-playground-lang');
+      if (savedLang === 'web' || savedLang === 'javascript') return savedLang;
+    }
+    return 'javascript';
+  });
+
+  const [code, setCode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const savedLang = localStorage.getItem('gyanix-code-playground-lang') || 'javascript';
+      const storageKey = savedLang === 'web' ? 'gyanix-code-playground-web' : 'gyanix-code-playground-js';
+      const savedCode = localStorage.getItem(storageKey);
+      if (savedCode !== null) return savedCode;
+      return DEFAULT_SNIPPETS[savedLang] || '';
+    }
+    return DEFAULT_SNIPPETS['javascript'] || '';
+  });
+
   const [output, setOutput] = useState('');
   const [isRunning, setIsRunning] = useState(false);
   const [executionTime, setExecutionTime] = useState<number | null>(null);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
+  // Sync code changes to localStorage
+  const handleCodeChange = (newCode: string) => {
+    setCode(newCode);
+    if (typeof window !== 'undefined') {
+      const storageKey = language === 'web' ? 'gyanix-code-playground-web' : 'gyanix-code-playground-js';
+      localStorage.setItem(storageKey, newCode);
+    }
+  };
+
   const handleLanguageChange = (lang: 'javascript' | 'web') => {
+    if (lang === language) return;
+    // Save current code before switching
+    const currentKey = language === 'web' ? 'gyanix-code-playground-web' : 'gyanix-code-playground-js';
+    localStorage.setItem(currentKey, code);
+
+    // Switch language
     setLanguage(lang);
-    setCode(DEFAULT_SNIPPETS[lang] || '');
+    localStorage.setItem('gyanix-code-playground-lang', lang);
+
+    // Load next language's code from storage or default
+    const nextKey = lang === 'web' ? 'gyanix-code-playground-web' : 'gyanix-code-playground-js';
+    const saved = localStorage.getItem(nextKey);
+    setCode(saved !== null ? saved : (DEFAULT_SNIPPETS[lang] || ''));
     setOutput('');
     setStatus('idle');
+  };
+
+  const handleResetToTemplate = () => {
+    const defaultCode = DEFAULT_SNIPPETS[language] || '';
+    setCode(defaultCode);
+    const storageKey = language === 'web' ? 'gyanix-code-playground-web' : 'gyanix-code-playground-js';
+    localStorage.setItem(storageKey, defaultCode);
+    toast.info(`Reset to default ${language === 'web' ? 'HTML/Web' : 'JavaScript'} template.`);
   };
 
   const handleRun = async () => {
@@ -138,6 +185,17 @@ export function CodePlaygroundPage() {
           </div>
 
           <Button
+            variant="outline"
+            size="sm"
+            onClick={handleResetToTemplate}
+            title="Reset to default code template"
+            className="text-xs text-text-secondary hover:text-text"
+          >
+            <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+            Reset
+          </Button>
+
+          <Button
             onClick={handleRun}
             disabled={isRunning}
             className="bg-primary text-white shadow-xs"
@@ -163,7 +221,7 @@ export function CodePlaygroundPage() {
 
           <CodeEditor
             value={code}
-            onChange={setCode}
+            onChange={handleCodeChange}
             language={language === 'web' ? 'html' : 'javascript'}
             height="560px"
             onRun={handleRun}

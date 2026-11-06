@@ -9,6 +9,167 @@ import type {
   AssessmentQuestion,
 } from '@gyanix/shared';
 
+export function cleanTopic(raw: string): string {
+  if (!raw || typeof raw !== 'string') return 'Software Engineering';
+
+  // Remove common conversational prefixes & prompts
+  let cleaned = raw
+    .replace(/^(please\s+)?(give\s+me|generate|create|build|make|prepare|show\s+me|start)(\s+a|\s+an)?\s+/i, '')
+    .replace(/^(quiz|assessment|test|exam|questions|roadmap|curriculum|guide|course|overview|practice)\s+(for|on|about|of|in)\s+/i, '')
+    .replace(/^(quiz|assessment|test|questions|roadmap)\s+/i, '')
+    .replace(/\s+(quiz|assessment|test|exam|roadmap|questions)$/i, '')
+    .trim();
+
+  if (!cleaned) cleaned = raw.trim();
+
+  // Normalize common engineering acronyms and names
+  const acronyms: Record<string, string> = {
+    'dsa': 'Data Structures & Algorithms',
+    'java dsa': 'Java Data Structures & Algorithms',
+    'python dsa': 'Python Data Structures & Algorithms',
+    'cpp dsa': 'C++ Data Structures & Algorithms',
+    'js': 'JavaScript',
+    'ts': 'TypeScript',
+    'fe': 'Frontend Engineering',
+    'be': 'Backend Engineering',
+    'ml': 'Machine Learning',
+    'ai': 'Artificial Intelligence',
+    'dl': 'Deep Learning',
+    'os': 'Operating Systems',
+    'dbms': 'Database Management Systems',
+    'sys design': 'System Design',
+    'system design': 'System Design',
+    'react': 'React.js',
+    'reactjs': 'React.js',
+    'vue': 'Vue.js',
+    'vuejs': 'Vue.js',
+    'node': 'Node.js',
+    'nodejs': 'Node.js',
+    'nextjs': 'Next.js',
+    'next': 'Next.js',
+  };
+
+  const lower = cleaned.toLowerCase();
+  if (acronyms[lower]) {
+    return acronyms[lower];
+  }
+
+  // Capitalize words nicely if all lowercase
+  if (cleaned === cleaned.toLowerCase()) {
+    cleaned = cleaned
+      .split(' ')
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+  }
+
+  return cleaned;
+}
+
+export function buildStageYouTubeRecommendations(cleanSubj: string, stageTitle: string, stageNum: number) {
+  const sLower = cleanSubj.toLowerCase();
+
+  if (sLower.includes('java') && (sLower.includes('dsa') || sLower.includes('data structure') || sLower.includes('algorithm'))) {
+    if (stageNum === 1) {
+      return [
+        {
+          title: 'Java Full Course for Beginners (Tutorial)',
+          channel: 'freeCodeCamp.org',
+          url: 'https://www.youtube.com/watch?v=A74TOX803D0',
+          type: 'video' as const,
+        },
+        {
+          title: 'Complete Java Development Bootcamp Playlist',
+          channel: 'Kunal Kushwaha',
+          url: 'https://www.youtube.com/playlist?list=PL9gnSGHSqcnr_DxHsP7mUgf54YjV4GCU0',
+          type: 'playlist' as const,
+        },
+      ];
+    } else if (stageNum === 2) {
+      return [
+        {
+          title: 'Data Structures & Algorithms in Java - Full Course',
+          channel: 'freeCodeCamp.org',
+          url: 'https://www.youtube.com/watch?v=RBSGKlAvoiM',
+          type: 'video' as const,
+        },
+        {
+          title: 'Complete DSA Sheet & Placement Course (Striver A2Z)',
+          channel: 'take U forward',
+          url: 'https://www.youtube.com/playlist?list=PLgUwDviBIf0oF6QL8m22w1hIDC1vJ_BHz',
+          type: 'playlist' as const,
+        },
+      ];
+    } else {
+      return [
+        {
+          title: 'Dynamic Programming & Graph Algorithms Playlist',
+          channel: 'take U forward',
+          url: 'https://www.youtube.com/playlist?list=PLgUwDviBIf0qUlt5H_kiKECyaGqq61950',
+          type: 'playlist' as const,
+        },
+      ];
+    }
+  }
+
+  if (sLower.includes('react')) {
+    if (stageNum === 1) {
+      return [
+        {
+          title: "React Course - Beginner's Tutorial for React JavaScript Library",
+          channel: 'freeCodeCamp.org',
+          url: 'https://www.youtube.com/watch?v=bMknfKXIFA8',
+          type: 'video' as const,
+        },
+        {
+          title: 'React 19 & React 18 Crash Course',
+          channel: 'Traversy Media',
+          url: 'https://www.youtube.com/watch?v=LDB4uaJ87e0',
+          type: 'video' as const,
+        },
+      ];
+    } else if (stageNum === 2) {
+      return [
+        {
+          title: 'Full Stack React & Node.js Production Architecture',
+          channel: 'JavaScript Mastery',
+          url: 'https://www.youtube.com/watch?v=wm5gMKuwSYk',
+          type: 'playlist' as const,
+        },
+      ];
+    }
+  }
+
+  if (sLower.includes('python')) {
+    if (stageNum === 1) {
+      return [
+        {
+          title: 'Python for Beginners - Full Course',
+          channel: 'Programming with Mosh',
+          url: 'https://www.youtube.com/watch?v=_uQrJ0TkZlc',
+          type: 'video' as const,
+        },
+        {
+          title: 'Python Tutorial for Beginners (Full Course)',
+          channel: 'freeCodeCamp.org',
+          url: 'https://www.youtube.com/watch?v=rfscVS0vtbw',
+          type: 'video' as const,
+        },
+      ];
+    }
+  }
+
+  // Universal dynamic recommendation for any topic or technology
+  const searchQuery = encodeURIComponent(`${cleanSubj} ${stageTitle} complete tutorial course`);
+  return [
+    {
+      title: `${cleanSubj}: ${stageTitle} (Recommended Full Playlist)`,
+      channel: 'Verified YouTube Educators',
+      url: `https://www.youtube.com/results?search_query=${searchQuery}`,
+      type: 'playlist' as const,
+    },
+  ];
+}
+
 export const aiService = {
   /**
    * AI Doubt Solver (lecture context aware)
@@ -68,7 +229,8 @@ Guidelines:
    */
   async generateRoadmap(userId: string, input: GenerateRoadmapInput) {
     const adapter = aiRegistry.getAdapter();
-    const sanitizedTopic = privacyFilter.sanitizeText(input.topic);
+    const cleanSubj = cleanTopic(input.topic);
+    const sanitizedTopic = privacyFilter.sanitizeText(cleanSubj);
 
     const systemPrompt = `You are an expert curriculum designer. Return a structured JSON learning roadmap for "${sanitizedTopic}" at ${input.currentSkillLevel} level.
 Return valid JSON with format:
@@ -101,29 +263,42 @@ Return valid JSON with format:
       roadmapData = JSON.parse(response.content);
     } catch (_e) {
       roadmapData = {
-        prerequisites: ['Basic programming fundamentals'],
+        prerequisites: ['Basic programming fundamentals', 'Terminal & Git basics'],
         stages: [
           {
             stageNumber: 1,
-            title: `${sanitizedTopic} Foundations`,
-            topics: ['Core syntax & data models', 'Standard libraries & toolchain'],
-            searchTerms: [`${sanitizedTopic} full course for beginners`],
+            title: `${sanitizedTopic} Foundations & Core Syntax`,
+            topics: ['Core syntax, types & memory model', 'Standard libraries & toolchain'],
+            searchTerms: [`${sanitizedTopic} full beginner course`],
           },
           {
             stageNumber: 2,
-            title: 'Production Patterns & Architecture',
-            topics: ['Concurrency', 'Database integration', 'Testing'],
-            searchTerms: [`${sanitizedTopic} advanced architecture tutorial`],
+            title: 'Data Structures, Algorithms & Concurrency',
+            topics: ['Algorithmic complexity & optimization', 'Concurrency, multithreading & async operations'],
+            searchTerms: [`${sanitizedTopic} data structures algorithms complete tutorial`],
+          },
+          {
+            stageNumber: 3,
+            title: 'Production Architecture & Capstone Systems',
+            topics: ['Design patterns & clean architecture', 'Database integration, testing & deployment'],
+            searchTerms: [`${sanitizedTopic} production architecture and full project tutorial`],
           },
         ],
         suggestedProjects: [
           {
-            title: `Hands-on ${sanitizedTopic} CLI / Service`,
-            description: 'Build an end-to-end working application demonstrating core paradigms.',
+            title: `Hands-on ${sanitizedTopic} Production Service`,
+            description: 'Build an end-to-end working production application demonstrating clean paradigms.',
           },
         ],
       };
     }
+
+    // Attach rich clickable YouTube recommendations with direct video/playlist links to every stage
+    const stagesWithRecs = (roadmapData.stages || []).map((stage: any, idx: number) => ({
+      ...stage,
+      stageNumber: stage.stageNumber || idx + 1,
+      recommendations: buildStageYouTubeRecommendations(cleanSubj, stage.title, stage.stageNumber || idx + 1),
+    }));
 
     // Save draft in ai_roadmaps table (is_approved = false)
     try {
@@ -131,10 +306,10 @@ Return valid JSON with format:
         .from('ai_roadmaps')
         .insert({
           user_id: userId,
-          topic: input.topic,
+          topic: cleanSubj,
           target_role: input.targetRole || null,
           prerequisites: roadmapData.prerequisites || [],
-          stages: roadmapData.stages || [],
+          stages: stagesWithRecs,
           suggested_projects: roadmapData.suggestedProjects || [],
           is_approved: false,
         })
@@ -149,10 +324,10 @@ Return valid JSON with format:
     return {
       id: 'roadmap-' + Date.now(),
       user_id: userId,
-      topic: input.topic,
+      topic: cleanSubj,
       target_role: input.targetRole || null,
       prerequisites: roadmapData.prerequisites || [],
-      stages: roadmapData.stages || [],
+      stages: stagesWithRecs,
       suggested_projects: roadmapData.suggestedProjects || [],
       is_approved: false,
       created_at: new Date().toISOString(),
@@ -164,15 +339,16 @@ Return valid JSON with format:
    */
   async generateAssessment(userId: string, pathId: string | null, topic: string, difficulty = 3) {
     const adapter = aiRegistry.getAdapter();
+    const cleanSubj = cleanTopic(topic);
 
-    const systemPrompt = `You are a technical examiner. Generate 3 assessment questions for "${topic}" at difficulty level ${difficulty} (out of 5).
+    const systemPrompt = `You are a technical examiner. Generate 3 assessment questions for "${cleanSubj}" at difficulty level ${difficulty} (out of 5).
 Include:
 1. One Multiple Choice Question (mcq) with 4 options and correctOptionIndex (0-3).
 2. One Conceptual Question (conceptual) explaining a trade-off.
 3. One Practical Scenario Question (code_scenario) with a codeSnippet.
 Output strict JSON format:
 {
-  "title": "${topic} Skill Assessment",
+  "title": "${cleanSubj} Skill Assessment",
   "questions": [
     {
       "id": "q1",
@@ -190,7 +366,7 @@ Output strict JSON format:
     let parsed: any = null;
     try {
       const response = await adapter.complete({
-        messages: [{ role: 'user', content: `Generate assessment for ${topic}` }],
+        messages: [{ role: 'user', content: `Generate assessment for ${cleanSubj}` }],
         systemPrompt,
         jsonMode: true,
         temperature: 0.3,
@@ -198,12 +374,12 @@ Output strict JSON format:
       parsed = JSON.parse(response.content);
     } catch (_e) {
       parsed = {
-        title: `${topic} Skill Assessment`,
+        title: `${cleanSubj} Skill Assessment`,
         questions: [
           {
             id: 'q1',
             type: 'mcq',
-            prompt: `In ${topic}, what is the primary consideration when scaling concurrent workloads?`,
+            prompt: `In ${cleanSubj}, what is the primary consideration when scaling concurrent workloads?`,
             options: [
               'Minimizing shared state contention and optimizing memory locality',
               'Increasing number of CSS rules',
@@ -218,7 +394,7 @@ Output strict JSON format:
           {
             id: 'q2',
             type: 'conceptual',
-            prompt: `Explain the fundamental trade-off between throughput and latency in ${topic} system architecture.`,
+            prompt: `Explain the fundamental trade-off between throughput and latency in ${cleanSubj} system architecture.`,
             explanation: 'Batching operations increases overall throughput at the cost of higher individual request latency.',
             difficulty,
             metricTarget: 'knowledge',
@@ -226,7 +402,7 @@ Output strict JSON format:
           {
             id: 'q3',
             type: 'code_scenario',
-            prompt: `Review the following ${topic} pattern. How would you ensure deterministic resource cleanup and error propagation?`,
+            prompt: `Review the following ${cleanSubj} pattern. How would you ensure deterministic resource cleanup and error propagation?`,
             codeSnippet: `// Resource lifecycle example\ntry {\n  const resource = acquire();\n  process(resource);\n} finally {\n  cleanup();\n}`,
             difficulty,
             metricTarget: 'practical',
@@ -240,7 +416,7 @@ Output strict JSON format:
         .from('assessments')
         .insert({
           path_id: pathId || null,
-          title: parsed.title || `${topic} Assessment`,
+          title: parsed.title || `${cleanSubj} Skill Assessment`,
           difficulty_level: difficulty,
           questions: parsed.questions || [],
         })
@@ -255,7 +431,7 @@ Output strict JSON format:
     return {
       id: 'assessment-' + Date.now(),
       path_id: pathId || null,
-      title: parsed.title || `${topic} Assessment`,
+      title: parsed.title || `${cleanSubj} Skill Assessment`,
       difficulty_level: difficulty,
       questions: parsed.questions || [],
       created_at: new Date().toISOString(),

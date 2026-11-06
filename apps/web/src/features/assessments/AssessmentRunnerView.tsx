@@ -163,18 +163,20 @@ export function AssessmentRunnerView() {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${session?.access_token}`,
         },
-        body: JSON.stringify({ answers: userAnswers }),
+        body: JSON.stringify({ assessmentId: assessment.id, answers: userAnswers }),
       });
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Submission failed');
+        const errorMsg = typeof data.error === 'string' ? data.error : (data.error?.message || 'Submission failed');
+        throw new Error(errorMsg);
       }
 
       setAttemptResult(data.data);
       toast.success('Assessment completed!');
     } catch (err: any) {
-      toast.error(err.message || 'Failed to submit assessment');
+      const errorMsg = typeof err === 'string' ? err : (err?.message || 'Failed to submit assessment');
+      toast.error(errorMsg);
     } finally {
       setIsSubmitting(false);
     }

@@ -32,7 +32,7 @@ export const AssessmentQuestionSchema = z.object({
 });
 
 export const SubmitAssessmentSchema = z.object({
-  assessmentId: z.string().uuid(),
+  assessmentId: z.string().optional(),
   answers: z.record(z.union([z.number(), z.string()])),
 });
 
