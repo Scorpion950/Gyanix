@@ -50,8 +50,8 @@ const navGroups: NavGroup[] = [
   {
     label: 'Practice',
     items: [
-      { label: 'Code Playground', to: '/code', icon: Code2, deferred: true },
-      { label: 'Practice Tracker', to: '/practice', icon: BarChart3, deferred: true },
+      { label: 'Code Playground', to: '/code', icon: Code2 },
+      { label: 'Practice Tracker', to: '/practice', icon: BarChart3 },
     ],
   },
   {

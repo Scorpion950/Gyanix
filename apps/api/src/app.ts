@@ -10,6 +10,7 @@ import { learningPathsRouter } from './routes/learningPaths.js';
 import { notesRouter } from './routes/notes.js';
 import { analyticsRouter } from './routes/analytics.js';
 import { aiRouter } from './routes/ai.js';
+import { codingRouter } from './routes/coding.js';
 import { env } from './config/env.js';
 
 export function createApp(): express.Application {
@@ -60,6 +61,7 @@ export function createApp(): express.Application {
   app.use('/api/notes', notesRouter);
   app.use('/api/analytics', analyticsRouter);
   app.use('/api/ai', aiRouter);
+  app.use('/api/coding', codingRouter);
 
   // ─── Global error handler (must be last) ──────────────────────────────────
   app.use(errorHandler);

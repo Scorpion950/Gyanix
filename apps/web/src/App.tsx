@@ -14,6 +14,9 @@ import { NotesLibraryPage } from './features/notes/NotesLibraryPage.tsx';
 import { AnalyticsPage } from './features/analytics/AnalyticsPage.tsx';
 import { RoadmapGeneratorView } from './features/ai/RoadmapGeneratorView.tsx';
 import { AssessmentRunnerView } from './features/assessments/AssessmentRunnerView.tsx';
+import { CodePlaygroundPage } from './features/coding/CodePlaygroundPage.tsx';
+import { PracticeTrackerPage } from './features/coding/PracticeTrackerPage.tsx';
+import { ProblemSolvingWorkspace } from './features/coding/ProblemSolvingWorkspace.tsx';
 import { DesignSystemPage } from './routes/DesignSystemPage.tsx';
 import { NotFoundPage } from './routes/NotFoundPage.tsx';
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx';
@@ -106,6 +109,9 @@ export default function App() {
         <Route path="/roadmaps" element={<RoadmapGeneratorView />} />
         <Route path="/assessments" element={<AssessmentRunnerView />} />
         <Route path="/assessments/:id" element={<AssessmentRunnerView />} />
+        <Route path="/code" element={<CodePlaygroundPage />} />
+        <Route path="/practice" element={<PracticeTrackerPage />} />
+        <Route path="/practice/problems/:slug" element={<ProblemSolvingWorkspace />} />
       </Route>
 
       {/* Design system — dev only */}
