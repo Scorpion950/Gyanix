@@ -9,6 +9,7 @@ interface CodeEditorProps {
   language?: string;
   readOnly?: boolean;
   minHeight?: string;
+  height?: string;
   placeholder?: string;
   onRun?: () => void;
   className?: string;
@@ -20,15 +21,24 @@ export function CodeEditor({
   language = 'javascript',
   readOnly = false,
   minHeight = '320px',
+  height,
   placeholder = '// Write your code here...',
   onRun,
   className,
 }: CodeEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const gutterRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
 
   const lines = value.split('\n');
   const lineCount = Math.max(lines.length, 1);
+
+  // Synchronize line numbers gutter scroll with textarea scroll
+  const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+    if (gutterRef.current) {
+      gutterRef.current.scrollTop = e.currentTarget.scrollTop;
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     // Run shortcut: Ctrl+Enter or Cmd+Enter
@@ -96,9 +106,18 @@ export function CodeEditor({
       </div>
 
       {/* Editor Body: Line numbers + Textarea */}
-      <div className="relative flex flex-1 overflow-auto" style={{ minHeight }}>
+      <div
+        className="relative flex flex-1 overflow-hidden"
+        style={{
+          height: height ?? '100%',
+          minHeight: height ? undefined : minHeight,
+        }}
+      >
         {/* Line numbers gutter */}
-        <div className="select-none py-3 pl-3 pr-2 text-right text-[#5F657B] bg-[#0E121A] border-r border-[#232B3B]/60 font-mono text-[11px] leading-5 shrink-0">
+        <div
+          ref={gutterRef}
+          className="select-none py-3 pl-3 pr-2 text-right text-[#5F657B] bg-[#0E121A] border-r border-[#232B3B]/60 font-mono text-[11px] leading-5 shrink-0 overflow-hidden"
+        >
           {Array.from({ length: lineCount }).map((_, i) => (
             <div key={i}>{i + 1}</div>
           ))}
@@ -110,13 +129,14 @@ export function CodeEditor({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={handleKeyDown}
+          onScroll={handleScroll}
           readOnly={readOnly}
           placeholder={placeholder}
           spellCheck={false}
           autoCapitalize="off"
           autoComplete="off"
           autoCorrect="off"
-          className="flex-1 w-full p-3 font-mono text-xs leading-5 bg-transparent text-[#E8ECF4] focus:outline-none resize-none selection:bg-primary/30"
+          className="flex-1 w-full h-full p-3 font-mono text-xs leading-5 bg-transparent text-[#E8ECF4] focus:outline-none resize-none selection:bg-primary/30 overflow-y-auto overflow-x-auto whitespace-pre [scrollbar-width:thin] [scrollbar-color:#232B3B_transparent]"
           style={{ tabSize: 2 }}
         />
       </div>

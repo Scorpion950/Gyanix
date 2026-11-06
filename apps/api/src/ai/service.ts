@@ -90,15 +90,14 @@ Return valid JSON with format:
   ]
 }`;
 
-    const response = await adapter.complete({
-      messages: [{ role: 'user', content: `Create learning roadmap for ${sanitizedTopic}` }],
-      systemPrompt,
-      jsonMode: true,
-      temperature: 0.3,
-    });
-
-    let roadmapData: any = {};
+    let roadmapData: any = null;
     try {
+      const response = await adapter.complete({
+        messages: [{ role: 'user', content: `Create learning roadmap for ${sanitizedTopic}` }],
+        systemPrompt,
+        jsonMode: true,
+        temperature: 0.3,
+      });
       roadmapData = JSON.parse(response.content);
     } catch (_e) {
       roadmapData = {
@@ -188,29 +187,49 @@ Output strict JSON format:
   ]
 }`;
 
-    const response = await adapter.complete({
-      messages: [{ role: 'user', content: `Generate assessment for ${topic}` }],
-      systemPrompt,
-      jsonMode: true,
-      temperature: 0.3,
-    });
-
-    let parsed: any = {};
+    let parsed: any = null;
     try {
+      const response = await adapter.complete({
+        messages: [{ role: 'user', content: `Generate assessment for ${topic}` }],
+        systemPrompt,
+        jsonMode: true,
+        temperature: 0.3,
+      });
       parsed = JSON.parse(response.content);
     } catch (_e) {
       parsed = {
-        title: `${topic} Skill Check`,
+        title: `${topic} Skill Assessment`,
         questions: [
           {
             id: 'q1',
             type: 'mcq',
             prompt: `In ${topic}, what is the primary consideration when scaling concurrent workloads?`,
-            options: ['Shared state lock contention', 'Variable naming', 'CSS specificity', 'File count'],
+            options: [
+              'Minimizing shared state contention and optimizing memory locality',
+              'Increasing number of CSS rules',
+              'Decreasing variable name lengths',
+              'Running on a single physical CPU core without clustering',
+            ],
             correctOptionIndex: 0,
-            explanation: 'Lock contention on shared resources is the primary bottleneck in concurrent systems.',
+            explanation: 'Contention on shared mutable state and lock synchronization are the primary bottlenecks in concurrent systems.',
             difficulty,
             metricTarget: 'knowledge',
+          },
+          {
+            id: 'q2',
+            type: 'conceptual',
+            prompt: `Explain the fundamental trade-off between throughput and latency in ${topic} system architecture.`,
+            explanation: 'Batching operations increases overall throughput at the cost of higher individual request latency.',
+            difficulty,
+            metricTarget: 'knowledge',
+          },
+          {
+            id: 'q3',
+            type: 'code_scenario',
+            prompt: `Review the following ${topic} pattern. How would you ensure deterministic resource cleanup and error propagation?`,
+            codeSnippet: `// Resource lifecycle example\ntry {\n  const resource = acquire();\n  process(resource);\n} finally {\n  cleanup();\n}`,
+            difficulty,
+            metricTarget: 'practical',
           },
         ],
       };

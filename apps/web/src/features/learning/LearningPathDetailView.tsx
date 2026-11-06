@@ -507,7 +507,7 @@ export function LearningPathDetailView() {
 
       {/* Add Lecture Modal */}
       {isAddLectureOpen && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
           <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
             <h2 className="text-lg font-heading font-bold text-text-default mb-1">Add Lecture</h2>
             <p className="text-xs text-text-secondary mb-4">
@@ -575,7 +575,7 @@ export function LearningPathDetailView() {
 
       {/* Add Folder Modal */}
       {isAddFolderOpen && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
           <Card className="w-full max-w-sm border border-border bg-surface p-6 shadow-popover">
             <h2 className="text-lg font-heading font-bold text-text-default mb-4">Create Folder</h2>
             <div className="space-y-4 text-xs">
@@ -612,7 +612,7 @@ export function LearningPathDetailView() {
 
       {/* Replace Video Modal */}
       {isReplaceOpen && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
           <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
             <h2 className="text-lg font-heading font-bold text-text-default mb-1">Replace Video</h2>
             <p className="text-xs text-text-secondary mb-4">

@@ -31,15 +31,24 @@
         const DEFAULT_THEME = 'dark';
 
         try {
-          const stored = localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME;
-          const useDark = stored !== 'light';
+          const raw = localStorage.getItem(STORAGE_KEY);
+          let theme = DEFAULT_THEME;
+          if (raw) {
+            if (raw.startsWith('{')) {
+              const parsed = JSON.parse(raw);
+              theme = parsed?.state?.theme || DEFAULT_THEME;
+            } else {
+              theme = raw;
+            }
+          }
+          const useDark = theme === 'dark';
 
           if (useDark) {
             document.documentElement.classList.add('dark');
           } else {
             document.documentElement.classList.remove('dark');
           }
-          document.documentElement.setAttribute('data-theme', stored);
+          document.documentElement.setAttribute('data-theme', theme);
         } catch (_e) {
           document.documentElement.classList.add('dark');
         }

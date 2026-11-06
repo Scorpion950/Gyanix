@@ -527,7 +527,7 @@ export function LecturePlayerView() {
 
       {/* Inactivity Prompt Modal (15-min idle pause check) */}
       {showInactivityPrompt && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
           <Card className="w-full max-w-sm border border-border bg-surface p-6 shadow-popover text-center space-y-4">
             <Clock size={36} className="mx-auto text-primary animate-pulse" />
             <h2 className="text-base font-heading font-bold text-text-default">
@@ -556,7 +556,7 @@ export function LecturePlayerView() {
 
       {/* Keyboard Shortcuts Dialog */}
       {showShortcutsHelp && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
           <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">

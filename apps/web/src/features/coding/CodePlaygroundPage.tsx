@@ -165,8 +165,9 @@ export function CodePlaygroundPage() {
             value={code}
             onChange={setCode}
             language={language === 'web' ? 'html' : 'javascript'}
-            minHeight="480px"
+            height="560px"
             onRun={handleRun}
+            className="h-[560px]"
           />
         </div>
 
@@ -185,22 +186,22 @@ export function CodePlaygroundPage() {
           </div>
 
           {language === 'web' ? (
-            <div className="rounded-xl border border-border bg-surface overflow-hidden h-[480px]">
+            <div className="rounded-xl border border-border bg-surface overflow-hidden h-[560px]">
               <iframe
                 title="Web Preview"
                 srcDoc={code}
                 sandbox="allow-scripts allow-modals"
-                className="w-full h-full border-none"
+                className="w-full h-full border-none bg-white"
               />
             </div>
           ) : (
-            <div className="rounded-xl border border-border bg-[#0B0E14] text-[#E8ECF4] h-[480px] p-4 font-mono text-xs overflow-auto flex flex-col justify-between">
-              <pre className="whitespace-pre-wrap leading-relaxed text-[#A6AFC3]">
+            <div className="rounded-xl border border-border bg-[#0B0E14] text-[#E8ECF4] h-[560px] p-4 font-mono text-xs overflow-auto flex flex-col justify-between">
+              <pre className="whitespace-pre-wrap leading-relaxed text-[#A6AFC3] overflow-y-auto flex-1">
                 {output || '// Console output will appear here after execution.'}
               </pre>
 
               {status !== 'idle' && (
-                <div className="pt-3 border-t border-[#232B3B] flex items-center justify-between text-[11px]">
+                <div className="pt-3 border-t border-[#232B3B] flex items-center justify-between text-[11px] shrink-0">
                   <span
                     className={`flex items-center gap-1.5 font-medium ${
                       status === 'success' ? 'text-success' : 'text-danger'

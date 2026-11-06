@@ -513,7 +513,7 @@ export function NotesLibraryPage() {
 
       {/* New Collection Modal */}
       {isNewCollectionOpen && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
           <Card className="w-full max-w-sm border border-border bg-surface p-6 shadow-popover space-y-4">
             <h2 className="text-sm font-heading font-bold text-text-default">Create Collection</h2>
             <div>

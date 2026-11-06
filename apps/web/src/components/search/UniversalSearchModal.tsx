@@ -42,8 +42,16 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
       setQuery('');
       setResults([]);
       setSelectedIndex(0);
+
+      const handleGlobalKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+      };
+      window.addEventListener('keydown', handleGlobalKeyDown);
+      return () => window.removeEventListener('keydown', handleGlobalKeyDown);
     }
-  }, [isOpen]);
+  }, [isOpen, onClose]);
 
   // Debounced search
   useEffect(() => {
@@ -110,7 +118,7 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 bg-black/60 backdrop-blur-xs">
+    <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 px-4 bg-black/90 backdrop-blur-md">
       <div
         className="fixed inset-0"
         onClick={onClose}
@@ -121,7 +129,7 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
         initial={{ opacity: 0, scale: 0.96, y: -10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.96, y: -10 }}
-        className="relative w-full max-w-xl rounded-2xl border border-border bg-surface-raised shadow-2xl overflow-hidden flex flex-col z-10"
+        className="relative w-full max-w-3xl rounded-2xl border border-border bg-surface-raised shadow-2xl overflow-hidden flex flex-col z-10"
       >
         {/* Search Input Bar */}
         <div className="p-4 border-b border-border flex items-center gap-3">
@@ -129,11 +137,11 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search learning paths, problems, notes, communities, users..."
+            placeholder="Search courses, lectures, coding problems, notes, communities, projects, AI roadmaps, users..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={handleKeyDown}
-            className="w-full bg-transparent text-sm text-text focus:outline-none placeholder:text-text-muted"
+            className="w-full bg-transparent text-sm text-text focus:outline-none placeholder:text-text-muted truncate sm:text-clip"
           />
           {loading ? (
             <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" />

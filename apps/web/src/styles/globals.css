@@ -21,7 +21,68 @@
 /* Default dark tokens for calm Notion+Discord feel */
 @layer base {
   :root {
-    /* Surfaces — dark palette by default */
+    /* Surfaces — Clean Notion/Discord Light Theme */
+    --background: 0 0% 100%;
+    /* #FFFFFF */
+    --surface: 220 20% 98%;
+    /* #F8FAFC */
+    --surface-raised: 220 14% 96%;
+    /* #F1F5F9 */
+    --surface-subtle: 220 13% 91%;
+    /* #E2E8F0 */
+    --border: 220 13% 86%;
+    /* #CBD5E1 */
+
+    /* Text */
+    --text: 222 47% 11%;
+    /* #0F172A */
+    --text-secondary: 215 16% 40%;
+    /* #475569 */
+    --text-muted: 215 16% 56%;
+    /* #64748B */
+
+    /* Primary (blue) */
+    --primary: 221 83% 53%;
+    /* #2563EB */
+    --primary-foreground: 0 0% 100%;
+
+    /* AI (violet) */
+    --ai: 262 83% 58%;
+    /* #7C3AED */
+    --ai-foreground: 0 0% 100%;
+
+    /* Status */
+    --success: 142 76% 36%;
+    /* #16A34A */
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    /* #D97706 */
+    --warning-foreground: 0 0% 100%;
+    --danger: 0 84% 60%;
+    /* #DC2626 */
+    --danger-foreground: 0 0% 100%;
+
+    /* Progress metrics */
+    --progress-learning: 221 83% 53%;
+    --progress-knowledge: 173 80% 40%;
+    --progress-practical: 24 95% 53%;
+
+    /* Streak / achievement */
+    --streak: 38 92% 50%;
+
+    /* Focus ring */
+    --ring: var(--primary);
+    --ring-offset: 2px;
+
+    /* Radius */
+    --radius-control: 0.5rem;
+    --radius-card: 0.75rem;
+    --radius-modal: 1rem;
+  }
+
+  /* ─── Dark Mode Tokens ─────────────────────────────────── */
+  .dark {
+    /* Surfaces — calm Notion+Discord dark palette */
     --background: 222 32% 7%;
     /* #0B0E14 */
     --surface: 222 30% 11%;
@@ -41,72 +102,7 @@
     --text-muted: 220 16% 59%;
     /* #8089A0 */
 
-    /* Primary (blue) */
-    --primary: 221 100% 68%;
-    /* #5B8DFF */
-    --primary-foreground: 222 32% 7%;
-
-    /* AI (violet) */
-    --ai: 265 83% 76%;
-    /* #A78BFA */
-    --ai-foreground: 222 32% 7%;
-
-    /* Status */
-    --success: 142 69% 58%;
-    /* #4ADE80 */
-    --success-foreground: 222 32% 7%;
-    --warning: 48 96% 56%;
-    /* #FBBF24 */
-    --warning-foreground: 222 32% 7%;
-    --danger: 0 91% 71%;
-    /* #F87171 */
-    --danger-foreground: 222 32% 7%;
-
-    /* Progress metrics */
-    --progress-learning: 221 100% 68%;
-    /* Primary blue */
-    --progress-knowledge: 172 76% 51%;
-    /* Teal #2DD4BF */
-    --progress-practical: 20 97% 61%;
-    /* Orange #FB923C */
-
-    /* Streak / achievement (amber) */
-    --streak: 48 96% 56%;
-    /* #FBBF24 */
-
-    /* Focus ring */
-    --ring: var(--primary);
-    --ring-offset: 2px;
-
-    /* Radius — tokens referenced in tailwind.config */
-    --radius-control: 0.5rem;
-    --radius-card: 0.75rem;
-    --radius-modal: 1rem;
-  }
-
-  /* ─── Dark Mode Tokens (Matches root) ─────────────────────────────────── */
-  .dark {
-    /* Surfaces — raised by lightness, NOT by shadow */
-    --background: 222 32% 7%;
-    /* #0B0E14 */
-    --surface: 222 30% 11%;
-    /* #121723 */
-    --surface-raised: 222 28% 15%;
-    /* #182030 */
-    --surface-subtle: 222 26% 17%;
-    /* #1B2231 */
-    --border: 222 24% 20%;
-    /* #232B3B */
-
-    /* Text — slightly desaturated */
-    --text: 220 30% 93%;
-    /* #E8ECF4 */
-    --text-secondary: 220 20% 71%;
-    /* #A6AFC3 */
-    --text-muted: 220 16% 59%;
-    /* #8089A0 */
-
-    /* Primary — lighter for dark backgrounds */
+    /* Primary */
     --primary: 221 100% 68%;
     /* #5B8DFF */
     --primary-foreground: 222 32% 7%;
@@ -217,6 +213,29 @@
   code,
   kbd {
     font-family: var(--font-mono), monospace;
+  }
+
+  /* ─── Input Autofill Handling ────────────────────────────────────────────── */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus {
+    -webkit-text-fill-color: hsl(var(--text));
+    -webkit-box-shadow: 0 0 0px 1000px hsl(var(--surface)) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus,
+  .dark textarea:-webkit-autofill,
+  .dark textarea:-webkit-autofill:hover,
+  .dark textarea:-webkit-autofill:focus {
+    -webkit-text-fill-color: #E8ECF4;
+    -webkit-box-shadow: 0 0 0px 1000px #121723 inset;
+    transition: background-color 5000s ease-in-out 0s;
   }
 
   /* ─── Scrollbar styling (consistent across light/dark) ─────────────────── */

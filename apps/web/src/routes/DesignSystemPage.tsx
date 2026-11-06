@@ -18,7 +18,7 @@ export function DesignSystemPage() {
             <p className="text-sm text-text-secondary mt-1">Gyanix — tokens, components and states</p>
           </div>
           <div className="flex gap-2">
-            {(['light', 'dark', 'system'] as const).map((t) => (
+            {(['light', 'dark'] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTheme(t)}

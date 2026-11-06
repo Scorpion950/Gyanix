@@ -284,7 +284,7 @@ export function LearningPathsListPage() {
 
       {/* Create Path Modal */}
       {isCreateOpen && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
           <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
             <h2 className="text-lg font-heading font-bold text-text-default mb-4">Create Learning Path</h2>
             <div className="space-y-4 text-xs">
@@ -362,7 +362,7 @@ export function LearningPathsListPage() {
 
       {/* Import YouTube Playlist Modal */}
       {isImportOpen && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
           <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
             <h2 className="text-lg font-heading font-bold text-text-default mb-1">
               Import YouTube Playlist

@@ -14,6 +14,7 @@ import {
   Briefcase,
   Layers,
   Compass,
+  X,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button.tsx';
 import { Card, CardContent } from '@/components/ui/Card.tsx';
@@ -91,6 +92,32 @@ export function OnboardingPage() {
   const [skillLevel, setSkillLevel] = useState<SkillLevel>('intermediate');
   const [selectedTech, setSelectedTech] = useState<string[]>(['React', 'TypeScript']);
   const [techSearch, setTechSearch] = useState('');
+  const [customInterestInput, setCustomInterestInput] = useState('');
+  const [customTechInput, setCustomTechInput] = useState('');
+
+  const handleAddCustomInterests = () => {
+    if (!customInterestInput.trim()) return;
+    const parts = customInterestInput
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    if (parts.length > 0) {
+      setSelectedInterests((prev) => Array.from(new Set([...prev, ...parts])));
+      setCustomInterestInput('');
+    }
+  };
+
+  const handleAddCustomTech = () => {
+    if (!customTechInput.trim()) return;
+    const parts = customTechInput
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0);
+    if (parts.length > 0) {
+      setSelectedTech((prev) => Array.from(new Set([...prev, ...parts])));
+      setCustomTechInput('');
+    }
+  };
   const [dailyGoalMinutes, setDailyGoalMinutes] = useState(30);
   const [sessionLength, setSessionLength] = useState<'short' | 'medium' | 'long'>('medium');
   const [learningStyle, setLearningStyle] = useState<'visual' | 'reading' | 'hands_on' | 'mixed'>('mixed');
@@ -251,7 +278,7 @@ export function OnboardingPage() {
                     What topics are you interested in?
                   </h1>
                   <p className="text-sm text-text-secondary mt-1">
-                    Select all that apply. You can change these anytime in settings.
+                    Select all that apply, or add custom topics below.
                   </p>
                 </div>
 
@@ -266,7 +293,7 @@ export function OnboardingPage() {
                   />
                 </div>
 
-                <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto py-1">
+                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto py-1">
                   {POPULAR_INTERESTS.filter((i) =>
                     i.toLowerCase().includes(interestSearch.toLowerCase()),
                   ).map((item) => {
@@ -293,6 +320,60 @@ export function OnboardingPage() {
                       </button>
                     );
                   })}
+                </div>
+
+                {/* Comma-separated custom topics input */}
+                <div className="pt-3 border-t border-border/60 space-y-2">
+                  <label className="text-xs font-medium text-text-secondary block">
+                    Add custom topics (separated by commas):
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. Distributed Systems, Kafka, WebRTC"
+                      value={customInterestInput}
+                      onChange={(e) => setCustomInterestInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddCustomInterests();
+                        }
+                      }}
+                      className="flex-1 h-9 px-3 rounded-control text-sm bg-surface-subtle border border-border text-text-default placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddCustomInterests}
+                      className="shrink-0"
+                    >
+                      Add
+                    </Button>
+                  </div>
+
+                  {/* Render any custom topics added */}
+                  {selectedInterests.filter((t) => !POPULAR_INTERESTS.includes(t)).length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {selectedInterests
+                        .filter((t) => !POPULAR_INTERESTS.includes(t))
+                        .map((custom) => (
+                          <span
+                            key={custom}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/30"
+                          >
+                            {custom}
+                            <button
+                              type="button"
+                              onClick={() => setSelectedInterests((l) => l.filter((x) => x !== custom))}
+                              className="hover:text-danger ml-0.5"
+                            >
+                              <X size={12} />
+                            </button>
+                          </span>
+                        ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -397,7 +478,7 @@ export function OnboardingPage() {
                     What specific technologies do you want to learn?
                   </h1>
                   <p className="text-sm text-text-secondary mt-1">
-                    We will find the highest-rated YouTube playlists and coding playgrounds for these.
+                    Select technologies, or add custom ones below.
                   </p>
                 </div>
 
@@ -412,7 +493,7 @@ export function OnboardingPage() {
                   />
                 </div>
 
-                <div className="flex flex-wrap gap-2 max-h-56 overflow-y-auto py-1">
+                <div className="flex flex-wrap gap-2 max-h-48 overflow-y-auto py-1">
                   {POPULAR_TECH.filter((t) =>
                     t.toLowerCase().includes(techSearch.toLowerCase()),
                   ).map((item) => {
@@ -439,6 +520,60 @@ export function OnboardingPage() {
                       </button>
                     );
                   })}
+                </div>
+
+                {/* Comma-separated custom technologies input */}
+                <div className="pt-3 border-t border-border/60 space-y-2">
+                  <label className="text-xs font-medium text-text-secondary block">
+                    Add custom technologies (separated by commas):
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="e.g. C#, .NET, Svelte, Fastify"
+                      value={customTechInput}
+                      onChange={(e) => setCustomTechInput(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddCustomTech();
+                        }
+                      }}
+                      className="flex-1 h-9 px-3 rounded-control text-sm bg-surface-subtle border border-border text-text-default placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary"
+                    />
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleAddCustomTech}
+                      className="shrink-0"
+                    >
+                      Add
+                    </Button>
+                  </div>
+
+                  {/* Render any custom tech added */}
+                  {selectedTech.filter((t) => !POPULAR_TECH.includes(t)).length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      {selectedTech
+                        .filter((t) => !POPULAR_TECH.includes(t))
+                        .map((custom) => (
+                          <span
+                            key={custom}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary border border-primary/30"
+                          >
+                            {custom}
+                            <button
+                              type="button"
+                              onClick={() => setSelectedTech((l) => l.filter((x) => x !== custom))}
+                              className="hover:text-danger ml-0.5"
+                            >
+                              <X size={12} />
+                            </button>
+                          </span>
+                        ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
