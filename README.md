@@ -60,7 +60,7 @@ Built entirely on modern, cloud-native technologies with zero proprietary lock-i
 
 | Domain | Technologies |
 |---|---|
-| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS, Radix UI primitives, Lucide Icons, Framer Motion, TanStack Query |
+| **Frontend** | React 24, TypeScript, Vite, Tailwind CSS, Radix UI primitives, Lucide Icons, Framer Motion, TanStack Query |
 | **Backend** | Node.js (v24 LTS), Express, Helmet, CORS, Zod validation |
 | **Database & Auth** | Supabase (PostgreSQL 15), Row Level Security (RLS), Supabase Auth JWT |
 | **AI Integration** | Google Gemini Flash API (`@google/generative-ai`), privacy sanitization layer |
