@@ -96,7 +96,7 @@ export function Sidebar() {
       >
         {/* Logo */}
         <div className="flex items-center h-14 px-4 border-b border-border flex-shrink-0">
-          <GyanixLogoMark className="h-7 w-7 text-primary flex-shrink-0" />
+          <GyanixLogoMark size={30} className="flex-shrink-0" />
           <AnimatePresence>
             {!sidebarCollapsed && (
               <motion.div
@@ -106,7 +106,7 @@ export function Sidebar() {
                 transition={{ duration: 0.2 }}
                 className="ml-2 overflow-hidden"
               >
-                <GyanixWordmark className="h-5 text-text-default" />
+                <GyanixWordmark size={24} className="text-text-default" />
               </motion.div>
             )}
           </AnimatePresence>

@@ -1,66 +1,125 @@
+import type { SVGProps } from 'react';
+
 /**
- * Gyanix Brand Assets — SVG Logo Mark and Wordmark
- * Hand-crafted with free tools. No external dependencies.
- * License: Proprietary — Gyanix project.
- *
- * LogoMark: A stylised "G" that doubles as a path/journey symbol.
- * Wordmark: "Gyanix" in Plus Jakarta Sans (approximated as SVG text).
+ * Gyanix Brand Assets — Professional Vector Logo Mark and Wordmark
+ * Signature identity:
+ * - Geometric G with blue-to-violet gradient arc and circular terminal
+ * - Central golden 4-point knowledge spark (Gyan / wisdom)
+ * - Modern Plus Jakarta Sans wordmark
  */
 
-interface LogoProps {
+export interface LogoProps extends SVGProps<SVGSVGElement> {
   className?: string;
-  'aria-hidden'?: boolean;
+  size?: number | string;
+  monochrome?: boolean;
 }
 
-/** Logomark — the "G" icon, square aspect ratio */
-export function GyanixLogoMark({ className, 'aria-hidden': ariaHidden }: LogoProps) {
+/**
+ * Gyanix Signature Logomark (The "G" icon with central knowledge spark)
+ */
+export function GyanixLogoMark({
+  className,
+  size = 32,
+  monochrome = false,
+  ...props
+}: LogoProps) {
+  const gradientId = 'gyanix-arc-grad';
+  const sparkGradId = 'gyanix-spark-grad';
+
   return (
     <svg
-      viewBox="0 0 32 32"
+      viewBox="0 0 128 128"
+      width={size}
+      height={size}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden={ariaHidden ?? true}
       role="img"
+      aria-label="Gyanix Logo"
+      {...props}
     >
-      {/* Outer ring */}
-      <circle
-        cx="16"
-        cy="16"
-        r="14"
-        stroke="currentColor"
-        strokeWidth="2"
-        fill="none"
-      />
-      {/* G letterform */}
+      <defs>
+        <linearGradient
+          id={gradientId}
+          x1="32"
+          y1="24"
+          x2="104"
+          y2="104"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="#3B82F6" />
+          <stop offset="50%" stopColor="#4F46E5" />
+          <stop offset="100%" stopColor="#7C3AED" />
+        </linearGradient>
+
+        <linearGradient
+          id={sparkGradId}
+          x1="48"
+          y1="48"
+          x2="80"
+          y2="80"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop offset="0%" stopColor="#FDE047" />
+          <stop offset="50%" stopColor="#F59E0B" />
+          <stop offset="100%" stopColor="#D97706" />
+        </linearGradient>
+      </defs>
+
+      {/* Main G arc with terminal circle */}
       <path
-        d="M22 12.5C20.5 10.5 18.4 9.5 16 9.5C11.86 9.5 8.5 12.86 8.5 17C8.5 21.14 11.86 24.5 16 24.5C19.5 24.5 22.4 22.3 23.2 19H17V16.5H26V17.5C26 22.75 21.52 27 16 27C10.48 27 6 22.52 6 17C6 11.48 10.48 7 16 7C19.2 7 22.08 8.5 24 10.8L22 12.5Z"
-        fill="currentColor"
+        d="M92.28 35.72 A40 40 0 1 0 104 64 H76"
+        fill="none"
+        stroke={monochrome ? 'currentColor' : `url(#${gradientId})`}
+        strokeWidth="13"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Terminal Node */}
+      <circle
+        cx="92.28"
+        cy="35.72"
+        r="8.5"
+        fill={monochrome ? 'currentColor' : '#3B82F6'}
+      />
+
+      {/* Central 4-point Knowledge Spark */}
+      <path
+        d="M64 47 C65.8 56.8 71.2 62.2 81 64 C71.2 65.8 65.8 71.2 64 81 C62.2 71.2 56.8 65.8 47 64 C56.8 62.2 62.2 56.8 64 47 Z"
+        fill={monochrome ? 'currentColor' : `url(#${sparkGradId})`}
       />
     </svg>
   );
 }
 
-/** Wordmark — "Gyanix" text, horizontal */
-export function GyanixWordmark({ className, 'aria-hidden': ariaHidden }: LogoProps) {
+/**
+ * Gyanix Horizontal Wordmark
+ */
+export function GyanixWordmark({
+  className,
+  size = 28,
+  ...props
+}: LogoProps) {
   return (
     <svg
-      viewBox="0 0 120 24"
+      viewBox="0 0 140 36"
+      height={size}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
-      aria-hidden={ariaHidden ?? true}
-      aria-label="Gyanix"
       role="img"
+      aria-label="Gyanix"
+      {...props}
     >
       <text
-        x="0"
-        y="18"
-        fontFamily="'Plus Jakarta Sans', sans-serif"
-        fontWeight="700"
-        fontSize="20"
+        x="2"
+        y="28"
+        fontFamily="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif"
+        fontWeight="800"
+        fontSize="30"
         fill="currentColor"
-        letterSpacing="-0.5"
+        letterSpacing="-0.035em"
       >
         Gyanix
       </text>
@@ -68,12 +127,24 @@ export function GyanixWordmark({ className, 'aria-hidden': ariaHidden }: LogoPro
   );
 }
 
-/** Full brand lockup — logomark + wordmark */
-export function GyanixBrand({ className }: { className?: string }) {
+/**
+ * Full Brand Lockup (Logomark + Wordmark)
+ */
+export function GyanixBrand({
+  className,
+  markSize = 34,
+  wordmarkSize = 26,
+  monochrome = false,
+}: {
+  className?: string;
+  markSize?: number | string;
+  wordmarkSize?: number | string;
+  monochrome?: boolean;
+}) {
   return (
-    <div className={`flex items-center gap-2 ${className ?? ''}`}>
-      <GyanixLogoMark className="h-7 w-7" />
-      <GyanixWordmark className="h-5" />
+    <div className={`flex items-center gap-2.5 ${className ?? ''}`}>
+      <GyanixLogoMark size={markSize} monochrome={monochrome} className="flex-shrink-0" />
+      <GyanixWordmark size={wordmarkSize} className="text-text-default flex-shrink-0" />
     </div>
   );
 }

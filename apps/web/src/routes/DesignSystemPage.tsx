@@ -1,4 +1,5 @@
 import { useThemeStore } from '@/stores/themeStore.ts';
+import { GyanixLogoMark, GyanixWordmark, GyanixBrand } from '@/assets/Logo.tsx';
 
 /**
  * Design System route — /design-system
@@ -32,6 +33,36 @@ export function DesignSystemPage() {
             ))}
           </div>
         </div>
+
+        {/* Brand & Logo Assets */}
+        <Section title="Brand Assets & Logo Identity">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6 rounded-2xl border border-border bg-surface">
+            {/* Full Brand Lockup */}
+            <div className="flex flex-col items-center justify-center p-6 rounded-xl bg-surface-subtle border border-border space-y-3">
+              <GyanixBrand markSize={44} wordmarkSize={30} />
+              <p className="text-2xs font-mono text-text-muted">Primary Brand Lockup</p>
+            </div>
+
+            {/* Signature Logomark */}
+            <div className="flex flex-col items-center justify-center p-6 rounded-xl bg-surface-subtle border border-border space-y-3">
+              <div className="flex items-center gap-4">
+                <GyanixLogoMark size={32} />
+                <GyanixLogoMark size={44} />
+                <GyanixLogoMark size={56} />
+              </div>
+              <p className="text-2xs font-mono text-text-muted">Signature Logomark (Multi-Scale)</p>
+            </div>
+
+            {/* Dark & Monochrome Variations */}
+            <div className="flex flex-col items-center justify-center p-6 rounded-xl bg-[#0B0E14] text-white border border-[#232B3B] space-y-3">
+              <div className="flex items-center gap-4">
+                <GyanixLogoMark size={40} />
+                <GyanixWordmark size={26} className="text-white" />
+              </div>
+              <p className="text-2xs font-mono text-slate-400">Dark Container Contrast</p>
+            </div>
+          </div>
+        </Section>
 
         {/* Colour tokens */}
         <Section title="Colour Tokens">

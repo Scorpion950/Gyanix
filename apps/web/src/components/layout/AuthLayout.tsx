@@ -12,8 +12,8 @@ export function AuthLayout() {
       {/* Brand panel — desktop only */}
       <div className="hidden lg:flex flex-col justify-between w-1/2 bg-primary p-12 text-primary-foreground">
         <div className="flex items-center gap-3">
-          <GyanixLogoMark className="h-9 w-9 text-primary-foreground" />
-          <GyanixWordmark className="h-7 text-primary-foreground" />
+          <GyanixLogoMark size={36} monochrome className="text-primary-foreground" />
+          <GyanixWordmark size={28} className="text-primary-foreground" />
         </div>
 
         <div>
@@ -35,8 +35,8 @@ export function AuthLayout() {
       <div className="flex flex-col flex-1 items-center justify-center p-6 bg-background">
         {/* Mobile logo */}
         <div className="lg:hidden flex items-center gap-2 mb-10">
-          <GyanixLogoMark className="h-8 w-8 text-primary" />
-          <GyanixWordmark className="h-6 text-text-default" />
+          <GyanixLogoMark size={36} />
+          <GyanixWordmark size={26} className="text-text-default" />
         </div>
 
         <div className="w-full max-w-sm">

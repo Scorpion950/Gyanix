@@ -4,7 +4,7 @@ import { GyanixLogoMark } from '@/assets/Logo.tsx';
 export function NotFoundPage() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background p-6 text-center">
-      <GyanixLogoMark className="h-12 w-12 text-primary mb-6 opacity-60" />
+      <GyanixLogoMark size={56} className="mb-6 opacity-80" />
       <h1 className="text-3xl font-heading font-bold text-text-default mb-2">Page not found</h1>
       <p className="text-sm text-text-secondary mb-8 max-w-sm">
         The page you're looking for doesn't exist or has moved. Let's get you back on track.

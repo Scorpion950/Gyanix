@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Gyanix">
+  <defs>
+    <linearGradient id="gx-arc" x1="32" y1="24" x2="104" y2="104" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#3B82F6"/>
+      <stop offset="50%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="gx-spark" x1="48" y1="48" x2="80" y2="80" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FDE047"/>
+      <stop offset="50%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="#0B0E14"/>
+  <g>
+    <!-- Main G arc -->
+    <path d="M92.28 35.72 A40 40 0 1 0 104 64 H76" fill="none" stroke="url(#gx-arc)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Terminal node -->
+    <circle cx="92.28" cy="35.72" r="8.5" fill="#3B82F6"/>
+    <!-- Central golden spark -->
+    <path d="M64 47 C65.8 56.8 71.2 62.2 81 64 C71.2 65.8 65.8 71.2 64 81 C62.2 71.2 56.8 65.8 47 64 C56.8 62.2 62.2 56.8 64 47 Z" fill="url(#gx-spark)"/>
+  </g>
+</svg>
