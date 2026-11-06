@@ -156,9 +156,29 @@ export const analyticsService = {
       weekProgress.push(Math.round((match?.total_seconds || 0) / 60)); // in minutes
     }
 
+    // Check lectures completed this week
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const { count: lecturesCount } = await supabaseAdmin
+      .from('user_lecture_progress')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('status', 'completed')
+      .gte('completed_at', weekAgo.toISOString());
+
+    // Get daily goal minutes from user profile
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('daily_goal_minutes')
+      .eq('auth_user_id', userId)
+      .maybeSingle();
+
     return {
       todayMinutes: Math.round((todayRollup?.total_seconds || 0) / 60),
-      streakDays: Math.max(streakDays, 1),
+      dailyGoalMinutes: profile?.daily_goal_minutes || 60,
+      streakDays: streakDays,
+      streakBest: streakDays,
+      lecturesThisWeek: lecturesCount || 0,
       weekProgress,
       pomodorosToday: todayRollup?.pomodoros_completed || 0,
     };

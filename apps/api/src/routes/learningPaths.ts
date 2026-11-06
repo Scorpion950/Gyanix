@@ -49,6 +49,20 @@ learningPathsRouter.get('/', async (req: Request, res: Response, next: NextFunct
 });
 
 /**
+ * GET /api/learning-paths/recent
+ * Returns the most recent in-progress lecture for the authenticated user
+ */
+learningPathsRouter.get('/recent', requireAuth, async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  try {
+    const { user } = req as AuthenticatedRequest;
+    const recent = await learningPathService.getRecentLecture(user.id);
+    res.json({ success: true, data: recent });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
  * POST /api/learning-paths
  * Create a new learning path
  */

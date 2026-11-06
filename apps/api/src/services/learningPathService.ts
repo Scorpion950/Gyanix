@@ -299,6 +299,70 @@ export const learningPathService = {
   },
 
   /**
+   * Get the most recent in-progress lecture for the user
+   */
+  async getRecentLecture(userId: string) {
+    try {
+      const { data: progress } = await supabaseAdmin
+        .from('user_lecture_progress')
+        .select('id, path_item_id, playback_seconds, status, updated_at')
+        .eq('user_id', userId)
+        .neq('status', 'completed')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (!progress) return null;
+
+      const { data: item } = await supabaseAdmin
+        .from('path_items')
+        .select('id, path_id, folder_id, custom_title, video_id')
+        .eq('id', progress.path_item_id)
+        .maybeSingle();
+
+      if (!item) return null;
+
+      const [videoRes, pathRes, folderRes] = await Promise.all([
+        supabaseAdmin.from('videos').select('*').eq('id', item.video_id).maybeSingle(),
+        supabaseAdmin.from('learning_paths').select('id, title').eq('id', item.path_id).maybeSingle(),
+        item.folder_id
+          ? supabaseAdmin.from('path_folders').select('id, title').eq('id', item.folder_id).maybeSingle()
+          : Promise.resolve({ data: null }),
+      ]);
+
+      const video = videoRes.data;
+      const path = pathRes.data;
+      const folder = folderRes.data;
+
+      const totalSeconds = video?.duration_seconds || 0;
+      const playbackSeconds = progress.playback_seconds || 0;
+      const progressPercent = totalSeconds > 0 ? Math.min(100, Math.round((playbackSeconds / totalSeconds) * 100)) : 0;
+      const timeLeftMinutes = Math.max(1, Math.round((totalSeconds - playbackSeconds) / 60));
+
+      const formatTime = (secs: number) => {
+        const m = Math.floor(secs / 60);
+        const s = secs % 60;
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+      };
+
+      return {
+        itemId: item.id,
+        pathId: item.path_id,
+        title: item.custom_title || video?.title || 'Untitled Lecture',
+        pathTitle: path?.title || 'Learning Path',
+        folderTitle: folder?.title || 'Module',
+        thumbnail: video?.thumbnail_url || 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=600&auto=format&fit=crop&q=80',
+        timestamp: formatTime(playbackSeconds),
+        totalDuration: formatTime(totalSeconds),
+        progressPercent,
+        timeLeftMinutes,
+      };
+    } catch {
+      return null;
+    }
+  },
+
+  /**
    * Replace an unavailable video with an alternative video
    */
   async replaceVideo(pathItemId: string, creatorId: string, newYoutubeUrl: string) {
