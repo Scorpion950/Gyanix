@@ -20,6 +20,7 @@ import { ProblemSolvingWorkspace } from './features/coding/ProblemSolvingWorkspa
 import { FeedPage } from './features/feed/FeedPage.tsx';
 import { CommunitiesListPage } from './features/feed/CommunitiesListPage.tsx';
 import { ProjectShowcasePage } from './features/feed/ProjectShowcasePage.tsx';
+import { MessagesPage } from './features/messages/MessagesPage.tsx';
 import { DesignSystemPage } from './routes/DesignSystemPage.tsx';
 import { NotFoundPage } from './routes/NotFoundPage.tsx';
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx';
@@ -118,6 +119,7 @@ export default function App() {
         <Route path="/feed" element={<FeedPage />} />
         <Route path="/communities" element={<CommunitiesListPage />} />
         <Route path="/projects" element={<ProjectShowcasePage />} />
+        <Route path="/messages" element={<MessagesPage />} />
       </Route>
 
       {/* Design system — dev only */}
