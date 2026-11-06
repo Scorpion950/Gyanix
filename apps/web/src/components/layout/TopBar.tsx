@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils.ts';
 import { GyanixLogoMark } from '@/assets/Logo.tsx';
 import { useNavigate } from 'react-router-dom';
 
-export function TopBar() {
+export function TopBar({ onSearchClick }: { onSearchClick?: () => void }) {
   const { session } = useAuthStore();
   const { toggleSidebar } = useUIStore();
   const navigate = useNavigate();
@@ -37,6 +37,7 @@ export function TopBar() {
       {/* Search — desktop */}
       <div className="hidden md:flex flex-1 max-w-sm">
         <button
+          onClick={onSearchClick}
           className={cn(
             'flex items-center gap-2 w-full px-3 h-9 rounded-control',
             'bg-surface-subtle border border-border text-text-muted text-xs',

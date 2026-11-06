@@ -10,4 +10,5 @@ export * from './coding.js';
 export * from './socialFeed.js';
 export * from './messaging.js';
 export * from './rooms.js';
+export * from './searchChallenges.js';
 

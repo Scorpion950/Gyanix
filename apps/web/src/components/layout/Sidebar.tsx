@@ -59,7 +59,7 @@ const navGroups: NavGroup[] = [
     items: [
       { label: 'Feed', to: '/feed', icon: Rss },
       { label: 'Communities', to: '/communities', icon: Users },
-      { label: 'Challenges', to: '/challenges', icon: Trophy, deferred: true },
+      { label: 'Challenges', to: '/challenges', icon: Trophy },
       { label: 'Projects', to: '/projects', icon: FolderKanban },
     ],
   },

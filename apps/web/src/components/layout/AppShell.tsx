@@ -1,6 +1,8 @@
+import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar.tsx';
 import { TopBar } from './TopBar.tsx';
+import { UniversalSearchModal } from '@/components/search/UniversalSearchModal.tsx';
 import { useUIStore } from '@/stores/uiStore.ts';
 import { cn } from '@/lib/utils.ts';
 
@@ -11,7 +13,19 @@ import { cn } from '@/lib/utils.ts';
  * Mobile: bottom tab bar + compact top bar
  */
 export function AppShell() {
-  const { sidebarCollapsed, focusMode } = useUIStore();
+  const { sidebarCollapsed: _sidebarCollapsed, focusMode } = useUIStore();
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div
@@ -27,11 +41,10 @@ export function AppShell() {
       <div
         className={cn(
           'flex flex-1 flex-col overflow-hidden transition-all duration-panel',
-          // Offset for expanded/collapsed sidebar on desktop
-          'lg:ml-0', // sidebar is positioned absolutely on mobile
+          'lg:ml-0',
         )}
       >
-        <TopBar />
+        <TopBar onSearchClick={() => setSearchOpen(true)} />
 
         <main
           id="main-content"
@@ -43,6 +56,12 @@ export function AppShell() {
           </div>
         </main>
       </div>
+
+      {/* Universal Search Modal (Ctrl/Cmd + K) */}
+      <UniversalSearchModal
+        isOpen={searchOpen}
+        onClose={() => setSearchOpen(false)}
+      />
     </div>
   );
 }
