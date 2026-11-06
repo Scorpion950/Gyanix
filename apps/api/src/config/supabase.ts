@@ -1,6 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 import { env } from './env.js';
 
+// Polyfill or fallback WebSocket for test environments or older runtime runners
+if (typeof (globalThis as unknown as { WebSocket?: unknown }).WebSocket === 'undefined') {
+  (globalThis as unknown as { WebSocket: unknown }).WebSocket = class DummyWebSocket {};
+}
+
 /**
  * Supabase admin client — uses the service-role key.
  * NEVER send this client or its key to the frontend.
