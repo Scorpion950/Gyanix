@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Rss,
@@ -71,6 +72,7 @@ export function FeedPage() {
   const { session } = useAuthStore();
   const [activeTab, setActiveTab] = useState<string>('all');
   const [posts, setPosts] = useState<Post[]>([]);
+  const [communities, setCommunities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Composer
@@ -90,7 +92,22 @@ export function FeedPage() {
 
   useEffect(() => {
     loadPosts(activeTab);
+    loadCommunities();
   }, [activeTab]);
+
+  const loadCommunities = async () => {
+    try {
+      const res = await fetch('/api/feed/communities', {
+        headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+      });
+      const data = await res.json();
+      if (data.success && data.data) {
+        setCommunities(data.data);
+      }
+    } catch {
+      // Non-blocking
+    }
+  };
 
   const loadPosts = async (feedType: string) => {
     setLoading(true);
@@ -354,29 +371,29 @@ export function FeedPage() {
               )}
 
               {/* Composer Toolbar */}
-              <div className="flex items-center justify-between pt-2 border-t border-border/50 text-xs">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border/50 text-xs">
+                <div className="flex items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setShowCodeInput(!showCodeInput)}
-                    className={`px-2 py-1 rounded text-[11px] border flex items-center gap-1 transition-colors ${
+                    className={`px-3 py-1.5 rounded-control text-xs border flex items-center gap-1.5 transition-colors ${
                       showCodeInput ? 'border-primary text-primary bg-primary/10' : 'border-border text-text-muted hover:text-text'
                     }`}
                   >
-                    <Code2 className="w-3 h-3" />
-                    Code
+                    <Code2 className="w-3.5 h-3.5" />
+                    Code Snippet
                   </button>
 
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-text-muted" />
-                    <Input
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-control border border-border bg-surface-subtle">
+                    <Clock className="w-3.5 h-3.5 text-text-muted shrink-0" />
+                    <input
                       type="number"
-                      placeholder="Min (e.g. 14)"
+                      placeholder="Timestamp (min)"
                       value={timestampMinutes}
                       onChange={(e) =>
                         setTimestampMinutes(e.target.value === '' ? '' : Number(e.target.value))
                       }
-                      className="w-24 h-7 text-[11px]"
+                      className="w-32 bg-transparent text-xs text-text placeholder:text-text-muted outline-none border-none focus:outline-none"
                     />
                   </div>
                 </div>
@@ -385,9 +402,9 @@ export function FeedPage() {
                   type="submit"
                   disabled={isPosting || !content.trim()}
                   size="sm"
-                  className="bg-primary text-white text-xs h-7"
+                  className="bg-primary text-white text-xs h-9 px-4"
                 >
-                  {isPosting ? <Loader2 className="w-3 h-3 animate-spin mr-1" /> : <Send className="w-3 h-3 mr-1" />}
+                  {isPosting ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" /> : <Send className="w-3.5 h-3.5 mr-1.5" />}
                   Publish
                 </Button>
               </div>
@@ -552,28 +569,41 @@ export function FeedPage() {
         <div className="w-full lg:w-[320px] space-y-6 shrink-0">
           {/* Trending Communities Widget */}
           <div className="p-5 rounded-xl border border-border bg-surface space-y-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-2">
-              <Users className="w-3.5 h-3.5 text-primary" />
-              Learning Communities
-            </h3>
-
-            <div className="space-y-2.5">
-              {[
-                { name: 'Systems Engineering & Rust', members: 42, slug: 'systems-and-rust' },
-                { name: 'Frontend & UI Engineering', members: 88, slug: 'frontend-craft' },
-                { name: 'Distributed Systems & Cloud', members: 65, slug: 'distributed-cloud' },
-              ].map((c) => (
-                <div key={c.slug} className="flex items-center justify-between text-xs">
-                  <div>
-                    <h4 className="font-bold text-text truncate max-w-[160px]">{c.name}</h4>
-                    <span className="text-[11px] text-text-muted">{c.members} members</span>
-                  </div>
-                  <Badge variant="outline" className="text-[10px] text-primary">
-                    Joined
-                  </Badge>
-                </div>
-              ))}
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-text-muted flex items-center gap-2">
+                <Users className="w-3.5 h-3.5 text-primary" />
+                Learning Communities
+              </h3>
+              <Link to="/communities" className="text-2xs text-primary hover:underline font-medium">
+                View all
+              </Link>
             </div>
+
+            {communities.length > 0 ? (
+              <div className="space-y-2.5">
+                {communities.map((c) => (
+                  <div key={c.id || c.slug} className="flex items-center justify-between text-xs py-1">
+                    <Link to="/communities" className="hover:underline truncate max-w-[170px]">
+                      <h4 className="font-semibold text-text truncate">{c.name}</h4>
+                      <span className="text-[11px] text-text-muted">{c.members_count || 0} members</span>
+                    </Link>
+                    <Badge variant="outline" className="text-[10px] text-primary">
+                      {c.isJoined ? 'Joined' : 'Join'}
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="py-4 text-center space-y-2">
+                <p className="text-xs text-text-muted">No communities created yet.</p>
+                <Link
+                  to="/communities"
+                  className="inline-flex items-center gap-1 text-xs text-primary hover:underline font-medium"
+                >
+                  Create or explore communities &rarr;
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Social Learning Guidelines per Part 0 */}

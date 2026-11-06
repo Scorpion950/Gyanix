@@ -425,33 +425,35 @@ export function PracticeTrackerPage() {
               </button>
             </div>
 
-            <form onSubmit={handleCreateExternalEntry} className="space-y-3">
-              <div className="space-y-1">
+            <form onSubmit={handleCreateExternalEntry} className="space-y-4">
+              <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-text-secondary">Problem Title *</label>
                 <Input
                   placeholder="e.g. 3Sum, LRU Cache"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
+                  className="h-10 text-xs"
                   required
                 />
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-text-secondary">External URL (Optional)</label>
                 <Input
                   placeholder="https://leetcode.com/problems/..."
                   value={newUrl}
                   onChange={(e) => setNewUrl(e.target.value)}
+                  className="h-10 text-xs"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-text-secondary">Platform</label>
                   <select
                     value={newPlatform}
                     onChange={(e) => setNewPlatform(e.target.value)}
-                    className="w-full p-2 rounded-lg border border-border bg-surface text-xs text-text"
+                    className="w-full h-10 px-3 rounded-control border border-border bg-surface text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="LeetCode">LeetCode</option>
                     <option value="HackerRank">HackerRank</option>
@@ -461,26 +463,27 @@ export function PracticeTrackerPage() {
                   </select>
                 </div>
 
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-text-secondary">Minutes Spent</label>
                   <Input
                     type="number"
                     min="1"
                     value={newMinutes}
                     onChange={(e) => setNewMinutes(Number(e.target.value))}
+                    className="h-10 text-xs"
                   />
                 </div>
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-text-secondary">Difficulty (1-5)</label>
-                <div className="flex gap-1.5">
+                <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((lvl) => (
                     <button
                       type="button"
                       key={lvl}
                       onClick={() => setNewDifficulty(lvl)}
-                      className={`flex-1 py-1.5 rounded border text-xs font-mono transition-colors ${
+                      className={`flex-1 h-9 rounded-control border text-xs font-mono transition-colors ${
                         newDifficulty === lvl
                           ? 'bg-primary/10 border-primary text-primary font-bold'
                           : 'border-border text-text-muted hover:border-text-secondary'
@@ -492,18 +495,18 @@ export function PracticeTrackerPage() {
                 </div>
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-text-secondary">Key Takeaways / Notes</label>
                 <textarea
-                  rows={2}
+                  rows={3}
                   value={newNotes}
                   onChange={(e) => setNewNotes(e.target.value)}
                   placeholder="e.g. Two-pointer approach beats O(N^2) sorting..."
-                  className="w-full p-2.5 rounded-lg border border-border bg-surface text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full p-3 rounded-control border border-border bg-surface text-xs text-text focus:outline-none focus:ring-1 focus:ring-primary resize-none"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <div className="flex justify-end gap-2 pt-3 border-t border-border">
                 <Button
                   type="button"
                   variant="outline"

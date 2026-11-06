@@ -4,15 +4,15 @@ import { cn } from "@/lib/utils";
 
 const inputWrapperVariants = cva(
   [
-    "relative flex items-center w-full",
+    "relative flex items-center w-full min-h-[40px]",
     "rounded-control border bg-surface",
     "transition-colors duration-micro",
-    "focus-within:ring-2 focus-within:ring-primary focus-within:ring-offset-0",
+    "focus-within:ring-1 focus-within:ring-primary focus-within:border-primary",
   ],
   {
     variants: {
       variant: {
-        default: "border-border focus-within:border-primary",
+        default: "border-border",
         error: "border-danger focus-within:border-danger focus-within:ring-danger",
       },
     },
@@ -103,9 +103,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             disabled={disabled}
             required={required}
             className={cn(
-              "flex-1 h-10 bg-transparent px-3 py-2",
+              "flex-1 w-full min-w-0 h-full bg-transparent px-3 py-2",
               "text-sm text-text-default placeholder:text-text-muted",
-              "outline-none border-none ring-0",
+              "outline-none border-none ring-0 focus:outline-none focus:ring-0",
               "disabled:cursor-not-allowed",
               leftIcon && "pl-2",
               rightIcon && "pr-2"

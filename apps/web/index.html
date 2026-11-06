@@ -28,13 +28,11 @@
     <script>
       (function () {
         const STORAGE_KEY = 'gyanix-theme';
-        const DEFAULT_THEME = 'system';
+        const DEFAULT_THEME = 'dark';
 
         try {
           const stored = localStorage.getItem(STORAGE_KEY) || DEFAULT_THEME;
-          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-          const useDark =
-            stored === 'dark' || (stored === 'system' && prefersDark);
+          const useDark = stored !== 'light';
 
           if (useDark) {
             document.documentElement.classList.add('dark');
@@ -43,10 +41,7 @@
           }
           document.documentElement.setAttribute('data-theme', stored);
         } catch (_e) {
-          // localStorage not available (private mode) — use system preference
-          if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-          }
+          document.documentElement.classList.add('dark');
         }
       })();
     </script>

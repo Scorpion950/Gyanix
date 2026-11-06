@@ -185,7 +185,7 @@ export function CodePlaygroundPage() {
           </div>
 
           {language === 'web' ? (
-            <div className="rounded-xl border border-border bg-white dark:bg-surface overflow-hidden h-[480px]">
+            <div className="rounded-xl border border-border bg-surface overflow-hidden h-[480px]">
               <iframe
                 title="Web Preview"
                 srcDoc={code}

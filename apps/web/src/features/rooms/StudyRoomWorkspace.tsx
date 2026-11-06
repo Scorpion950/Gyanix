@@ -308,7 +308,7 @@ export function StudyRoomWorkspace() {
             </div>
           ) : (
             /* Whiteboard Canvas Stage */
-            <div className="flex-1 flex flex-col bg-white dark:bg-[#121723]">
+            <div className="flex-1 flex flex-col bg-[#121723]">
               {/* Whiteboard Toolbar */}
               <div className="p-2 border-b border-border flex items-center justify-between text-xs bg-surface-subtle">
                 <div className="flex items-center gap-2">

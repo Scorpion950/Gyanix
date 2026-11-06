@@ -18,44 +18,44 @@
 @tailwind utilities;
 
 /* ─── Design Tokens (CSS Custom Properties) ─────────────────────────────── */
-/* Light mode tokens */
+/* Default dark tokens for calm Notion+Discord feel */
 @layer base {
   :root {
-    /* Surfaces */
-    --background: 220 20% 97%;          /* #F7F8FB */
-    --surface: 0 0% 100%;              /* #FFFFFF */
-    --surface-raised: 0 0% 100%;       /* #FFFFFF */
-    --surface-subtle: 220 20% 95%;     /* #F1F3F8 */
-    --border: 220 20% 91%;             /* #E3E6EE */
+    /* Surfaces — dark palette by default */
+    --background: 222 32% 7%;           /* #0B0E14 */
+    --surface: 222 30% 11%;             /* #121723 */
+    --surface-raised: 222 28% 15%;      /* #182030 */
+    --surface-subtle: 222 26% 17%;      /* #1B2231 */
+    --border: 222 24% 20%;              /* #232B3B */
 
     /* Text */
-    --text: 230 42% 11%;               /* #0F1424 */
-    --text-secondary: 225 18% 36%;     /* #4A5168 */
-    --text-muted: 225 12% 43%;         /* #5F657B */
+    --text: 220 30% 93%;                /* #E8ECF4 */
+    --text-secondary: 220 20% 71%;      /* #A6AFC3 */
+    --text-muted: 220 16% 59%;          /* #8089A0 */
 
     /* Primary (blue) */
-    --primary: 221 83% 53%;            /* #2563EB */
-    --primary-foreground: 0 0% 100%;
+    --primary: 221 100% 68%;            /* #5B8DFF */
+    --primary-foreground: 222 32% 7%;
 
     /* AI (violet) */
-    --ai: 263 70% 50%;                 /* #7C3AED */
-    --ai-foreground: 0 0% 100%;
+    --ai: 265 83% 76%;                  /* #A78BFA */
+    --ai-foreground: 222 32% 7%;
 
     /* Status */
-    --success: 142 72% 29%;            /* #15803D */
-    --success-foreground: 0 0% 100%;
-    --warning: 32 95% 36%;             /* #B45309 */
-    --warning-foreground: 0 0% 100%;
-    --danger: 0 72% 51%;               /* #DC2626 */
-    --danger-foreground: 0 0% 100%;
+    --success: 142 69% 58%;             /* #4ADE80 */
+    --success-foreground: 222 32% 7%;
+    --warning: 48 96% 56%;              /* #FBBF24 */
+    --warning-foreground: 222 32% 7%;
+    --danger: 0 91% 71%;               /* #F87171 */
+    --danger-foreground: 222 32% 7%;
 
     /* Progress metrics */
-    --progress-learning: 221 83% 53%;  /* Primary blue */
-    --progress-knowledge: 173 80% 32%; /* Teal #0D9488 */
-    --progress-practical: 20 90% 48%; /* Orange #EA580C */
+    --progress-learning: 221 100% 68%;  /* Primary blue */
+    --progress-knowledge: 172 76% 51%; /* Teal #2DD4BF */
+    --progress-practical: 20 97% 61%; /* Orange #FB923C */
 
     /* Streak / achievement (amber) */
-    --streak: 33 92% 44%;              /* #D97706 */
+    --streak: 48 96% 56%;              /* #FBBF24 */
 
     /* Focus ring */
     --ring: var(--primary);
@@ -67,7 +67,7 @@
     --radius-modal: 1rem;
   }
 
-  /* ─── Dark Mode Tokens ──────────────────────────────────────────────────── */
+  /* ─── Dark Mode Tokens (Matches root) ─────────────────────────────────── */
   .dark {
     /* Surfaces — raised by lightness, NOT by shadow */
     --background: 222 32% 7%;           /* #0B0E14 */
@@ -81,11 +81,11 @@
     --text-secondary: 220 20% 71%;      /* #A6AFC3 */
     --text-muted: 220 16% 59%;          /* #8089A0 */
 
-    /* Primary — lighter for dark backgrounds, use dark text on it */
+    /* Primary — lighter for dark backgrounds */
     --primary: 221 100% 68%;            /* #5B8DFF */
-    --primary-foreground: 222 32% 7%;   /* dark background as text */
+    --primary-foreground: 222 32% 7%;
 
-    /* AI (violet) — lighter */
+    /* AI (violet) */
     --ai: 265 83% 76%;                  /* #A78BFA */
     --ai-foreground: 222 32% 7%;
 
@@ -97,13 +97,13 @@
     --danger: 0 91% 71%;               /* #F87171 */
     --danger-foreground: 222 32% 7%;
 
-    /* Progress metrics — lighter for dark */
-    --progress-learning: 221 100% 68%;  /* Matches primary */
-    --progress-knowledge: 172 76% 51%; /* Teal #2DD4BF */
-    --progress-practical: 20 97% 61%; /* Orange #FB923C */
+    /* Progress metrics */
+    --progress-learning: 221 100% 68%;
+    --progress-knowledge: 172 76% 51%;
+    --progress-practical: 20 97% 61%;
 
     /* Streak */
-    --streak: 48 96% 56%;               /* #FBBF24 */
+    --streak: 48 96% 56%;
   }
 }
 
@@ -184,6 +184,41 @@
   ::selection {
     background-color: hsl(var(--primary) / 0.2);
     color: hsl(var(--text));
+  }
+
+  /* ─── Anti-White Box Overrides (Browser Autofill, Paste & Form Cache) ─────── */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover, 
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active,
+  textarea:-webkit-autofill,
+  textarea:-webkit-autofill:hover,
+  textarea:-webkit-autofill:focus,
+  textarea:-webkit-autofill:active,
+  select:-webkit-autofill,
+  select:-webkit-autofill:hover,
+  select:-webkit-autofill:focus,
+  select:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px #121723 inset !important;
+    -webkit-text-fill-color: #E8ECF4 !important;
+    caret-color: #E8ECF4 !important;
+    border-color: #232B3B !important;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+
+  /* ─── Number Input Clean Styling (removes glitchy browser spin buttons) ──── */
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+
+  /* ─── Dark Baseline for Form Controls ────────────────────────────────────── */
+  input, textarea, select {
+    color-scheme: dark;
   }
 }
 
