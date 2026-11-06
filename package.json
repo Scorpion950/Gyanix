@@ -2,6 +2,7 @@
   "name": "gyanix",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "AI-powered social and collaborative learning platform",
   "packageManager": "pnpm@10.5.2",
   "engines": {
@@ -9,6 +10,7 @@
     "pnpm": ">=10.0.0"
   },
   "scripts": {
+    "setup": "node scripts/setup-env.js",
     "dev": "pnpm --parallel --filter @gyanix/api --filter @gyanix/web dev",
     "build": "pnpm --filter @gyanix/shared build && pnpm --filter @gyanix/api build && pnpm --filter @gyanix/web build",
     "lint": "pnpm --recursive --parallel lint",
