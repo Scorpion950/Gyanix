@@ -37,6 +37,8 @@ const badgeVariants = cva(
           "bg-danger/10 text-danger",
         ai:
           "bg-ai/10 text-ai",
+        outline:
+          "border border-border text-text-secondary bg-transparent",
       },
     },
     defaultVariants: {

@@ -190,13 +190,16 @@ export const analyticsService = {
 
     if (!ach) return;
 
-    await supabaseAdmin
-      .from('user_achievements')
-      .insert({
-        user_id: userId,
-        achievement_id: ach.id,
-      })
-      .catch(() => {});
+    try {
+      await supabaseAdmin
+        .from('user_achievements')
+        .insert({
+          user_id: userId,
+          achievement_id: ach.id,
+        });
+    } catch (_err) {
+      // Ignore if already unlocked
+    }
   },
 
   async getAchievements(userId: string) {

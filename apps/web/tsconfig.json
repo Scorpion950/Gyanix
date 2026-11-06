@@ -10,10 +10,14 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@gyanix/shared": ["../../packages/shared/src/index.ts"]
+      "@gyanix/shared": ["../../packages/shared/dist/index.d.ts"]
     },
-    "noEmit": true
+    "types": ["vite/client"],
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+    "declaration": false,
+    "declarationMap": false
   },
-  "include": ["src", "../../packages/shared/src"],
+  "include": ["src"],
   "exclude": ["dist", "node_modules"]
 }

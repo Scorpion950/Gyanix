@@ -243,7 +243,7 @@ function inputClass(hasError: boolean) {
   );
 }
 
-function FormField({ label, error: _err, children }: { label: string; error?: string; children: React.ReactNode }) {
+function FormField({ label, error: _err, children }: { label: string; error?: string | undefined; children: React.ReactNode }) {
   return (
     <div>
       <label className="block text-xs font-medium text-text-secondary mb-1.5">{label}</label>

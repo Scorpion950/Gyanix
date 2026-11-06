@@ -12,6 +12,8 @@ import { LearningPathDetailView } from './features/learning/LearningPathDetailVi
 import { LecturePlayerView } from './features/learning/LecturePlayerView.tsx';
 import { NotesLibraryPage } from './features/notes/NotesLibraryPage.tsx';
 import { AnalyticsPage } from './features/analytics/AnalyticsPage.tsx';
+import { RoadmapGeneratorView } from './features/ai/RoadmapGeneratorView.tsx';
+import { AssessmentRunnerView } from './features/assessments/AssessmentRunnerView.tsx';
 import { DesignSystemPage } from './routes/DesignSystemPage.tsx';
 import { NotFoundPage } from './routes/NotFoundPage.tsx';
 import { LoadingScreen } from './components/ui/LoadingScreen.tsx';
@@ -101,6 +103,9 @@ export default function App() {
         <Route path="/learning/player/:itemId" element={<LecturePlayerView />} />
         <Route path="/notes" element={<NotesLibraryPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/roadmaps" element={<RoadmapGeneratorView />} />
+        <Route path="/assessments" element={<AssessmentRunnerView />} />
+        <Route path="/assessments/:id" element={<AssessmentRunnerView />} />
       </Route>
 
       {/* Design system — dev only */}

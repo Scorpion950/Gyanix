@@ -24,15 +24,17 @@ export const notesService = {
 
     // Increment notes_created counter in today's rollup
     const today = new Date().toISOString().split('T')[0];
-    await supabaseAdmin.rpc('increment_daily_notes', { p_user_id: userId, p_date: today }).catch(() => {
+    try {
+      await supabaseAdmin.rpc('increment_daily_notes', { p_user_id: userId, p_date: today });
+    } catch (_err) {
       // Fallback: upsert manually if rpc not created
-      supabaseAdmin
+      await supabaseAdmin
         .from('daily_learning_rollups')
         .upsert(
           { user_id: userId, date: today, notes_created: 1 },
           { onConflict: 'user_id,date' },
         );
-    });
+    }
 
     return data;
   },
@@ -72,7 +74,14 @@ export const notesService = {
     return true;
   },
 
-  async listNotes(userId: string, options: { collectionId?: string; pathItemId?: string; query?: string }) {
+  async listNotes(
+    userId: string,
+    options: {
+      collectionId?: string | undefined;
+      pathItemId?: string | undefined;
+      query?: string | undefined;
+    },
+  ) {
     let q = supabaseAdmin
       .from('notes')
       .select(`

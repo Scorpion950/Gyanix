@@ -106,7 +106,12 @@ export const learningPathService = {
   /**
    * List learning paths (My Paths, or Public/Discoverable)
    */
-  async listPaths(options: { userId?: string; publicOnly?: boolean; limit?: number; offset?: number }) {
+  async listPaths(options: {
+    userId?: string | undefined;
+    publicOnly?: boolean | undefined;
+    limit?: number | undefined;
+    offset?: number | undefined;
+  }) {
     const { userId, publicOnly = false, limit = 20, offset = 0 } = options;
 
     let query = supabaseAdmin.from('learning_paths').select(

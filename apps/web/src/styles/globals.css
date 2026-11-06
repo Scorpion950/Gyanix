@@ -161,8 +161,8 @@
   }
 
   /* ─── Code and timestamps ──────────────────────────────────────────────── */
-  code, kbd, .font-mono {
-    @apply font-mono;
+  code, kbd {
+    font-family: var(--font-mono), monospace;
   }
 
   /* ─── Scrollbar styling (consistent across light/dark) ─────────────────── */

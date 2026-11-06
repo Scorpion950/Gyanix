@@ -26,17 +26,20 @@ const avatarVariants = cva(
 export interface AvatarProps
   extends React.ComponentPropsWithoutRef<typeof RadixAvatar.Root>,
     VariantProps<typeof avatarVariants> {
-  src?: string;
-  alt?: string;
+  src?: string | undefined;
+  alt?: string | undefined;
   /** Fallback initials (up to 2 chars shown). Auto-derived from `alt` if omitted. */
-  fallback?: string;
+  fallback?: string | undefined;
 }
 
 function deriveInitials(text?: string): string {
   if (!text) return "?";
   const parts = text.trim().split(/\s+/);
+  if (!parts[0]) return "?";
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  const first = parts[0];
+  const last = parts[parts.length - 1];
+  return ((first[0] || "") + (last ? last[0] || "" : "")).toUpperCase() || "?";
 }
 
 const Avatar = React.forwardRef<

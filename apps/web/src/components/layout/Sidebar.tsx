@@ -14,6 +14,7 @@ import {
   BookMarked,
   MessageSquare,
   Compass,
+  Sparkles,
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
@@ -42,7 +43,8 @@ const navGroups: NavGroup[] = [
       { label: 'Dashboard', to: '/dashboard', icon: LayoutDashboard },
       { label: 'My Learning', to: '/learning', icon: BookOpen },
       { label: 'Notes', to: '/notes', icon: FileText },
-      { label: 'Assessments', to: '/assessments', icon: ClipboardCheck, deferred: true },
+      { label: 'AI Roadmaps', to: '/roadmaps', icon: Sparkles },
+      { label: 'Assessments', to: '/assessments', icon: ClipboardCheck },
     ],
   },
   {
