@@ -15,6 +15,7 @@ const EnvSchema = z.object({
   API_URL: z.string().url().default('http://localhost:3001'),
   // AI
   GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().default('gemini-3.8-flash'),
   // Encryption
   ENCRYPTION_KEY: z.string().optional(),
   // YouTube
@@ -40,6 +41,7 @@ function validateEnv() {
       APP_URL: 'http://localhost:5173',
       API_URL: 'http://localhost:3001',
       GEMINI_API_KEY: undefined,
+      GEMINI_MODEL: 'gemini-3.8-flash',
       ENCRYPTION_KEY: undefined,
       YOUTUBE_API_KEY: undefined,
       SMTP_HOST: undefined,

@@ -84,12 +84,13 @@ export function DashboardPage() {
   const { data: completion } = useQuery<ProfileCompletionData>({
     queryKey: ['profile-completion'],
     queryFn: async () => {
-      if (!token) return { percentage: 60, suggestions: ['Complete onboarding'], onboardingCompleted: false };
+      const isLocalOnboarded = typeof window !== 'undefined' && localStorage.getItem('gyanix_onboarded') === 'true';
+      if (!token) return { percentage: isLocalOnboarded ? 100 : 60, suggestions: isLocalOnboarded ? [] : ['Complete onboarding'], onboardingCompleted: isLocalOnboarded };
       const res = await fetch(`${apiUrl}/users/me/completion`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const json = (await res.json()) as { success: boolean; data?: ProfileCompletionData };
-      return json.data || { percentage: 60, suggestions: ['Complete onboarding'], onboardingCompleted: false };
+      return json.data || { percentage: isLocalOnboarded ? 100 : 60, suggestions: isLocalOnboarded ? [] : ['Complete onboarding'], onboardingCompleted: isLocalOnboarded };
     },
     enabled: !!token,
   });

@@ -294,10 +294,12 @@ Return valid JSON with format:
     const cleanSubj = cleanTopic(topic);
 
     const systemPrompt = `You are a technical examiner. Generate 3 assessment questions for "${cleanSubj}" at difficulty level ${difficulty} (out of 5).
-Include:
-1. One Multiple Choice Question (mcq) with 4 options and correctOptionIndex (0-3).
-2. One Conceptual Question (conceptual) explaining a trade-off.
-3. One Practical Scenario Question (code_scenario) with a codeSnippet.
+${questionType === 'mcq' ? 'Generate ONLY multiple choice questions (type: "mcq").' : questionType === 'text' ? 'Generate ONLY conceptual/paragraph questions (type: "conceptual").' : 'Include a mix of multiple choice (mcq) and conceptual questions.'}
+CRITICAL FORMATTING INSTRUCTIONS:
+1. Do NOT append or mention the topic, assessment title, or phrases like "in ${cleanSubj}", "in Practise Assignment", or "in <Topic>" inside the question prompt text.
+2. The question prompts must be direct, self-contained questions (e.g. "What is the primary architectural trade-off when designing scalable systems?").
+3. The assessment topic is displayed separately in the top header.
+
 Output strict JSON format:
 {
   "title": "${cleanSubj} Skill Assessment",
@@ -307,8 +309,8 @@ Output strict JSON format:
       "type": "mcq",
       "prompt": "Question text",
       "options": ["A", "B", "C", "D"],
-      "correctOptionIndex": 1,
-      "explanation": "Why B is correct",
+      "correctOptionIndex": 0,
+      "explanation": "Why option is correct",
       "difficulty": ${difficulty},
       "metricTarget": "knowledge"
     }
@@ -333,7 +335,7 @@ Output strict JSON format:
             {
               id: 'q1',
               type: 'mcq',
-              prompt: `In ${cleanSubj}, what is the time complexity of searching an element in a Balanced Binary Search Tree (such as AVL or Red-Black Tree)?`,
+              prompt: `What is the time complexity of searching an element in a Balanced Binary Search Tree (such as AVL or Red-Black Tree)?`,
               options: [
                 'O(log n) average and worst-case',
                 'O(1) average and O(n) worst-case',
@@ -348,7 +350,7 @@ Output strict JSON format:
             {
               id: 'q2',
               type: 'conceptual',
-              prompt: `When solving array and string problems in ${cleanSubj}, in what scenarios is the Two-Pointer approach preferred over a Hash Map or brute-force search?`,
+              prompt: `When solving array and string problems, in what scenarios is the Two-Pointer approach preferred over a Hash Map or brute-force search?`,
               explanation: 'The Two-Pointer technique operates with O(1) auxiliary space on sorted arrays or monotonic sequences, avoiding the O(n) memory allocation of Hash Maps.',
               difficulty,
               metricTarget: 'knowledge',
@@ -356,7 +358,7 @@ Output strict JSON format:
             {
               id: 'q3',
               type: 'code_scenario',
-              prompt: `Review the following cycle-detection implementation in ${cleanSubj}. What is the algorithm called, and why does fast move at twice the speed of slow?`,
+              prompt: `Review the following cycle-detection implementation. What is the algorithm called, and why does fast move at twice the speed of slow?`,
               codeSnippet: `// Cycle Detection\npublic boolean hasCycle(ListNode head) {\n    if (head == null || head.next == null) return false;\n    ListNode slow = head;\n    ListNode fast = head.next;\n    while (slow != fast) {\n        if (fast == null || fast.next == null) return false;\n        slow = slow.next;\n        fast = fast.next.next;\n    }\n    return true;\n}`,
               difficulty,
               metricTarget: 'practical',
@@ -370,7 +372,7 @@ Output strict JSON format:
             {
               id: 'q1',
               type: 'mcq',
-              prompt: `In ${cleanSubj}, what is the primary consideration when scaling concurrent workloads?`,
+              prompt: `What is the primary architectural trade-off when designing scalable systems?`,
               options: [
                 'Minimizing shared state contention and optimizing memory locality',
                 'Increasing number of CSS rules',
@@ -385,7 +387,7 @@ Output strict JSON format:
             {
               id: 'q2',
               type: 'conceptual',
-              prompt: `Explain the fundamental trade-off between throughput and latency in ${cleanSubj} architecture.`,
+              prompt: `Explain the fundamental trade-off between throughput and latency in system architecture.`,
               explanation: 'Batching operations increases overall throughput at the cost of higher individual request latency.',
               difficulty,
               metricTarget: 'knowledge',
@@ -393,7 +395,7 @@ Output strict JSON format:
             {
               id: 'q3',
               type: 'code_scenario',
-              prompt: `Review the following ${cleanSubj} pattern. How would you ensure deterministic resource cleanup and error propagation?`,
+              prompt: `Review the following resource management pattern. How would you ensure deterministic cleanup and safe error propagation?`,
               codeSnippet: `// Resource lifecycle example\ntry {\n  const resource = acquire();\n  process(resource);\n} finally {\n  cleanup();\n}`,
               difficulty,
               metricTarget: 'practical',
@@ -407,8 +409,10 @@ Output strict JSON format:
     const sanitizePrompt = (p: string) => {
       if (!p) return p;
       return p
-        .replace(/\s+in\s+(give me quiz for|practise assignment for|practice assignment for|assignment for)[^?.]*/gi, '')
+        .replace(/\s+in\s+(give me quiz for|practise assignment for|practice assignment for|assignment for|practise assignment|practice assignment)[^?.]*/gi, '')
         .replace(/\s+in\s+[a-zA-Z0-9_\s]+Skill Assessment\??/gi, '?')
+        .replace(new RegExp(`\\s+in\\s+${cleanSubj.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\??`, 'gi'), '?')
+        .replace(new RegExp(`^In\\s+${cleanSubj.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')},?\\s*`, 'i'), '')
         .replace(/\s+\?$/, '?')
         .trim();
     };

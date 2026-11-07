@@ -93,10 +93,7 @@ notesRouter.get('/collections', async (req: Request, res: Response): Promise<voi
   } catch (_err) {
     res.json({
       success: true,
-      data: [
-        { id: 'col-core', title: 'Core Architecture', color: '#2563EB' },
-        { id: 'col-quick', title: 'Quick Snippets', color: '#10B981' },
-      ],
+      data: [],
     });
   }
 });

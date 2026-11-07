@@ -143,10 +143,24 @@ export const searchChallengesService = {
 
       if (!error && challenges && challenges.length > 0) {
         // Exclude dummy static seed challenges that user did not create
+        const defaultSlugs = new Set([
+          '7-days-concurrency',
+          '30-days-algorithms',
+          '7-days-frontend-architecture',
+          '30-days-of-dsa-system-design',
+          '14-days-of-distributed-systems',
+          '7-days-of-react-typescript-patterns',
+          'challenge-dsa-30',
+          'challenge-dist-14',
+          'challenge-react-7',
+        ]);
         const real = challenges.filter(
-          (c) => c.creator_id || c.id?.startsWith('ch-') || (userId && c.creator_id === userId)
+          (c) => c.creator_id && !defaultSlugs.has(c.slug) && !defaultSlugs.has(c.id)
         );
-        challengesList = real.length > 0 ? real : inMemoryChallenges;
+        const map = new Map<string, any>();
+        for (const ch of inMemoryChallenges) map.set(ch.id, ch);
+        for (const ch of real) map.set(ch.id, ch);
+        challengesList = Array.from(map.values());
       }
     } catch (_err) { }
 

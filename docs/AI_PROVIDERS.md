@@ -14,14 +14,14 @@ Feature Code (Doubt Solver / Roadmap / Code Assistant)
        ┌─────────────┴─────────────┐
        ▼                           ▼
  GeminiAdapter                GroqAdapter (Phase 10)
-(Google Gemini Flash)      (OpenAI-Compatible Fallback)
+(Google Gemini 3.8 Flash)   (OpenAI-Compatible Fallback)
 ```
 
 ## Supported Providers & Models
 
 | Provider | Model | Tier | Capabilities |
 |---|---|---|---|
-| **Google Gemini** (Default) | `gemini-1.5-flash` | Free tier | Structured JSON, Streaming, 1M context |
+| **Google Gemini** (Default) | `gemini-3.8-flash` | Free tier | Structured JSON, Streaming, 1M context |
 | **Groq** (Secondary) | `llama-3.1-70b-versatile` | Free tier | Ultra-fast inference, Streaming |
 
 ## Environment Configuration
@@ -29,6 +29,7 @@ Initial deployment reads configuration from server-side environment variables:
 ```bash
 # apps/api/.env
 GEMINI_API_KEY=AIzaSy...
+GEMINI_MODEL=gemini-3.8-flash
 ```
 
 *Note: Keys are never sent to the client browser.*

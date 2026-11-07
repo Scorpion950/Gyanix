@@ -402,7 +402,7 @@ export function PracticeTrackerPage() {
                 placeholder="Search DSA problems by name, tag, or topic..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-9 pl-9 pr-3 rounded-lg border border-border bg-surface text-xs text-text placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary"
+                className="w-full h-9 pl-9 pr-3 rounded-full border border-border bg-surface text-xs text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary/30"
               />
             </div>
 

@@ -4,7 +4,7 @@ import { cleanTopic } from '../cleanTopic.js';
 
 export class GeminiAdapter implements AIProviderAdapter {
   id = 'gemini';
-  name = 'Google Gemini Flash';
+  name = 'Google Gemini 3.8 Flash';
   capabilities: AIProviderCapabilities = {
     streaming: true,
     structuredOutput: true,
@@ -25,44 +25,65 @@ export class GeminiAdapter implements AIProviderAdapter {
   }
 
   async complete(options: AIRequestOptions): Promise<AIResponse> {
-    // If no API key configured, return high-quality educational fallback response
-    if (!this.client || !process.env['GEMINI_API_KEY']) {
+    // If no API key configured or running in test runner, return high-quality educational fallback response
+    if (!this.client || !process.env['GEMINI_API_KEY'] || process.env['NODE_ENV'] === 'test') {
       return this.generateMockFallback(options);
     }
 
-    try {
-      const modelName = process.env['GEMINI_MODEL'] || 'gemini-1.5-flash';
-      const modelConfig: any = {
-        model: modelName,
-        generationConfig: {
-          temperature: options.temperature ?? 0.7,
-          maxOutputTokens: options.maxTokens ?? 1024,
-          responseMimeType: options.jsonMode ? 'application/json' : 'text/plain',
-        },
-      };
-      if (options.systemPrompt) {
-        modelConfig.systemInstruction = options.systemPrompt;
+    const candidateModels = [
+      process.env['GEMINI_MODEL'] || 'gemini-3.8-flash',
+      'gemini-3.8-flash',
+      'gemini-2.5-flash',
+      'gemini-1.5-flash',
+    ];
+    const uniqueModels = [...new Set(candidateModels)];
+
+    let lastError: any = null;
+
+    for (const modelName of uniqueModels) {
+      try {
+        const modelConfig: any = {
+          model: modelName,
+          generationConfig: {
+            temperature: options.temperature ?? 0.7,
+            maxOutputTokens: options.maxTokens ?? 1024,
+            responseMimeType: options.jsonMode ? 'application/json' : 'text/plain',
+          },
+        };
+        if (options.systemPrompt) {
+          modelConfig.systemInstruction = options.systemPrompt;
+        }
+        const model = this.client.getGenerativeModel(modelConfig);
+
+        const contents = options.messages.map((m) => ({
+          role: m.role === 'user' ? 'user' : 'model',
+          parts: [{ text: m.content }],
+        }));
+
+        const fetchPromise = (async () => {
+          const result = await model.generateContent({ contents });
+          return {
+            content: result.response.text(),
+            model: modelName,
+            provider: 'gemini',
+            tokensUsed: result.response.usageMetadata?.totalTokenCount || 0,
+          };
+        })();
+
+        const timeoutPromise = new Promise<null>((_, reject) =>
+          setTimeout(() => reject(new Error(`Timeout connecting to ${modelName}`)), 2500)
+        );
+
+        const outcome = await Promise.race([fetchPromise, timeoutPromise]);
+        if (outcome) return outcome;
+      } catch (err: any) {
+        lastError = err;
+        // Continue to try next candidate model
       }
-      const model = this.client.getGenerativeModel(modelConfig);
-
-      const contents = options.messages.map((m) => ({
-        role: m.role === 'user' ? 'user' : 'model',
-        parts: [{ text: m.content }],
-      }));
-
-      const result = await model.generateContent({ contents });
-      const text = result.response.text();
-
-      return {
-        content: text,
-        model: modelName,
-        provider: 'gemini',
-        tokensUsed: result.response.usageMetadata?.totalTokenCount || 0,
-      };
-    } catch (err: any) {
-      console.warn('[GeminiAdapter] API call failed, falling back to local reasoning:', err?.message);
-      return this.generateMockFallback(options);
     }
+
+    console.warn('[GeminiAdapter] API calls failed across candidate models, falling back to local reasoning:', lastError?.message);
+    return this.generateMockFallback(options);
   }
 
   private generateMockFallback(options: AIRequestOptions): AIResponse {
@@ -163,7 +184,7 @@ export class GeminiAdapter implements AIProviderAdapter {
               {
                 id: 'q1',
                 type: 'mcq',
-                prompt: `In ${topic}, what is the time complexity of searching an element in a Balanced Binary Search Tree?`,
+                prompt: 'What is the time complexity of searching an element in a Balanced Binary Search Tree?',
                 options: [
                   'O(log n) average and worst-case',
                   'O(1) average and O(n) worst-case',
@@ -313,7 +334,7 @@ export class GeminiAdapter implements AIProviderAdapter {
             {
               id: 'q1',
               type: 'mcq',
-              prompt: `In ${topic}, which of the following best describes memory management and concurrency safety?`,
+              prompt: 'Which of the following best describes memory management and concurrency safety in scalable systems?',
               options: [
                 'Structured garbage collection with standard thread synchronization primitives',
                 'Manual pointer arithmetic with raw memory deallocation',
@@ -321,14 +342,14 @@ export class GeminiAdapter implements AIProviderAdapter {
                 'Static global buffers with no runtime dynamic allocation',
               ],
               correctOptionIndex: 0,
-              explanation: `${topic} manages runtime resources while providing standard synchronization mechanisms for thread safety.`,
+              explanation: 'Scalable runtime architectures optimize resource disposal while providing deterministic synchronization primitives.',
               difficulty: 3,
               metricTarget: 'knowledge',
             },
             {
               id: 'q2',
               type: 'conceptual',
-              prompt: `What is the primary architectural trade-off when designing scalable systems in ${topic}?`,
+              prompt: 'What is the primary architectural trade-off when designing scalable systems?',
               explanation: 'Balancing thread contention, CPU cache locality, and runtime pauses against ease of maintenance.',
               difficulty: 3,
               metricTarget: 'knowledge',
@@ -336,7 +357,7 @@ export class GeminiAdapter implements AIProviderAdapter {
             {
               id: 'q3',
               type: 'code_scenario',
-              prompt: `Review the following ${topic} pattern. How would you ensure deterministic resource cleanup?`,
+              prompt: 'Review the following resource management pattern. How would you ensure deterministic resource cleanup?',
               codeSnippet: '// Resource lifecycle example\ntry {\n  const resource = acquire();\n  process(resource);\n} finally {\n  cleanup();\n}',
               explanation: 'Ensure structured resource disposal (such as automatic context managers or try-finally) to guarantee release.',
               difficulty: 3,

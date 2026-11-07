@@ -137,6 +137,7 @@ export function ProfilePage() {
   const [editProfession, setEditProfession] = useState('');
   const [editGithubUrl, setEditGithubUrl] = useState('');
   const [editLocation, setEditLocation] = useState('');
+  const [editInterests, setEditInterests] = useState('');
 
   function openEditModal() {
     if (!profile) return;
@@ -145,11 +146,17 @@ export function ProfilePage() {
     setEditProfession(profile.profession || '');
     setEditGithubUrl(profile.github_url || '');
     setEditLocation(profile.location || '');
+    setEditInterests(((profile as any).interests || []).join(', '));
     setIsEditing(true);
   }
 
   const updateProfileMutation = useMutation({
     mutationFn: async () => {
+      const interestsArray = editInterests
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+
       const res = await fetch(`${apiUrl}/users/profile`, {
         method: 'PUT',
         headers: {
@@ -162,6 +169,7 @@ export function ProfilePage() {
           profession: editProfession || undefined,
           githubUrl: editGithubUrl || null,
           location: editLocation || null,
+          interests: interestsArray,
         }),
       });
       const json = await res.json();
@@ -540,6 +548,17 @@ export function ProfilePage() {
                 placeholder="https://github.com/username"
                 value={editGithubUrl}
                 onChange={(e) => setEditGithubUrl(e.target.value)}
+                className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Learning Focus & Interests (comma-separated)</label>
+              <input
+                type="text"
+                placeholder="e.g. Distributed Systems, React, Python, Algorithms"
+                value={editInterests}
+                onChange={(e) => setEditInterests(e.target.value)}
                 className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
               />
             </div>

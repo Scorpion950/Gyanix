@@ -35,12 +35,12 @@ authRouter.get(
           id: user.id,
           auth_user_id: user.id,
           username: cleanUsername || 'developer',
-          display_name: metadata?.['full_name'] || metadata?.['name'] || cleanUsername || 'Gyanix Learner',
-          bio: 'Passionate learner & builder on Gyanix',
+          display_name: metadata?.['full_name'] || metadata?.['name'] || cleanUsername || user.email?.split('@')[0] || 'Learner',
+          bio: null,
           avatar_url: metadata?.['avatar_url'] || null,
-          profession: 'Full-Stack Engineer',
-          reputation_score: 100,
-          streak_count: 1,
+          profession: null,
+          reputation_score: 0,
+          streak_count: 0,
           created_at: new Date().toISOString(),
         };
 

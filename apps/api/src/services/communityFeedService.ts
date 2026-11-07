@@ -344,9 +344,26 @@ export const communityFeedService = {
           }
         }
 
-        // Only show real user communities
-        const realCommunities = data.filter((c) => c.creator_id || c.id?.startsWith('comm-'));
-        const listToReturn = realCommunities.length > 0 ? realCommunities : inMemoryCommunities;
+        // Only show real user-created communities (exclude default seed communities)
+        const defaultSlugs = new Set([
+          'systems-and-rust',
+          'frontend-craft',
+          'distributed-cloud',
+          'systems-engineering',
+          'frontend-architecture',
+        ]);
+        const realCommunities = data.filter(
+          (c) =>
+            !defaultSlugs.has(c.slug) &&
+            !c.id?.startsWith('c0000000-0000-0000-0000-') &&
+            c.id !== 'c0000000-0000-0000-0000-000000000001' &&
+            c.id !== 'c0000000-0000-0000-0000-000000000002' &&
+            c.id !== 'c0000000-0000-0000-0000-000000000003'
+        );
+        const map = new Map<string, any>();
+        for (const c of inMemoryCommunities) map.set(c.id, c);
+        for (const c of realCommunities) map.set(c.id, c);
+        const listToReturn = Array.from(map.values());
 
         return listToReturn.map((c) => ({
           ...c,
@@ -436,35 +453,40 @@ export const communityFeedService = {
 
   async toggleJoinCommunity(userId: string, communityId: string) {
     const key = `${userId}:${communityId}`;
+    const comm = inMemoryCommunities.find((c) => c.id === communityId);
+    const wasJoinedLocally = inMemoryMemberships.has(key);
+
     try {
-      const { data: existing } = await supabaseAdmin
+      const { data: existing, error } = await supabaseAdmin
         .from('community_members')
         .select('id')
         .eq('community_id', communityId)
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (existing) {
+      if (!error && existing) {
         await supabaseAdmin.from('community_members').delete().eq('id', existing.id);
         inMemoryMemberships.delete(key);
         const { data: c } = await supabaseAdmin.from('communities').select('member_count').eq('id', communityId).single();
         if (c) {
-          await supabaseAdmin.from('communities').update({ member_count: Math.max(0, c.member_count - 1) }).eq('id', communityId);
+          await supabaseAdmin.from('communities').update({ member_count: Math.max(0, (c.member_count || 1) - 1) }).eq('id', communityId);
         }
+        if (comm) comm.member_count = Math.max(0, (comm.member_count || 1) - 1);
         return { joined: false };
-      } else {
+      } else if (!error && !existing && !wasJoinedLocally) {
         await supabaseAdmin.from('community_members').insert({ community_id: communityId, user_id: userId, role: 'member' });
         inMemoryMemberships.add(key);
         const { data: c } = await supabaseAdmin.from('communities').select('member_count').eq('id', communityId).single();
         if (c) {
           await supabaseAdmin.from('communities').update({ member_count: (c.member_count || 0) + 1 }).eq('id', communityId);
         }
+        if (comm) comm.member_count = (comm.member_count || 0) + 1;
         return { joined: true };
       }
     } catch (_err) {}
 
-    const comm = inMemoryCommunities.find((c) => c.id === communityId);
-    if (inMemoryMemberships.has(key)) {
+    // Resilient local fallback: if already joined, leave; otherwise join
+    if (wasJoinedLocally) {
       inMemoryMemberships.delete(key);
       if (comm) comm.member_count = Math.max(0, (comm.member_count || 1) - 1);
       return { joined: false };

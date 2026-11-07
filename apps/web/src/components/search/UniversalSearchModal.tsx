@@ -204,7 +204,7 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-16 px-4 bg-black/25 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen min-w-full min-h-screen z-[999] flex items-start justify-center pt-16 px-4 bg-black/25 backdrop-blur-md overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();

@@ -152,6 +152,9 @@ export function OnboardingPage() {
       });
 
       if (finish) {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('gyanix_onboarded', 'true');
+        }
         toast.success('Onboarding complete! Welcome to Gyanix.');
         navigate('/dashboard', { replace: true });
       }

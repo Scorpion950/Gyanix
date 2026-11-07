@@ -188,7 +188,12 @@ export function ChallengesPage() {
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Failed to join challenge');
+        const errorMsg =
+          data?.error?.message ||
+          data?.error ||
+          (Array.isArray(data) ? data[0]?.message : null) ||
+          'Failed to join challenge';
+        throw new Error(errorMsg);
       }
 
       toast.success('Enrolled in challenge! Let’s crush day 1.');

@@ -19,15 +19,14 @@ import { executeJavaScript } from '@/lib/sandboxedRunner.ts';
 import { useAuthStore } from '@/stores/authStore.ts';
 import { toast } from 'sonner';
 
-export type PlaygroundLanguage = 'javascript' | 'python' | 'java' | 'cpp' | 'c' | 'web';
+export type PlaygroundLanguage = 'javascript' | 'c' | 'cpp' | 'java' | 'python';
 
 export const PLAYGROUND_LANGUAGES: { id: PlaygroundLanguage; label: string; ext: string }[] = [
   { id: 'javascript', label: 'JavaScript (Node.js)', ext: 'js' },
-  { id: 'python', label: 'Python (Python 3.11)', ext: 'py' },
-  { id: 'java', label: 'Java (OpenJDK 17)', ext: 'java' },
-  { id: 'cpp', label: 'C++ (G++ 17)', ext: 'cpp' },
   { id: 'c', label: 'C (GCC 11)', ext: 'c' },
-  { id: 'web', label: 'HTML / Web Preview', ext: 'html' },
+  { id: 'cpp', label: 'C++ (G++ 17)', ext: 'cpp' },
+  { id: 'java', label: 'Java (OpenJDK 17)', ext: 'java' },
+  { id: 'python', label: 'Python (Python 3.11)', ext: 'py' },
 ];
 
 const DEFAULT_SNIPPETS: Record<PlaygroundLanguage, string> = {
@@ -128,24 +127,6 @@ int main() {
     return 0;
 }
 `,
-  web: `<!-- Interactive Web Component Sandbox -->
-<div style="font-family: system-ui, sans-serif; padding: 24px; text-align: center;">
-  <h2 style="color: #2563EB;">Hello from Gyanix Web Preview!</h2>
-  <p style="color: #4A5168;">Edit the HTML & CSS live to see updates.</p>
-  <button id="counterBtn" style="padding: 8px 16px; background: #2563EB; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">
-    Clicked 0 times
-  </button>
-</div>
-
-<script>
-  let count = 0;
-  const btn = document.getElementById('counterBtn');
-  btn.addEventListener('click', () => {
-    count++;
-    btn.textContent = 'Clicked ' + count + ' times!';
-  });
-</script>
-`,
 };
 
 export function CodePlaygroundPage() {
@@ -208,11 +189,6 @@ export function CodePlaygroundPage() {
   };
 
   const handleRun = async () => {
-    if (language === 'web') {
-      setStatus('success');
-      return;
-    }
-
     setIsRunning(true);
     setStatus('idle');
     const start = performance.now();
@@ -354,41 +330,31 @@ export function CodePlaygroundPage() {
           <CodeEditor
             value={code}
             onChange={handleCodeChange}
-            language={language === 'web' ? 'html' : language}
+            language={language}
             height="580px"
             onRun={handleRun}
             className="h-[580px]"
           />
         </div>
 
-        {/* Right: Output Console or Web Preview (Exact same dimensions) */}
+        {/* Right: Output Console (Exact same dimensions) */}
         <div className="space-y-3 flex flex-col">
           <div className="flex items-center justify-between text-xs text-text-muted px-1">
             <span className="font-semibold uppercase tracking-wider flex items-center gap-1.5">
-              {language === 'web' ? <Eye className="w-3.5 h-3.5" /> : <Terminal className="w-3.5 h-3.5" />}
-              {language === 'web' ? 'Live Component Preview' : 'Console Output'}
+              <Terminal className="w-3.5 h-3.5" />
+              Console Output
             </span>
-            {executionTime !== null && language !== 'web' && (
+            {executionTime !== null && (
               <span className="font-mono text-[11px] text-text-secondary">
                 {executionTime}ms
               </span>
             )}
           </div>
 
-          {language === 'web' ? (
-            <div className="rounded-xl border border-border bg-surface overflow-hidden h-[580px] flex flex-col shadow-xs">
-              <iframe
-                title="Web Preview"
-                srcDoc={code}
-                sandbox="allow-scripts allow-modals"
-                className="w-full h-full border-none bg-white flex-1"
-              />
-            </div>
-          ) : (
-            <div className="rounded-xl border border-border bg-[#0B0E14] text-[#E8ECF4] h-[580px] p-4 font-mono text-xs overflow-auto flex flex-col justify-between shadow-xs">
-              <pre className="whitespace-pre-wrap leading-relaxed text-[#A6AFC3] overflow-y-auto flex-1">
-                {output || '// Console output will appear here after execution.'}
-              </pre>
+          <div className="rounded-xl border border-border bg-[#0B0E14] text-[#E8ECF4] h-[580px] p-4 font-mono text-xs overflow-auto flex flex-col justify-between shadow-xs">
+            <pre className="whitespace-pre-wrap leading-relaxed text-[#A6AFC3] overflow-y-auto flex-1">
+              {output || '// Console output will appear here after execution.'}
+            </pre>
 
               {status !== 'idle' && (
                 <div className="pt-3 border-t border-[#232B3B] flex items-center justify-between text-[11px] shrink-0">
@@ -413,7 +379,6 @@ export function CodePlaygroundPage() {
                 </div>
               )}
             </div>
-          )}
         </div>
       </div>
     </div>

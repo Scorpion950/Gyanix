@@ -200,7 +200,7 @@ export function LearningPathsListPage() {
             placeholder="Search paths…"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-8 pl-8 pr-3 text-xs rounded-control bg-surface border border-border text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+            className="w-full h-8 pl-8 pr-3 text-xs rounded-full bg-surface border border-border text-text-default focus:ring-2 focus:ring-primary/30 focus:outline-none"
           />
         </div>
       </div>

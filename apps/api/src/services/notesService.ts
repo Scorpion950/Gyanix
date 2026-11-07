@@ -181,27 +181,7 @@ export const notesService = {
       if (!error && data && data.length > 0) return data;
     } catch (_err) {}
 
-    const userCollections = inMemoryCollections.get(userId) || [
-      {
-        id: 'col-core',
-        user_id: userId,
-        title: 'Core Architecture',
-        description: 'Key engineering notes and system patterns',
-        color: '#2563EB',
-        created_at: new Date().toISOString(),
-      },
-      {
-        id: 'col-quick',
-        user_id: userId,
-        title: 'Quick Snippets',
-        description: 'Algorithms and reference links',
-        color: '#10B981',
-        created_at: new Date().toISOString(),
-      },
-    ];
-    if (!inMemoryCollections.has(userId)) {
-      inMemoryCollections.set(userId, userCollections);
-    }
+    const userCollections = inMemoryCollections.get(userId) || [];
     return userCollections;
   },
 

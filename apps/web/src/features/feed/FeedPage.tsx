@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Rss,
@@ -70,6 +70,9 @@ const FEED_TABS = [
 
 export function FeedPage() {
   const { session } = useAuthStore();
+  const [searchParams] = useSearchParams();
+  const communityParam = searchParams.get('community');
+
   const [activeTab, setActiveTab] = useState<string>('all');
   const [selectedCommunity, setSelectedCommunity] = useState<any | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
@@ -104,6 +107,23 @@ export function FeedPage() {
       const data = await res.json();
       if (data.success && data.data) {
         setCommunities(data.data);
+        if (communityParam && !selectedCommunity) {
+          const matched = data.data.find((c: any) => c.id === communityParam || c.slug === communityParam);
+          if (matched) {
+            setSelectedCommunity(matched);
+          } else {
+            // Fetch directly
+            try {
+              const singleRes = await fetch(`/api/feed/communities/${communityParam}`, {
+                headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+              });
+              const singleData = await singleRes.json();
+              if (singleData.success && singleData.data) {
+                setSelectedCommunity(singleData.data);
+              }
+            } catch (_err) {}
+          }
+        }
       }
     } catch {
       // Non-blocking

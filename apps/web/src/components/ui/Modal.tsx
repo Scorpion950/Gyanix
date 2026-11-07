@@ -45,8 +45,8 @@ export function Modal({
   return createPortal(
     <div
       className={cn(
-        'fixed inset-0 z-[100] flex items-center justify-center p-4',
-        'bg-black/30 backdrop-blur-md transition-all duration-200 overflow-y-auto',
+        'fixed inset-0 top-0 left-0 right-0 bottom-0 w-screen h-screen min-w-full min-h-screen z-[999] flex items-center justify-center p-4',
+        'bg-black/25 backdrop-blur-md transition-all duration-200 overflow-y-auto',
         overlayClassName
       )}
       onClick={(e) => {
@@ -57,7 +57,7 @@ export function Modal({
       aria-modal="true"
       role="dialog"
     >
-      <div className="relative max-h-[92vh] w-full flex items-center justify-center pointer-events-none">
+      <div className="relative max-h-[92vh] w-full flex items-center justify-center pointer-events-none my-auto">
         <div className={cn('w-full mx-auto pointer-events-auto flex flex-col items-center justify-center', maxWidth || 'max-w-md', className)}>
           {children}
         </div>

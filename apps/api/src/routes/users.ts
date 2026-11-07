@@ -98,11 +98,8 @@ usersRouter.get('/me/completion', requireAuth, async (req: Request, res: Respons
       suggestions.push('Connect your GitHub profile');
     }
 
-    // When onboarding is completed and basic info exists, score is at least 90-100%
-    if (hasOnboarded && hasProfession) {
-      percentage = Math.max(percentage, 95);
-    }
-    if (hasOnboarded && hasBio && hasProfession) {
+    // When onboarding is completed, setup is 100% complete
+    if (hasOnboarded) {
       percentage = 100;
     }
 
@@ -110,7 +107,7 @@ usersRouter.get('/me/completion', requireAuth, async (req: Request, res: Respons
       success: true,
       data: {
         percentage: Math.min(percentage, 100),
-        suggestions: suggestions.slice(0, 3),
+        suggestions: hasOnboarded ? (hasAvatar ? [] : ['Add a profile photo']) : suggestions.slice(0, 3),
         onboardingCompleted: hasOnboarded,
       },
     });

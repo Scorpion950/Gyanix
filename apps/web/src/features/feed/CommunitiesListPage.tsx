@@ -223,12 +223,16 @@ export function CommunitiesListPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <Input
-            placeholder="Search communities..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full sm:w-60 text-xs"
-          />
+          <div className="relative w-full sm:w-64">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+            <input
+              type="text"
+              placeholder="Search communities..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full h-9 pl-9 pr-3 rounded-full border border-border bg-surface text-xs text-text placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-primary/30"
+            />
+          </div>
 
           <Button
             onClick={() => setIsCreateOpen(true)}
@@ -324,7 +328,7 @@ export function CommunitiesListPage() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => navigate('/feed')}
+                    onClick={() => navigate(`/feed?community=${c.id}`)}
                     className="text-xs px-2 text-text-secondary"
                   >
                     Feed <ArrowRight className="w-3.5 h-3.5 ml-1" />

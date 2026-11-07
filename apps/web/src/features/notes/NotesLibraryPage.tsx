@@ -77,11 +77,31 @@ export function NotesLibraryPage() {
   const { data: collections = [] } = useQuery<NoteCollection[]>({
     queryKey: ['notes-collections'],
     queryFn: async () => {
-      const res = await fetch(`${apiUrl}/notes/collections`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const json = await res.json() as any;
-      return json.data || [];
+      let remoteCols: NoteCollection[] = [];
+      try {
+        const res = await fetch(`${apiUrl}/notes/collections`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json() as any;
+        remoteCols = json.data || [];
+      } catch (_e) {}
+
+      let localCols: NoteCollection[] = [];
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = localStorage.getItem('gyanix_local_collections');
+          if (raw) localCols = JSON.parse(raw);
+        } catch (_e) {}
+      }
+
+      const map = new Map<string, NoteCollection>();
+      for (const c of remoteCols) map.set(c.id, c);
+      for (const c of localCols) map.set(c.id, c);
+      const merged = Array.from(map.values());
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('gyanix_local_collections', JSON.stringify(merged));
+      }
+      return merged;
     },
     enabled: !!token,
   });
@@ -90,30 +110,61 @@ export function NotesLibraryPage() {
   const { data: allNotes = [] } = useQuery<NoteItem[]>({
     queryKey: ['notes-all'],
     queryFn: async () => {
-      const res = await fetch(`${apiUrl}/notes`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const json = await res.json() as any;
-      return json.data || [];
+      let remoteNotes: NoteItem[] = [];
+      try {
+        const res = await fetch(`${apiUrl}/notes`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const json = await res.json() as any;
+        remoteNotes = json.data || [];
+      } catch (_e) {}
+
+      let localNotes: NoteItem[] = [];
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = localStorage.getItem('gyanix_local_notes');
+          if (raw) localNotes = JSON.parse(raw);
+        } catch (_e) {}
+      }
+
+      const map = new Map<string, NoteItem>();
+      for (const n of remoteNotes) map.set(n.id, n);
+      for (const n of localNotes) {
+        if (!map.has(n.id)) {
+          map.set(n.id, n);
+        } else {
+          const existing = map.get(n.id)!;
+          if (new Date(n.updated_at) > new Date(existing.updated_at)) {
+            map.set(n.id, { ...existing, ...n });
+          }
+        }
+      }
+      const merged = Array.from(map.values());
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('gyanix_local_notes', JSON.stringify(merged));
+      }
+      return merged;
     },
     enabled: !!token,
   });
 
   // Fetch notes (filtered by collection or search query)
   const { data: notes = [], isLoading } = useQuery<NoteItem[]>({
-    queryKey: ['notes-list', selectedCollectionId, searchQuery],
+    queryKey: ['notes-list', selectedCollectionId, searchQuery, allNotes],
     queryFn: async () => {
-      let url = `${apiUrl}/notes?`;
-      if (selectedCollectionId) url += `collectionId=${selectedCollectionId}&`;
-      if (searchQuery) url += `q=${encodeURIComponent(searchQuery)}&`;
-
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const json = await res.json() as any;
-      return json.data || [];
+      let list = allNotes;
+      if (selectedCollectionId) {
+        list = list.filter((n) => n.collection_id === selectedCollectionId);
+      }
+      if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        list = list.filter(
+          (n) => n.title.toLowerCase().includes(q) || (n.content_markdown || '').toLowerCase().includes(q)
+        );
+      }
+      return list;
     },
-    enabled: !!token,
+    enabled: true,
   });
 
   // Helper to persist draft locally on every keystroke
@@ -134,32 +185,62 @@ export function NotesLibraryPage() {
   // Create note mutation
   const createNoteMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`${apiUrl}/notes`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          title: 'Untitled Note',
-          contentMarkdown: '',
-          collectionId: selectedCollectionId,
-          priority: 'medium',
-        }),
-      });
-      const json = await res.json() as any;
-      if (!res.ok) throw new Error(json.error?.message || 'Failed to create note');
-      return json.data;
+      const fallbackId = 'note-' + Date.now();
+      const localNewNote: NoteItem = {
+        id: fallbackId,
+        user_id: session?.user?.id || 'dev-user-01',
+        collection_id: selectedCollectionId,
+        path_id: null,
+        path_item_id: null,
+        timestamp_seconds: null,
+        title: 'Untitled Note',
+        content_markdown: '',
+        priority: 'medium',
+        deadline_at: null,
+        is_pinned: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        collection: null,
+      };
+
+      try {
+        const res = await fetch(`${apiUrl}/notes`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: 'Untitled Note',
+            contentMarkdown: '',
+            collectionId: selectedCollectionId,
+            priority: 'medium',
+          }),
+        });
+        const json = await res.json() as any;
+        if (res.ok && json.data) return json.data;
+      } catch (_e) {}
+
+      return localNewNote;
     },
     onSuccess: (newNote) => {
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = localStorage.getItem('gyanix_local_notes');
+          const list: NoteItem[] = raw ? JSON.parse(raw) : [];
+          list.unshift(newNote);
+          localStorage.setItem('gyanix_local_notes', JSON.stringify(list));
+        } catch (_e) {}
+      }
+      queryClient.setQueryData<NoteItem[]>(['notes-all'], (old = []) => [newNote, ...old]);
       queryClient.invalidateQueries({ queryKey: ['notes-list'] });
       queryClient.invalidateQueries({ queryKey: ['notes-all'] });
       setSelectedNoteId(newNote.id);
       setActiveTitle(newNote.title);
-      setActiveContent(newNote.content_markdown);
+      setActiveContent(newNote.content_markdown || '');
       setActivePriority(newNote.priority);
       setActiveIsPinned(newNote.is_pinned);
-      saveDraft(newNote.id, newNote.title, newNote.content_markdown);
+      saveDraft(newNote.id, newNote.title, newNote.content_markdown || '');
       toast.success('Note created');
     },
   });
@@ -167,19 +248,37 @@ export function NotesLibraryPage() {
   // Create collection mutation
   const createCollectionMutation = useMutation({
     mutationFn: async () => {
-      const res = await fetch(`${apiUrl}/notes/collections`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ title: collectionTitle }),
-      });
-      const json = await res.json() as any;
-      if (!res.ok) throw new Error(json.error?.message || 'Failed to create collection');
-      return json.data;
+      const localCol: NoteCollection = {
+        id: 'col-' + Date.now(),
+        title: collectionTitle,
+        description: null,
+        color: '#2563EB',
+      };
+
+      try {
+        const res = await fetch(`${apiUrl}/notes/collections`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ title: collectionTitle }),
+        });
+        const json = await res.json() as any;
+        if (res.ok && json.data) return json.data;
+      } catch (_e) {}
+
+      return localCol;
     },
-    onSuccess: () => {
+    onSuccess: (newCol) => {
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = localStorage.getItem('gyanix_local_collections');
+          const list: NoteCollection[] = raw ? JSON.parse(raw) : [];
+          list.push(newCol);
+          localStorage.setItem('gyanix_local_collections', JSON.stringify(list));
+        } catch (_e) {}
+      }
       queryClient.invalidateQueries({ queryKey: ['notes-collections'] });
       setIsNewCollectionOpen(false);
       setCollectionTitle('');
@@ -190,15 +289,26 @@ export function NotesLibraryPage() {
   // Delete note mutation (with undo toast)
   const deleteNoteMutation = useMutation({
     mutationFn: async (noteId: string) => {
-      await fetch(`${apiUrl}/notes/${noteId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      try {
+        await fetch(`${apiUrl}/notes/${noteId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch (_e) {}
       if (typeof window !== 'undefined') {
         localStorage.removeItem(`gyanix-note-draft-${noteId}`);
+        try {
+          const raw = localStorage.getItem('gyanix_local_notes');
+          if (raw) {
+            const list: NoteItem[] = JSON.parse(raw);
+            const updated = list.filter((n) => n.id !== noteId);
+            localStorage.setItem('gyanix_local_notes', JSON.stringify(updated));
+          }
+        } catch (_e) {}
       }
     },
-    onSuccess: () => {
+    onSuccess: (_, deletedId) => {
+      queryClient.setQueryData<NoteItem[]>(['notes-all'], (old = []) => old.filter((n) => n.id !== deletedId));
       queryClient.invalidateQueries({ queryKey: ['notes-list'] });
       queryClient.invalidateQueries({ queryKey: ['notes-all'] });
       setSelectedNoteId(null);
@@ -242,7 +352,7 @@ export function NotesLibraryPage() {
         setActiveContent(draft.content);
       } else if (current) {
         setActiveTitle(current.title);
-        setActiveContent(current.content_markdown);
+        setActiveContent(current.content_markdown || '');
       }
 
       if (current) {
@@ -256,10 +366,22 @@ export function NotesLibraryPage() {
   // Delete collection mutation
   const deleteCollectionMutation = useMutation({
     mutationFn: async (collectionId: string) => {
-      await fetch(`${apiUrl}/notes/collections/${collectionId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      try {
+        await fetch(`${apiUrl}/notes/collections/${collectionId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        });
+      } catch (_e) {}
+      if (typeof window !== 'undefined') {
+        try {
+          const raw = localStorage.getItem('gyanix_local_collections');
+          if (raw) {
+            const list: NoteCollection[] = JSON.parse(raw);
+            const updated = list.filter((c) => c.id !== collectionId);
+            localStorage.setItem('gyanix_local_collections', JSON.stringify(updated));
+          }
+        } catch (_e) {}
+      }
     },
     onSuccess: (_, deletedId) => {
       queryClient.invalidateQueries({ queryKey: ['notes-collections'] });
@@ -281,15 +403,23 @@ export function NotesLibraryPage() {
       content_markdown: (updatedFields as any).content_markdown ?? (updatedFields as any).contentMarkdown,
     };
 
-    // Optimistically update query client state in memory
-    queryClient.setQueryData<NoteItem[]>(['notes-list', selectedCollectionId, searchQuery], (old) => {
-      if (!old) return [];
-      return old.map((n) => (n.id === selectedNoteId ? { ...n, ...payload } : n));
-    });
+    // Update query client cache immediately in memory
     queryClient.setQueryData<NoteItem[]>(['notes-all'], (old) => {
       if (!old) return [];
-      return old.map((n) => (n.id === selectedNoteId ? { ...n, ...payload } : n));
+      return old.map((n) => (n.id === selectedNoteId ? { ...n, ...payload, updated_at: new Date().toISOString() } : n));
     });
+
+    // Save to localStorage immediately
+    if (typeof window !== 'undefined') {
+      try {
+        const raw = localStorage.getItem('gyanix_local_notes');
+        const list: NoteItem[] = raw ? JSON.parse(raw) : [];
+        const updatedList = list.map((n) =>
+          n.id === selectedNoteId ? { ...n, ...payload, updated_at: new Date().toISOString() } : n
+        );
+        localStorage.setItem('gyanix_local_notes', JSON.stringify(updatedList));
+      } catch (_e) {}
+    }
 
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
     autosaveTimerRef.current = setTimeout(async () => {
@@ -423,7 +553,7 @@ export function NotesLibraryPage() {
               placeholder="Search notes…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-8 pl-8 pr-3 text-xs rounded-xl bg-surface border border-border text-text-default focus:ring-2 focus:ring-primary/40 focus:outline-none"
+              className="w-full h-8 pl-8 pr-3 text-xs rounded-full bg-surface border border-border text-text-default focus:ring-2 focus:ring-primary/40 focus:outline-none"
             />
           </div>
 
