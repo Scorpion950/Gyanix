@@ -139,10 +139,36 @@ export const youtubeService = {
   },
 
   /**
-   * Import playlist items
+   * Import playlist or single video items
    */
   async getPlaylistVideos(playlistUrlOrId: string): Promise<{ title: string; videos: YouTubeVideoMetadata[] }> {
-    const playlistId = this.extractPlaylistId(playlistUrlOrId) || playlistUrlOrId.trim();
+    const playlistId = this.extractPlaylistId(playlistUrlOrId);
+    const videoId = this.extractVideoId(playlistUrlOrId);
+
+    // If input is a single YouTube video URL (e.g., https://youtu.be/iXNhh_y67BE)
+    if (!playlistId && videoId) {
+      try {
+        const video = await this.resolveVideo(videoId);
+        return {
+          title: video.title || 'YouTube Course',
+          videos: [video],
+        };
+      } catch (_err) {
+        return {
+          title: 'YouTube Lecture',
+          videos: [
+            {
+              youtubeVideoId: videoId,
+              title: 'YouTube Video Lecture',
+              channelTitle: 'YouTube',
+              thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+              durationSeconds: 1800,
+              isAvailable: true,
+            },
+          ],
+        };
+      }
+    }
 
     const apiKey = process.env['YOUTUBE_API_KEY'];
     if (apiKey && playlistId) {
@@ -204,7 +230,18 @@ export const youtubeService = {
       }
     }
 
-    // High quality offline fallback with curated foundational engineering lectures
+    // If URL has an embedded video ID alongside playlist, resolve that video
+    if (videoId) {
+      try {
+        const video = await this.resolveVideo(videoId);
+        return {
+          title: video.title || 'YouTube Course',
+          videos: [video],
+        };
+      } catch (_e) {}
+    }
+
+    // Fallback only if input has neither a valid video ID nor playlist
     return {
       title: 'Imported Video Course',
       videos: [

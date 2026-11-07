@@ -75,7 +75,7 @@ export const learningPathService = {
       creator_id: creatorId,
       title: input.title,
       description: input.description || '',
-      cover_url: input.coverUrl || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&auto=format&fit=crop&q=80',
+      cover_url: input.coverUrl || null,
       visibility: input.visibility || 'private',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

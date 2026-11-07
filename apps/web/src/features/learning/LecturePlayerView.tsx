@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Keyboard,
   X,
+  Trash2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button.tsx';
 import { Card } from '@/components/ui/Card.tsx';
@@ -51,18 +52,19 @@ export function LecturePlayerView() {
   const [postRemark, setPostRemark] = useState('');
   const [isSavedIndicator, setIsSavedIndicator] = useState(false);
 
-  // Quick note state
+  // Quick note state (persisted per video itemId)
   const [noteContent, setNoteContent] = useState('');
   const [notesList, setNotesList] = useState<
     { id: string; timestamp: number; text: string; createdAt: string }[]
-  >([
-    {
-      id: 'demo-1',
-      timestamp: 142,
-      text: 'Key architectural insight: B-Tree indexes provide logarithmic search, insertion, and deletion guarantees.',
-      createdAt: '10 mins ago',
-    },
-  ]);
+  >(() => {
+    if (typeof window !== 'undefined' && itemId) {
+      try {
+        const raw = localStorage.getItem(`gyanix_lecture_notes_${itemId}`);
+        if (raw) return JSON.parse(raw);
+      } catch {}
+    }
+    return [];
+  });
 
   // AI Doubt State
   const [doubtQuestion, setDoubtQuestion] = useState('');
@@ -135,7 +137,31 @@ export function LecturePlayerView() {
     },
   });
 
-  // Load YouTube IFrame API Script safely
+  // Sync notes from localStorage when itemId changes
+  useEffect(() => {
+    if (!itemId || typeof window === 'undefined') return;
+    try {
+      const raw = localStorage.getItem(`gyanix_lecture_notes_${itemId}`);
+      if (raw) {
+        setNotesList(JSON.parse(raw));
+      } else {
+        setNotesList([]);
+      }
+    } catch {
+      setNotesList([]);
+    }
+  }, [itemId]);
+
+  const saveNotes = (updated: { id: string; timestamp: number; text: string; createdAt: string }[]) => {
+    setNotesList(updated);
+    if (typeof window !== 'undefined' && itemId) {
+      try {
+        localStorage.setItem(`gyanix_lecture_notes_${itemId}`, JSON.stringify(updated));
+      } catch {}
+    }
+  };
+
+  // Load YouTube IFrame API Script safely & listen for postMessage updates
   useEffect(() => {
     if (!window.YT) {
       const tag = document.createElement('script');
@@ -146,29 +172,25 @@ export function LecturePlayerView() {
 
     const initPlayer = () => {
       if (playerRef.current) return;
-      playerRef.current = new window.YT.Player('yt-player', {
-        videoId: lectureData.youtubeVideoId,
-        playerVars: {
-          autoplay: 0,
-          modestbranding: 1,
-          rel: 0,
-        },
-        events: {
-          onStateChange: (event: any) => {
-            if (event.data === window.YT.PlayerState.PLAYING) {
-              setIsPlaying(true);
-              lastActivityRef.current = Date.now();
-            } else if (event.data === window.YT.PlayerState.PAUSED) {
-              setIsPlaying(false);
-            } else if (event.data === window.YT.PlayerState.ENDED) {
-              setIsPlaying(false);
-              setSavedStatus('completed');
-              progressMutation.mutate({ status: 'completed' });
-              toast.success('Lecture completed! Great work.');
-            }
+      try {
+        playerRef.current = new window.YT.Player('yt-player', {
+          events: {
+            onStateChange: (event: any) => {
+              if (event.data === window.YT.PlayerState.PLAYING) {
+                setIsPlaying(true);
+                lastActivityRef.current = Date.now();
+              } else if (event.data === window.YT.PlayerState.PAUSED) {
+                setIsPlaying(false);
+              } else if (event.data === window.YT.PlayerState.ENDED) {
+                setIsPlaying(false);
+                setSavedStatus('completed');
+                progressMutation.mutate({ status: 'completed' });
+                toast.success('Lecture completed! Great work.');
+              }
+            },
           },
-        },
-      });
+        });
+      } catch {}
     };
 
     if (window.YT && window.YT.Player) {
@@ -177,21 +199,42 @@ export function LecturePlayerView() {
       window.onYouTubeIframeAPIReady = initPlayer;
     }
 
-    // Playback time polling & periodic autosave
+    // Direct YouTube postMessage listener for instantaneous currentTime and playback sync
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const data = typeof event.data === 'string' ? JSON.parse(event.data) : event.data;
+        if (data?.event === 'infoDelivery' && data?.info) {
+          if (typeof data.info.currentTime === 'number') {
+            const sec = Math.floor(data.info.currentTime);
+            setCurrentSeconds(sec);
+            lastActivityRef.current = Date.now();
+          }
+          if (data.info.playerState === 1) {
+            setIsPlaying(true);
+          } else if (data.info.playerState === 2) {
+            setIsPlaying(false);
+          } else if (data.info.playerState === 0) {
+            setIsPlaying(false);
+            setSavedStatus('completed');
+            progressMutation.mutate({ status: 'completed' });
+          }
+        }
+      } catch {}
+    };
+    window.addEventListener('message', handleMessage);
+
+    // Playback time polling fallback & periodic autosave
     const interval = setInterval(() => {
       if (playerRef.current && typeof playerRef.current.getCurrentTime === 'function') {
         try {
           const time = Math.floor(playerRef.current.getCurrentTime() || 0);
-          setCurrentSeconds(time);
+          if (time > 0) setCurrentSeconds(time);
 
-          // Inactivity check: if paused for > 15 mins (simulated here for responsiveness)
           const idleTime = Date.now() - lastActivityRef.current;
           if (!isPlaying && idleTime > 15 * 60 * 1000) {
             setShowInactivityPrompt(true);
           }
-        } catch (_e) {
-          // Player not ready
-        }
+        } catch (_e) {}
       }
     }, 1000);
 
@@ -203,6 +246,7 @@ export function LecturePlayerView() {
     }, 15000);
 
     return () => {
+      window.removeEventListener('message', handleMessage);
       clearInterval(interval);
       clearInterval(saveInterval);
     };
@@ -210,22 +254,61 @@ export function LecturePlayerView() {
 
   function seekTo(seconds: number) {
     if (playerRef.current && typeof playerRef.current.seekTo === 'function') {
-      playerRef.current.seekTo(seconds, true);
-      playerRef.current.playVideo();
+      try {
+        playerRef.current.seekTo(seconds, true);
+        playerRef.current.playVideo();
+      } catch {}
+    }
+    const iframe = document.getElementById('yt-player') as HTMLIFrameElement;
+    if (iframe?.contentWindow) {
+      iframe.contentWindow.postMessage(
+        JSON.stringify({
+          event: 'command',
+          func: 'seekTo',
+          args: [seconds, true],
+        }),
+        '*'
+      );
     }
   }
 
-  function handleAddNote() {
+  async function handleAddNote() {
     if (!noteContent.trim()) return;
     const newNote = {
       id: `note-${Date.now()}`,
       timestamp: currentSeconds,
       text: noteContent.trim(),
-      createdAt: 'Just now',
+      createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
-    setNotesList((prev) => [newNote, ...prev]);
+    const updated = [newNote, ...notesList];
+    saveNotes(updated);
     setNoteContent('');
     toast.success(`Note saved at ${formatTimestamp(currentSeconds)}`);
+
+    if (token) {
+      try {
+        await fetch(`${apiUrl}/notes`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: `Note at ${formatTimestamp(currentSeconds)} - ${lectureData.title.slice(0, 40)}`,
+            contentMarkdown: newNote.text,
+            pathItemId: itemId,
+            timestampSeconds: currentSeconds,
+            priority: 'medium',
+          }),
+        });
+      } catch {}
+    }
+  }
+
+  function handleDeleteNote(noteId: string) {
+    const updated = notesList.filter((n) => n.id !== noteId);
+    saveNotes(updated);
+    toast.success('Note deleted');
   }
 
   function handleAskDoubt() {
@@ -286,7 +369,8 @@ export function LecturePlayerView() {
             className="w-full aspect-video rounded-card overflow-hidden bg-black shadow-lg relative border border-border"
           >
             <iframe
-              src={`https://www.youtube-nocookie.com/embed/${lectureData.youtubeVideoId}?autoplay=0&enablejsapi=1&rel=0`}
+              id="yt-player"
+              src={`https://www.youtube-nocookie.com/embed/${lectureData.youtubeVideoId}?autoplay=0&enablejsapi=1&rel=0&origin=${typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : ''}`}
               title={lectureData.title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -441,24 +525,41 @@ export function LecturePlayerView() {
                     <h3 className="text-2xs font-semibold uppercase tracking-wider text-text-muted">
                       Your Lecture Notes ({notesList.length})
                     </h3>
-                    {notesList.map((n) => (
-                      <div
-                        key={n.id}
-                        className="p-3 rounded-control bg-surface-subtle border border-border/50 text-xs space-y-1.5 group"
-                      >
-                        <div className="flex items-center justify-between">
-                          <button
-                            onClick={() => seekTo(n.timestamp)}
-                            className="timestamp-chip"
-                            title="Jump to moment in lecture"
-                          >
-                            {formatTimestamp(n.timestamp)}
-                          </button>
-                          <span className="text-2xs text-text-muted font-mono">{n.createdAt}</span>
-                        </div>
-                        <p className="text-xs text-text-default leading-relaxed">{n.text}</p>
+                    {notesList.length === 0 ? (
+                      <div className="py-6 text-center text-xs text-text-muted space-y-1">
+                        <FileText size={20} className="mx-auto text-text-muted/40 mb-1" />
+                        <p>No notes for this video yet.</p>
+                        <p className="text-2xs text-text-secondary">Type above to save timestamps & takeaways.</p>
                       </div>
-                    ))}
+                    ) : (
+                      notesList.map((n) => (
+                        <div
+                          key={n.id}
+                          className="p-3 rounded-control bg-surface-subtle border border-border/50 text-xs space-y-1.5 group relative"
+                        >
+                          <div className="flex items-center justify-between">
+                            <button
+                              onClick={() => seekTo(n.timestamp)}
+                              className="timestamp-chip"
+                              title="Jump to moment in lecture"
+                            >
+                              {formatTimestamp(n.timestamp)}
+                            </button>
+                            <div className="flex items-center gap-2">
+                              <span className="text-2xs text-text-muted font-mono">{n.createdAt}</span>
+                              <button
+                                onClick={() => handleDeleteNote(n.id)}
+                                className="opacity-0 group-hover:opacity-100 p-1 text-text-muted hover:text-danger rounded transition-all"
+                                title="Delete note"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
+                          </div>
+                          <p className="text-xs text-text-default leading-relaxed whitespace-pre-wrap">{n.text}</p>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </div>
               )}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Folder,
@@ -103,17 +103,17 @@ export function NotesLibraryPage() {
       }
       return merged;
     },
-    enabled: !!token,
+    enabled: true,
   });
 
-  // Fetch all notes (unfiltered, to maintain accurate "All Notes" count)
-  const { data: allNotes = [] } = useQuery<NoteItem[]>({
+  // Fetch all notes (unfiltered, to maintain accurate "All Notes" count and single source of truth)
+  const { data: allNotes = [], isLoading } = useQuery<NoteItem[]>({
     queryKey: ['notes-all'],
     queryFn: async () => {
       let remoteNotes: NoteItem[] = [];
       try {
         const res = await fetch(`${apiUrl}/notes`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         const json = await res.json() as any;
         remoteNotes = json.data || [];
@@ -145,27 +145,23 @@ export function NotesLibraryPage() {
       }
       return merged;
     },
-    enabled: !!token,
-  });
-
-  // Fetch notes (filtered by collection or search query)
-  const { data: notes = [], isLoading } = useQuery<NoteItem[]>({
-    queryKey: ['notes-list', selectedCollectionId, searchQuery, allNotes],
-    queryFn: async () => {
-      let list = allNotes;
-      if (selectedCollectionId) {
-        list = list.filter((n) => n.collection_id === selectedCollectionId);
-      }
-      if (searchQuery) {
-        const q = searchQuery.toLowerCase();
-        list = list.filter(
-          (n) => n.title.toLowerCase().includes(q) || (n.content_markdown || '').toLowerCase().includes(q)
-        );
-      }
-      return list;
-    },
     enabled: true,
   });
+
+  // Derive filtered notes reactively from single source of truth
+  const notes = useMemo(() => {
+    let list = allNotes;
+    if (selectedCollectionId) {
+      list = list.filter((n) => n.collection_id === selectedCollectionId);
+    }
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      list = list.filter(
+        (n) => n.title.toLowerCase().includes(q) || (n.content_markdown || '').toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }, [allNotes, selectedCollectionId, searchQuery]);
 
   // Helper to persist draft locally on every keystroke
   function saveDraft(noteId: string | null, title: string, content: string) {
@@ -440,6 +436,13 @@ export function NotesLibraryPage() {
     }, 600);
   }
 
+  function selectNote(nextId: string) {
+    if (selectedNoteId && (activeTitle || activeContent)) {
+      triggerAutosave({ title: activeTitle, content_markdown: activeContent });
+    }
+    setSelectedNoteId(nextId);
+  }
+
   const selectedNote = notes.find((n) => n.id === selectedNoteId);
 
   return (
@@ -571,7 +574,7 @@ export function NotesLibraryPage() {
                 return (
                   <div
                     key={note.id}
-                    onClick={() => setSelectedNoteId(note.id)}
+                    onClick={() => selectNote(note.id)}
                     className={cn(
                       'p-3 rounded-control cursor-pointer transition-colors duration-micro space-y-1',
                       isSelected

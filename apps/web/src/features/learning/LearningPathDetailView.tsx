@@ -179,6 +179,25 @@ export function LearningPathDetailView() {
     onError: (err: Error) => toast.error(err.message),
   });
 
+  // Toggle lecture progress directly from syllabus tree
+  const toggleProgressMutation = useMutation({
+    mutationFn: async ({ itemId, status }: { itemId: string; status: LectureStatus }) => {
+      if (!token) return;
+      await fetch(`${apiUrl}/learning-paths/items/${itemId}/progress`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ status }),
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['path-details', pathId] });
+      toast.success('Lecture status updated');
+    },
+  });
+
   // Fork / duplicate mutation
   const duplicateMutation = useMutation({
     mutationFn: async () => {
@@ -274,11 +293,16 @@ export function LearningPathDetailView() {
       {/* Path Header Banner */}
       <Card className="border border-border bg-surface p-6">
         <div className="flex flex-col md:flex-row items-start gap-5">
-          {path.cover_url && (
-            <div className="w-28 h-28 rounded-card overflow-hidden bg-surface-subtle flex-shrink-0">
-              <img src={path.cover_url} alt={path.title} className="w-full h-full object-cover" />
-            </div>
-          )}
+          {(() => {
+            const rawCover = path.cover_url && !path.cover_url.includes('unsplash.com') ? path.cover_url : null;
+            const effectiveCover = rawCover || path.items?.[0]?.video?.thumbnail_url;
+            if (!effectiveCover) return null;
+            return (
+              <div className="w-28 h-28 rounded-card overflow-hidden bg-surface-subtle flex-shrink-0 border border-border">
+                <img src={effectiveCover} alt={path.title} className="w-full h-full object-cover" />
+              </div>
+            );
+          })()}
 
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1.5">
@@ -337,6 +361,9 @@ export function LearningPathDetailView() {
                   progress={userProgress[item.id]}
                   onSelect={() => setSelectedItemId(item.id)}
                   onPlay={() => navigate(`/learning/player/${item.id}`)}
+                  onToggleComplete={(targetId, nextStatus) =>
+                    toggleProgressMutation.mutate({ itemId: targetId, status: nextStatus })
+                  }
                 />
               ))}
 
@@ -378,6 +405,9 @@ export function LearningPathDetailView() {
                             progress={userProgress[item.id]}
                             onSelect={() => setSelectedItemId(item.id)}
                             onPlay={() => navigate(`/learning/player/${item.id}`)}
+                            onToggleComplete={(targetId, nextStatus) =>
+                              toggleProgressMutation.mutate({ itemId: targetId, status: nextStatus })
+                            }
                           />
                         ))
                       )}
@@ -656,14 +686,17 @@ function LectureTreeRow({
   progress,
   onSelect,
   onPlay,
+  onToggleComplete,
 }: {
   item: PathDetailItem;
   isSelected: boolean;
   progress?: { status: LectureStatus };
   onSelect: () => void;
   onPlay: () => void;
+  onToggleComplete: (itemId: string, nextStatus: LectureStatus) => void;
 }) {
   const status: LectureStatus = progress?.status || 'not_started';
+  const isCompleted = status === 'completed';
 
   return (
     <div
@@ -674,8 +707,22 @@ function LectureTreeRow({
       )}
     >
       <div className="flex items-center gap-2.5 min-w-0 pr-2">
-        <StatusIcon status={status} />
-        <span className="text-xs font-medium truncate">
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleComplete(item.id, isCompleted ? 'not_started' : 'completed');
+          }}
+          className="p-0.5 rounded hover:scale-110 active:scale-95 transition-all text-text-muted hover:text-success"
+          title={isCompleted ? 'Mark as incomplete' : 'Mark as completed'}
+        >
+          {isCompleted ? (
+            <CheckCircle2 size={16} className="text-success flex-shrink-0" fill="currentColor" />
+          ) : (
+            <Circle size={16} className="text-border hover:text-success flex-shrink-0" />
+          )}
+        </button>
+        <span className={cn('text-xs font-medium truncate', isCompleted && 'line-through text-text-muted')}>
           {item.custom_title || item.video.title}
         </span>
       </div>

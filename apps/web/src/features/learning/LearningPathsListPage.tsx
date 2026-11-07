@@ -241,7 +241,7 @@ export function LearningPathsListPage() {
               <div>
                 {/* Cover / Placeholder */}
                 <div className="h-32 bg-surface-subtle overflow-hidden relative">
-                  {path.cover_url ? (
+                  {path.cover_url && !path.cover_url.includes('unsplash.com') ? (
                     <img src={path.cover_url} alt={path.title} className="w-full h-full object-cover" />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-text-muted bg-primary/5">

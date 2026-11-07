@@ -351,8 +351,8 @@ export function CodePlaygroundPage() {
             )}
           </div>
 
-          <div className="rounded-xl border border-border bg-[#0B0E14] text-[#E8ECF4] h-[580px] p-4 font-mono text-xs overflow-auto flex flex-col justify-between shadow-xs">
-            <pre className="whitespace-pre-wrap leading-relaxed text-[#A6AFC3] overflow-y-auto flex-1">
+          <div className="rounded-xl border border-border bg-[#0B0E14] text-[#E8ECF4] h-[580px] p-4 font-mono text-xs overflow-auto flex flex-col justify-between shadow-xs selection:bg-primary selection:text-white">
+            <pre className="whitespace-pre-wrap leading-relaxed text-[#A6AFC3] overflow-y-auto flex-1 selection:bg-primary selection:text-white">
               {output || '// Console output will appear here after execution.'}
             </pre>
 

@@ -138,10 +138,12 @@ learningPathsRouter.post('/import-playlist', requireAuth, async (req: Request, r
     const playlist = await youtubeService.getPlaylistVideos(validated.playlistUrl);
 
     // 2. Create the learning path
+    const coverUrl = playlist.videos[0]?.thumbnailUrl || null;
     const path = await learningPathService.createPath(user.id, {
       title: validated.pathTitle || playlist.title,
       description: `Imported from YouTube playlist: ${validated.playlistUrl}`,
       visibility: validated.visibility,
+      coverUrl,
     });
 
     // 3. Add all videos as path items

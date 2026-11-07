@@ -259,10 +259,11 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
               key={pill.label}
               type="button"
               onClick={() => {
-                setQuery(pill.query);
-                inputRef.current?.focus();
+                navigate(pill.url);
+                onClose();
               }}
               className="px-2.5 py-0.5 rounded-full bg-surface-subtle border border-border/70 text-text-secondary hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer font-medium active:scale-95"
+              title={`Jump to ${pill.label}`}
             >
               {pill.label}
             </button>

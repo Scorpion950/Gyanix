@@ -384,3 +384,17 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ─── Global Selection & Console Terminal Contrast ──────────────────────── */
+::selection {
+  background-color: #2563EB;
+  color: #FFFFFF;
+}
+
+pre::selection,
+code::selection,
+.bg-\[\#0B0E14\] *::selection,
+.bg-\[\#0B0E14\]::selection {
+  background-color: #2563EB !important;
+  color: #FFFFFF !important;
+}
