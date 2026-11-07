@@ -69,7 +69,7 @@ export function NotesLibraryPage() {
   const [isNewCollectionOpen, setIsNewCollectionOpen] = useState(false);
   const [collectionTitle, setCollectionTitle] = useState('');
 
-  const apiUrl = import.meta.env['VITE_API_URL'] || 'http://localhost:3001/api';
+  const apiUrl = import.meta.env['VITE_API_URL'] || '/api';
   const token = session?.access_token;
   const autosaveTimerRef = useRef<any>(null);
 
@@ -253,19 +253,42 @@ export function NotesLibraryPage() {
     }
   }, [selectedNoteId, notes]);
 
+  // Delete collection mutation
+  const deleteCollectionMutation = useMutation({
+    mutationFn: async (collectionId: string) => {
+      await fetch(`${apiUrl}/notes/collections/${collectionId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    },
+    onSuccess: (_, deletedId) => {
+      queryClient.invalidateQueries({ queryKey: ['notes-collections'] });
+      if (selectedCollectionId === deletedId) {
+        setSelectedCollectionId(null);
+      }
+      toast.success('Collection deleted');
+    },
+  });
+
   // Silent Autosave with 600ms debounce (updates query cache directly without reset)
   function triggerAutosave(updatedFields: Partial<NoteItem>) {
     if (!selectedNoteId) return;
     setSaveStatus('saving');
 
+    const payload = {
+      ...updatedFields,
+      contentMarkdown: (updatedFields as any).content_markdown ?? (updatedFields as any).contentMarkdown,
+      content_markdown: (updatedFields as any).content_markdown ?? (updatedFields as any).contentMarkdown,
+    };
+
     // Optimistically update query client state in memory
     queryClient.setQueryData<NoteItem[]>(['notes-list', selectedCollectionId, searchQuery], (old) => {
       if (!old) return [];
-      return old.map((n) => (n.id === selectedNoteId ? { ...n, ...updatedFields } : n));
+      return old.map((n) => (n.id === selectedNoteId ? { ...n, ...payload } : n));
     });
     queryClient.setQueryData<NoteItem[]>(['notes-all'], (old) => {
       if (!old) return [];
-      return old.map((n) => (n.id === selectedNoteId ? { ...n, ...updatedFields } : n));
+      return old.map((n) => (n.id === selectedNoteId ? { ...n, ...payload } : n));
     });
 
     if (autosaveTimerRef.current) clearTimeout(autosaveTimerRef.current);
@@ -277,7 +300,7 @@ export function NotesLibraryPage() {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify(updatedFields),
+          body: JSON.stringify(payload),
         });
         setSaveStatus('saved');
         setTimeout(() => setSaveStatus('idle'), 2000);
@@ -355,13 +378,13 @@ export function NotesLibraryPage() {
             </button>
 
             {collections.map((col) => (
-              <button
+              <div
                 key={col.id}
                 onClick={() => setSelectedCollectionId(col.id)}
                 className={cn(
-                  'w-full flex items-center justify-between px-2.5 py-1.5 rounded-control text-xs font-medium transition-colors text-left',
+                  'group w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium transition-colors text-left cursor-pointer',
                   selectedCollectionId === col.id
-                    ? 'bg-primary/10 text-primary'
+                    ? 'bg-primary/10 text-primary font-semibold'
                     : 'text-text-secondary hover:bg-surface-subtle hover:text-text-default',
                 )}
               >
@@ -372,7 +395,20 @@ export function NotesLibraryPage() {
                   />
                   <span className="truncate">{col.title}</span>
                 </span>
-              </button>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (window.confirm(`Delete collection "${col.title}"? Your notes will remain safe in All Notes.`)) {
+                      deleteCollectionMutation.mutate(col.id);
+                    }
+                  }}
+                  className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-danger/10 hover:text-danger text-text-muted transition-all"
+                  title="Delete collection"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
             ))}
           </div>
         </div>
@@ -381,13 +417,13 @@ export function NotesLibraryPage() {
         <div className="md:col-span-4 lg:col-span-4 h-full flex flex-col space-y-3 border-r border-border/70 pr-3">
           {/* Search */}
           <div className="relative">
-            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-text-muted" />
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
             <input
               type="text"
               placeholder="Search notes…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-8 pl-8 pr-3 text-xs rounded-control bg-surface border border-border text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+              className="w-full h-8 pl-8 pr-3 text-xs rounded-xl bg-surface border border-border text-text-default focus:ring-2 focus:ring-primary/40 focus:outline-none"
             />
           </div>
 
@@ -417,14 +453,14 @@ export function NotesLibraryPage() {
                       <div className="flex items-center gap-1.5 min-w-0">
                         {note.is_pinned && <Pin size={12} className="text-primary flex-shrink-0" />}
                         <h3 className="text-xs font-semibold text-text-default truncate">
-                          {note.title || 'Untitled Note'}
+                          {(isSelected ? activeTitle : note.title) || 'Untitled Note'}
                         </h3>
                       </div>
                       <PriorityBadge priority={note.priority} />
                     </div>
 
                     <p className="text-2xs text-text-secondary line-clamp-2 leading-relaxed">
-                      {note.content_markdown || 'No content.'}
+                      {(isSelected ? activeContent : note.content_markdown) || 'No content.'}
                     </p>
 
                     <div className="flex items-center justify-between pt-1 text-2xs text-text-muted font-mono">

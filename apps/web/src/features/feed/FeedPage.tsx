@@ -624,7 +624,7 @@ export function FeedPage() {
                     className="flex items-start justify-between gap-2 p-2 rounded-lg border border-border/60 bg-surface-subtle/50 hover:bg-surface-subtle hover:border-primary/40 transition-all cursor-pointer group"
                   >
                     <div className="flex-1 min-w-0 pr-1">
-                      <h4 className="font-semibold text-text text-xs group-hover:text-primary transition-colors leading-snug">
+                      <h4 className="font-semibold text-text text-xs group-hover:text-primary transition-colors leading-snug break-words">
                         {c.name}
                       </h4>
                       <span className="text-[11px] text-text-muted mt-0.5 block">

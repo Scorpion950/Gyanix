@@ -142,7 +142,11 @@ export const searchChallengesService = {
         .order('duration_days', { ascending: true });
 
       if (!error && challenges && challenges.length > 0) {
-        challengesList = challenges;
+        // Exclude dummy static seed challenges that user did not create
+        const real = challenges.filter(
+          (c) => c.creator_id || c.id?.startsWith('ch-') || (userId && c.creator_id === userId)
+        );
+        challengesList = real.length > 0 ? real : inMemoryChallenges;
       }
     } catch (_err) { }
 

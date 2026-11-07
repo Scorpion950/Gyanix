@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
-import { Search, Plus, Menu, FileText, BookOpen, Sparkles, ClipboardCheck, FolderKanban, BarChart3 } from 'lucide-react';
+import { Search, Plus, Menu, FileText, BookOpen, Sparkles, ClipboardCheck, FolderKanban, BarChart3, Play, Pause, RotateCcw } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore.ts';
 import { useUIStore } from '@/stores/uiStore.ts';
+import { usePomodoroStore } from '@/stores/pomodoroStore.ts';
 import { ThemeToggle } from '@/components/ui/ThemeToggle.tsx';
 import { NotificationBell } from './NotificationBell.tsx';
 import { cn } from '@/lib/utils.ts';
@@ -14,6 +15,19 @@ export function TopBar({ onSearchClick }: { onSearchClick?: () => void }) {
   const navigate = useNavigate();
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   const quickAddRef = useRef<HTMLDivElement>(null);
+
+  // Global Pomodoro Timer state
+  const { isRunning, timeLeft, tick, externalSession, activeProblemTitle, togglePlayPause, resetTimer } = usePomodoroStore();
+
+  useEffect(() => {
+    if (!isRunning) return;
+    const interval = setInterval(() => tick(), 1000);
+    return () => clearInterval(interval);
+  }, [isRunning, tick]);
+
+  const pMinutes = Math.floor(timeLeft / 60);
+  const pSeconds = timeLeft % 60;
+  const timeFormatted = `${pMinutes.toString().padStart(2, '0')}:${pSeconds.toString().padStart(2, '0')}`;
 
   // Close quick add menu when clicking outside
   useEffect(() => {
@@ -70,10 +84,10 @@ export function TopBar({ onSearchClick }: { onSearchClick?: () => void }) {
         <button
           onClick={onSearchClick}
           className={cn(
-            'flex items-center gap-2 w-full px-3.5 h-9 rounded-control',
+            'flex items-center gap-2.5 w-full px-4 h-9 rounded-full',
             'bg-surface-subtle border border-border text-text-muted text-xs',
-            'hover:border-primary/40 transition-colors duration-micro cursor-pointer',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary',
+            'hover:border-primary/50 hover:bg-surface transition-all duration-micro cursor-pointer',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
           )}
           aria-label="Open search"
           aria-keyshortcuts="Control+K"
@@ -87,6 +101,39 @@ export function TopBar({ onSearchClick }: { onSearchClick?: () => void }) {
       </div>
 
       <div className="flex-1" />
+
+      {/* Live Active Pomodoro Timer Pill */}
+      {(isRunning || timeLeft < 1500) && (
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-xs font-mono font-medium shadow-xs">
+          <span className="flex items-center gap-1.5">
+            <span className="text-sm">🍅</span>
+            <span className="font-bold">{timeFormatted}</span>
+          </span>
+
+          {(externalSession?.websiteName || activeProblemTitle) && (
+            <span className="hidden sm:inline-block max-w-[130px] truncate text-[11px] text-text-secondary border-l border-primary/20 pl-2">
+              {externalSession?.websiteName ? `${externalSession.websiteName}` : activeProblemTitle}
+            </span>
+          )}
+
+          <div className="flex items-center gap-1 border-l border-primary/20 pl-1.5 ml-0.5">
+            <button
+              onClick={togglePlayPause}
+              className="p-1 hover:text-text-default rounded transition-colors cursor-pointer"
+              title={isRunning ? 'Pause Pomodoro' : 'Resume Pomodoro'}
+            >
+              {isRunning ? <Pause size={12} className="fill-current" /> : <Play size={12} className="fill-current" />}
+            </button>
+            <button
+              onClick={resetTimer}
+              className="p-1 hover:text-danger rounded transition-colors cursor-pointer"
+              title="Reset Timer"
+            >
+              <RotateCcw size={12} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Right actions */}
       <div className="flex items-center gap-1">

@@ -15,12 +15,14 @@ import {
   RotateCcw,
   BookOpen,
   Award,
+  Loader2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button.tsx';
 import { Card, CardContent } from '@/components/ui/Card.tsx';
 import { Input } from '@/components/ui/Input.tsx';
 import { Badge } from '@/components/ui/Badge.tsx';
 import { useAuthStore } from '@/stores/authStore.ts';
+import { cn } from '@/lib/utils.ts';
 import { toast } from 'sonner';
 
 interface Question {
@@ -65,6 +67,7 @@ export function AssessmentRunnerView() {
   // New assessment generator input
   const [newTopic, setNewTopic] = useState('');
   const [newDifficulty, setNewDifficulty] = useState(3);
+  const [questionType, setQuestionType] = useState<'mixed' | 'mcq' | 'text'>('mixed');
   const [isGenerating, setIsGenerating] = useState(false);
 
   useEffect(() => {
@@ -125,6 +128,7 @@ export function AssessmentRunnerView() {
         body: JSON.stringify({
           topic: newTopic.trim(),
           difficulty: newDifficulty,
+          questionType,
         }),
       });
 
@@ -213,22 +217,25 @@ export function AssessmentRunnerView() {
           </h1>
         </div>
 
-        {/* Generate quick assessment trigger */}
+        {/* Controls */}
         <div className="flex items-center gap-2">
-          {!assessment && (
-            <form onSubmit={handleGenerateAssessment} className="flex items-center gap-2">
-              <Input
-                placeholder="Topic (e.g. Docker, Python GIL)..."
-                value={newTopic}
-                onChange={(e) => setNewTopic(e.target.value)}
-                className="w-48 text-xs"
-              />
-              <Button type="submit" disabled={isGenerating || !newTopic.trim()} size="sm">
-                <Sparkles className="w-3.5 h-3.5 mr-1 text-ai" />
-                Generate
-              </Button>
-            </form>
+          {assessment && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setAssessment(null);
+                setAttemptResult(null);
+                setUserAnswers({});
+                setCurrentIdx(0);
+                setNewTopic('');
+              }}
+            >
+              <Sparkles className="w-3.5 h-3.5 mr-1 text-ai" />
+              New Topic
+            </Button>
           )}
+
           {attemptResult && (
             <Button
               variant="outline"
@@ -248,23 +255,74 @@ export function AssessmentRunnerView() {
 
       {/* No assessment loaded fallback */}
       {!assessment && !loading && (
-        <Card className="border border-dashed border-border p-12 text-center bg-surface">
+        <Card className="border border-dashed border-border p-8 md:p-12 text-center bg-surface">
           <Brain className="w-12 h-12 mx-auto text-primary/60 mb-3" />
           <h2 className="text-base font-semibold text-text mb-1">Create an AI-Powered Assessment</h2>
-          <p className="text-xs text-text-secondary max-w-sm mx-auto mb-4">
+          <p className="text-xs text-text-secondary max-w-sm mx-auto mb-6">
             Test and measure your mastery in any language, framework, or architectural discipline.
           </p>
-          <form onSubmit={handleGenerateAssessment} className="max-w-md mx-auto space-y-3">
+
+          <form onSubmit={handleGenerateAssessment} className="max-w-md mx-auto space-y-4">
             <Input
-              placeholder="e.g. PostgreSQL Query Optimization"
+              placeholder="e.g. Java, Python DSA, React.js, System Design"
               value={newTopic}
               onChange={(e) => setNewTopic(e.target.value)}
-              className="text-sm"
+              className="text-sm rounded-xl"
               required
             />
+
+            {/* Question Format Selector */}
+            <div className="space-y-1.5 text-left">
+              <label className="text-xs font-semibold text-text-secondary block">
+                Select Question Format
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setQuestionType('mixed')}
+                  className={cn(
+                    'px-2.5 py-2 rounded-lg text-xs font-medium border text-center transition-all',
+                    questionType === 'mixed'
+                      ? 'border-primary bg-primary/10 text-primary font-semibold'
+                      : 'border-border bg-surface-subtle text-text-secondary hover:text-text'
+                  )}
+                >
+                  Mixed (All)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setQuestionType('mcq')}
+                  className={cn(
+                    'px-2.5 py-2 rounded-lg text-xs font-medium border text-center transition-all',
+                    questionType === 'mcq'
+                      ? 'border-primary bg-primary/10 text-primary font-semibold'
+                      : 'border-border bg-surface-subtle text-text-secondary hover:text-text'
+                  )}
+                >
+                  MCQ Only
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setQuestionType('text')}
+                  className={cn(
+                    'px-2.5 py-2 rounded-lg text-xs font-medium border text-center transition-all',
+                    questionType === 'text'
+                      ? 'border-primary bg-primary/10 text-primary font-semibold'
+                      : 'border-border bg-surface-subtle text-text-secondary hover:text-text'
+                  )}
+                >
+                  Paragraph
+                </button>
+              </div>
+            </div>
+
             <Button type="submit" disabled={isGenerating || !newTopic.trim()} className="w-full">
-              <Sparkles className="w-4 h-4 mr-2 text-ai" />
-              Generate 3-Question Assessment
+              {isGenerating ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Sparkles className="w-4 h-4 mr-2 text-ai" />
+              )}
+              {isGenerating ? 'Synthesizing Questions...' : 'Generate 3-Question Assessment'}
             </Button>
           </form>
         </Card>

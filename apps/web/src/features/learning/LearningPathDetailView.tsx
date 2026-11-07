@@ -77,7 +77,7 @@ export function LearningPathDetailView() {
   const [folderTitle, setFolderTitle] = useState('');
   const [replacementUrl, setReplacementUrl] = useState('');
 
-  const apiUrl = import.meta.env['VITE_API_URL'] || 'http://localhost:3001/api';
+  const apiUrl = import.meta.env['VITE_API_URL'] || '/api';
   const token = session?.access_token;
 
   // Fetch full path details

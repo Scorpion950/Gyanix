@@ -56,7 +56,7 @@ export function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'paths' | 'projects' | 'achievements'>('overview');
   const [isEditing, setIsEditing] = useState(false);
 
-  const apiUrl = import.meta.env['VITE_API_URL'] || 'http://localhost:3001/api';
+  const apiUrl = import.meta.env['VITE_API_URL'] || '/api';
   const token = session?.access_token;
 
   // 1. Fetch current authenticated user's own profile to resolve username if not in route
@@ -497,6 +497,17 @@ export function ProfilePage() {
                 type="text"
                 value={editDisplayName}
                 onChange={(e) => setEditDisplayName(e.target.value)}
+                className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block font-medium text-text-secondary mb-1">Profession / Target Role</label>
+              <input
+                type="text"
+                placeholder="e.g. Backend Engineer, CS Student, Systems Architect"
+                value={editProfession}
+                onChange={(e) => setEditProfession(e.target.value)}
                 className="w-full h-9 px-3 rounded-control border border-border bg-background text-text-default focus:ring-2 focus:ring-primary focus:outline-none"
               />
             </div>

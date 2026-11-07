@@ -80,7 +80,7 @@ export function LecturePlayerView() {
   const iframeContainerRef = useRef<HTMLDivElement>(null);
   const lastActivityRef = useRef<number>(Date.now());
 
-  const apiUrl = import.meta.env['VITE_API_URL'] || 'http://localhost:3001/api';
+  const apiUrl = import.meta.env['VITE_API_URL'] || '/api';
   const token = session?.access_token;
 
   // Turn on Focus Mode on mount, revert on unmount

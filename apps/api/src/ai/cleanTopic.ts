@@ -6,16 +6,17 @@
 export function cleanTopic(raw: string): string {
   if (!raw || typeof raw !== 'string') return 'Software Engineering';
 
-  // Iteratively strip conversational prompts
+  // Iteratively strip conversational prompts, practice/assignment prefixes
   let cleaned = raw.trim();
   let prev = '';
   while (cleaned !== prev) {
     prev = cleaned;
     cleaned = cleaned
       .replace(/^(please\s+)?(give\s+me|generate|create|build|make|prepare|show\s+me|start|i\s+want)(\s+a|\s+an)?\s+/i, '')
-      .replace(/^(quiz|assessment|test|exam|questions|roadmap|curriculum|guide|course|overview|practice)\s+(for|on|about|of|in|to)\s+/i, '')
-      .replace(/^(quiz|assessment|test|questions|roadmap)\s+/i, '')
-      .replace(/\s+(quiz|assessment|test|exam|roadmap|questions)$/i, '')
+      .replace(/^(quiz|assessment|test|exam|questions|question|roadmap|curriculum|guide|course|overview|practice|practise|assignment|assignemnt|exercise|exercises|problems|problem)\s+(for|on|about|of|in|to)\s+/i, '')
+      .replace(/^(practice|practise)\s+(assignment|assignemnt|test|quiz|questions|problems)\s+(for|on|about|of|in|to)\s+/i, '')
+      .replace(/^(quiz|assessment|test|questions|roadmap|assignment|assignemnt|practice|practise)\s+/i, '')
+      .replace(/\s+(quiz|assessment|test|exam|roadmap|questions|assignment|assignemnt|practice|practise)$/i, '')
       .trim();
   }
 
@@ -23,10 +24,21 @@ export function cleanTopic(raw: string): string {
 
   // Normalize common engineering acronyms and names
   const acronyms: Record<string, string> = {
+    'java': 'Java',
+    'python': 'Python',
+    'c': 'C',
+    'c++': 'C++',
+    'cpp': 'C++',
+    'csharp': 'C#',
+    'c#': 'C#',
+    'golang': 'Go',
+    'go': 'Go',
+    'rust': 'Rust',
     'dsa': 'Data Structures & Algorithms',
     'java dsa': 'Java Data Structures & Algorithms',
     'python dsa': 'Python Data Structures & Algorithms',
     'cpp dsa': 'C++ Data Structures & Algorithms',
+    'c dsa': 'C Data Structures & Algorithms',
     'js': 'JavaScript',
     'ts': 'TypeScript',
     'fe': 'Frontend Engineering',

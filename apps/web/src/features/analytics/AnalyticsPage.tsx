@@ -29,7 +29,7 @@ export function AnalyticsPage() {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [timerMode, setTimerMode] = useState<'focus' | 'break'>('focus');
 
-  const apiUrl = import.meta.env['VITE_API_URL'] || 'http://localhost:3001/api';
+  const apiUrl = import.meta.env['VITE_API_URL'] || '/api';
   const token = session?.access_token;
 
   // Fetch summary stats

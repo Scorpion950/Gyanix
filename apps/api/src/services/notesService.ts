@@ -75,8 +75,9 @@ export const notesService = {
         updated_at: new Date().toISOString(),
       };
 
+      const content = input.contentMarkdown ?? (input as any).content_markdown;
       if (input.title !== undefined) updatePayload['title'] = input.title;
-      if (input.contentMarkdown !== undefined) updatePayload['content_markdown'] = input.contentMarkdown;
+      if (content !== undefined) updatePayload['content_markdown'] = content;
       if (input.collectionId !== undefined) updatePayload['collection_id'] = input.collectionId;
       if (input.priority !== undefined) updatePayload['priority'] = input.priority;
       if (input.deadlineAt !== undefined) updatePayload['deadline_at'] = input.deadlineAt;
@@ -96,8 +97,9 @@ export const notesService = {
     const userNotes = inMemoryNotes.get(userId) || [];
     const note = userNotes.find((n) => n.id === noteId);
     if (note) {
+      const content = input.contentMarkdown ?? (input as any).content_markdown;
       if (input.title !== undefined) note.title = input.title;
-      if (input.contentMarkdown !== undefined) note.content_markdown = input.contentMarkdown;
+      if (content !== undefined) note.content_markdown = content;
       if (input.collectionId !== undefined) note.collection_id = input.collectionId;
       if (input.priority !== undefined) note.priority = input.priority;
       if (input.deadlineAt !== undefined) note.deadline_at = input.deadlineAt;
@@ -105,7 +107,8 @@ export const notesService = {
       note.updated_at = new Date().toISOString();
       return note;
     }
-    return { id: noteId, ...input, updated_at: new Date().toISOString() };
+    const content = input.contentMarkdown ?? (input as any).content_markdown;
+    return { id: noteId, ...input, content_markdown: content ?? '', updated_at: new Date().toISOString() };
   },
 
   async deleteNote(userId: string, noteId: string) {
@@ -230,5 +233,32 @@ export const notesService = {
     list.push(newCol);
     inMemoryCollections.set(userId, list);
     return newCol;
+  },
+
+  async deleteCollection(userId: string, collectionId: string) {
+    try {
+      await supabaseAdmin
+        .from('notes_collections')
+        .delete()
+        .eq('id', collectionId)
+        .eq('user_id', userId);
+
+      await supabaseAdmin
+        .from('notes')
+        .update({ collection_id: null })
+        .eq('collection_id', collectionId)
+        .eq('user_id', userId);
+    } catch (_err) {}
+
+    const list = inMemoryCollections.get(userId) || [];
+    inMemoryCollections.set(userId, list.filter((c) => c.id !== collectionId));
+
+    const userNotes = inMemoryNotes.get(userId) || [];
+    for (const n of userNotes) {
+      if (n.collection_id === collectionId) {
+        n.collection_id = null;
+      }
+    }
+    return true;
   },
 };

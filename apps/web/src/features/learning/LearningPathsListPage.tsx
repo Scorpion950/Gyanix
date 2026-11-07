@@ -54,7 +54,7 @@ export function LearningPathsListPage() {
   const [playlistUrl, setPlaylistUrl] = useState('');
   const [importTitle, setImportTitle] = useState('');
 
-  const apiUrl = import.meta.env['VITE_API_URL'] || 'http://localhost:3001/api';
+  const apiUrl = import.meta.env['VITE_API_URL'] || '/api';
   const token = session?.access_token;
 
   // Query paths

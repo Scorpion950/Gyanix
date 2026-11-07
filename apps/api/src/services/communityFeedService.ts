@@ -337,9 +337,18 @@ export const communityFeedService = {
           if (memberships) {
             joinedSet = new Set(memberships.map((m) => m.community_id));
           }
+          // Also sync with local membership state
+          for (const key of inMemoryMemberships) {
+            const [uId, cId] = key.split(':');
+            if (uId === userId && cId) joinedSet.add(cId);
+          }
         }
 
-        return data.map((c) => ({
+        // Only show real user communities
+        const realCommunities = data.filter((c) => c.creator_id || c.id?.startsWith('comm-'));
+        const listToReturn = realCommunities.length > 0 ? realCommunities : inMemoryCommunities;
+
+        return listToReturn.map((c) => ({
           ...c,
           isCreator: userId ? c.creator_id === userId : false,
           isMember: joinedSet.has(c.id),
@@ -426,6 +435,7 @@ export const communityFeedService = {
   },
 
   async toggleJoinCommunity(userId: string, communityId: string) {
+    const key = `${userId}:${communityId}`;
     try {
       const { data: existing } = await supabaseAdmin
         .from('community_members')
@@ -436,22 +446,23 @@ export const communityFeedService = {
 
       if (existing) {
         await supabaseAdmin.from('community_members').delete().eq('id', existing.id);
+        inMemoryMemberships.delete(key);
         const { data: c } = await supabaseAdmin.from('communities').select('member_count').eq('id', communityId).single();
         if (c) {
-          await supabaseAdmin.from('communities').update({ member_count: Math.max(1, c.member_count - 1) }).eq('id', communityId);
+          await supabaseAdmin.from('communities').update({ member_count: Math.max(0, c.member_count - 1) }).eq('id', communityId);
         }
         return { joined: false };
       } else {
         await supabaseAdmin.from('community_members').insert({ community_id: communityId, user_id: userId, role: 'member' });
+        inMemoryMemberships.add(key);
         const { data: c } = await supabaseAdmin.from('communities').select('member_count').eq('id', communityId).single();
         if (c) {
-          await supabaseAdmin.from('communities').update({ member_count: c.member_count + 1 }).eq('id', communityId);
+          await supabaseAdmin.from('communities').update({ member_count: (c.member_count || 0) + 1 }).eq('id', communityId);
         }
         return { joined: true };
       }
     } catch (_err) {}
 
-    const key = `${userId}:${communityId}`;
     const comm = inMemoryCommunities.find((c) => c.id === communityId);
     if (inMemoryMemberships.has(key)) {
       inMemoryMemberships.delete(key);

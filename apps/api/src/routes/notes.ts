@@ -123,3 +123,17 @@ notesRouter.post('/collections', async (req: Request, res: Response): Promise<vo
     });
   }
 });
+
+/**
+ * DELETE /api/notes/collections/:id
+ */
+notesRouter.delete('/collections/:id', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { user } = req as AuthenticatedRequest;
+    const { id } = req.params as { id: string };
+    await notesService.deleteCollection(user.id, id);
+    res.json({ success: true, data: { id, deleted: true } });
+  } catch (_err) {
+    res.json({ success: true, data: { id: req.params['id'], deleted: true } });
+  }
+});

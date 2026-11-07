@@ -127,7 +127,7 @@ aiRouter.get('/assessments', async (req: Request, res: Response): Promise<void> 
 aiRouter.post('/assessments/generate', requireAuth, async (req: Request, res: Response): Promise<void> => {
   try {
     const { user } = req as AuthenticatedRequest;
-    const { topic, pathId, difficulty } = req.body;
+    const { topic, pathId, difficulty, questionType } = req.body;
     if (!topic || typeof topic !== 'string') {
       res.status(400).json({ success: false, error: 'Topic is required' });
       return;
@@ -138,6 +138,7 @@ aiRouter.post('/assessments/generate', requireAuth, async (req: Request, res: Re
       pathId || null,
       cleanSubj,
       difficulty ? Number(difficulty) : 3,
+      questionType || 'mixed',
     );
     res.json({ success: true, data: assessment });
   } catch (err: any) {
@@ -153,16 +154,16 @@ aiRouter.post('/assessments/generate', requireAuth, async (req: Request, res: Re
         questions: [
           {
             id: 'q1',
-            type: 'mcq',
-            prompt: `In ${cleanSubj}, what is the primary consideration when scaling concurrent workloads?`,
+            type: req.body?.questionType === 'text' ? 'conceptual' : 'mcq',
+            prompt: `In ${cleanSubj}, what is the primary consideration when designing scalable systems?`,
             options: [
-              'Minimizing lock contention on shared mutable state',
+              'Minimizing shared state contention and optimizing memory locality',
               'Decreasing variable name lengths',
               'Increasing CSS specificity',
               'Restricting workloads to single-threaded sequential execution',
             ],
             correctOptionIndex: 0,
-            explanation: 'Shared state contention and cache coherency are the dominant bottlenecks in concurrent architectures.',
+            explanation: 'Shared state contention and cache coherency are key considerations in concurrent architectures.',
             difficulty: 3,
             metricTarget: 'knowledge',
           },

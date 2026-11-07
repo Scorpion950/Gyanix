@@ -283,7 +283,13 @@ Return valid JSON with format:
   /**
    * Generate an assessment for a learning path or topic
    */
-  async generateAssessment(userId: string, pathId: string | null, topic: string, difficulty = 3) {
+  async generateAssessment(
+    userId: string,
+    pathId: string | null,
+    topic: string,
+    difficulty = 3,
+    questionType: 'mcq' | 'text' | 'mixed' = 'mixed'
+  ) {
     const adapter = aiRegistry.getAdapter();
     const cleanSubj = cleanTopic(topic);
 
@@ -395,6 +401,23 @@ Output strict JSON format:
           ],
         };
       }
+    }
+
+    // Sanitize any prompts to ensure no raw command text leaks into questions
+    const sanitizePrompt = (p: string) => {
+      if (!p) return p;
+      return p
+        .replace(/\s+in\s+(give me quiz for|practise assignment for|practice assignment for|assignment for)[^?.]*/gi, '')
+        .replace(/\s+in\s+[a-zA-Z0-9_\s]+Skill Assessment\??/gi, '?')
+        .replace(/\s+\?$/, '?')
+        .trim();
+    };
+
+    if (parsed?.questions && Array.isArray(parsed.questions)) {
+      parsed.questions = parsed.questions.map((q: any) => ({
+        ...q,
+        prompt: sanitizePrompt(q.prompt),
+      }));
     }
 
     try {

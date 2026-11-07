@@ -34,7 +34,7 @@ export function RegisterPage() {
     queryKey: ['username-check', username],
     queryFn: async () => {
       if (!username || username.length < 3) return null;
-      const apiUrl = import.meta.env['VITE_API_URL'] as string ?? 'http://localhost:3001/api';
+      const apiUrl = (import.meta.env['VITE_API_URL'] as string) || '/api';
       const res = await fetch(`${apiUrl}/users/check-username/${username}`);
       const json = await res.json() as { success: boolean; data?: { available: boolean } };
       return json.data?.available ?? null;

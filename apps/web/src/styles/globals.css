@@ -21,17 +21,17 @@
 /* Default dark tokens for calm Notion+Discord feel */
 @layer base {
   :root {
-    /* Surfaces — Soft Off-White Light Theme (Calm & Non-glaring) */
-    --background: 216 20% 97%;
-    /* #F4F6F9 - Soft warm off-white */
-    --surface: 0 0% 100%;
-    /* #FFFFFF - Crisp white cards */
-    --surface-raised: 220 20% 98%;
-    /* #F8FAFC */
-    --surface-subtle: 220 16% 93%;
-    /* #EBEEF4 */
-    --border: 220 14% 87%;
-    /* #D7DDE6 */
+    /* Surfaces — Soft Off-White Light Theme (Calm & Non-glaring, eye-strain free) */
+    --background: 220 18% 95%;
+    /* #F0F3F7 - Soft warm off-white */
+    --surface: 220 18% 98%;
+    /* #F8FAFC - Calm non-glaring off-white */
+    --surface-raised: 220 20% 99%;
+    /* #FAFCFF */
+    --surface-subtle: 220 16% 91%;
+    /* #E4E8F0 */
+    --border: 220 14% 84%;
+    /* #CFD6E2 */
 
     /* Text */
     --text: 222 47% 11%;

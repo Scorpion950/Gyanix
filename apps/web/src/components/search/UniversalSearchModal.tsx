@@ -204,7 +204,7 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-16 px-4 w-screen h-screen bg-black/40 backdrop-blur-md"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-16 px-4 bg-black/25 backdrop-blur-md overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           onClose();
@@ -224,29 +224,31 @@ export function UniversalSearchModal({ isOpen, onClose }: UniversalSearchModalPr
         className="relative w-full max-w-3xl rounded-2xl border border-border bg-surface-raised shadow-2xl overflow-hidden flex flex-col z-10"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Search Input Bar */}
-        <div className="p-4 border-b border-border flex items-center gap-3">
-          <Search className="w-5 h-5 text-text-muted shrink-0" />
-          <input
-            ref={inputRef}
-            type="text"
-            placeholder="Search learning paths, problems, notes, roadmaps, communities, projects, users..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="w-full bg-transparent text-sm text-text focus:outline-none placeholder:text-text-muted"
-          />
-          {loading ? (
-            <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" />
-          ) : (
-            <button
-              onClick={onClose}
-              className="px-2 py-1 rounded text-2xs font-mono border border-border bg-surface-subtle text-text-muted hover:text-text-default hover:bg-surface transition-colors cursor-pointer"
-              title="Press ESC to close"
-            >
-              ESC
-            </button>
-          )}
+        {/* Search Input Bar (Rounded Pill Container) */}
+        <div className="p-4 border-b border-border/60">
+          <div className="flex items-center gap-3 px-4 py-2.5 rounded-full border border-border/80 bg-surface focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <Search className="w-4 h-4 text-text-muted shrink-0" />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Search learning paths, problems, notes, roadmaps, communities, projects, users..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="w-full bg-transparent text-sm text-text border-none outline-none focus:outline-none focus:ring-0 placeholder:text-text-muted"
+            />
+            {loading ? (
+              <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" />
+            ) : (
+              <button
+                onClick={onClose}
+                className="px-2 py-0.5 rounded-full text-2xs font-mono border border-border bg-surface-subtle text-text-muted hover:text-text-default hover:bg-surface transition-colors cursor-pointer shrink-0"
+                title="Press ESC to close"
+              >
+                ESC
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Quick Clickable Scope Pills */}

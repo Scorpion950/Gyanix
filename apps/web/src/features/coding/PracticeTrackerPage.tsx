@@ -16,6 +16,8 @@ import {
   ArrowRight,
   BookOpen,
   Trophy,
+  Timer,
+  Pause,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button.tsx';
 import { Card, CardContent } from '@/components/ui/Card.tsx';
@@ -23,6 +25,7 @@ import { Input } from '@/components/ui/Input.tsx';
 import { Badge } from '@/components/ui/Badge.tsx';
 import { Modal } from '@/components/ui/Modal.tsx';
 import { useAuthStore } from '@/stores/authStore.ts';
+import { usePomodoroStore } from '@/stores/pomodoroStore.ts';
 import { toast } from 'sonner';
 
 interface Problem {
@@ -71,6 +74,35 @@ export function PracticeTrackerPage() {
   const [newMinutes, setNewMinutes] = useState(20);
   const [newNotes, setNewNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Pomodoro Focus state
+  const {
+    timeLeft,
+    isRunning,
+    startSession,
+    togglePlayPause,
+    resetTimer,
+    externalSession,
+  } = usePomodoroStore();
+
+  const [showPomodoroModal, setShowPomodoroModal] = useState(false);
+  const [extWebsiteName, setExtWebsiteName] = useState('LeetCode');
+  const [extProblemName, setExtProblemName] = useState('');
+  const [pomodoroMins, setPomodoroMins] = useState(25);
+
+  const pMinutes = Math.floor(timeLeft / 60);
+  const pSeconds = timeLeft % 60;
+  const timerDisplay = `${pMinutes.toString().padStart(2, '0')}:${pSeconds.toString().padStart(2, '0')}`;
+
+  const handleStartExternalPomodoro = (e: React.FormEvent) => {
+    e.preventDefault();
+    startSession({
+      durationMinutes: pomodoroMins,
+      websiteName: extWebsiteName.trim() || 'External Coding',
+      problemName: extProblemName.trim() || 'Practice Problem',
+    });
+    setShowPomodoroModal(false);
+  };
 
   useEffect(() => {
     loadProblems();
@@ -212,6 +244,92 @@ export function PracticeTrackerPage() {
           >
             <Plus className="w-4 h-4 mr-1.5" />
             Log External Problem
+          </Button>
+        </div>
+      </div>
+
+      {/* Pomodoro Focus & Deep Work Bar */}
+      <div className="p-4 sm:p-5 rounded-2xl border border-primary/20 bg-gradient-to-r from-primary/5 via-surface to-surface shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <span className="text-2xl">🍅</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                Focus Pomodoro Timer
+              </span>
+              {isRunning && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-2xs font-semibold bg-success/10 text-success">
+                  <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+                  Running
+                </span>
+              )}
+            </div>
+            <div className="flex items-baseline gap-2 mt-0.5">
+              <span className="text-2xl sm:text-3xl font-extrabold font-mono text-text">
+                {timerDisplay}
+              </span>
+              {externalSession?.websiteName && (
+                <span className="text-xs text-text-secondary truncate max-w-[200px]">
+                  solving on <span className="font-semibold text-text">{externalSession.websiteName}</span>
+                  {externalSession.problemName ? `: ${externalSession.problemName}` : ''}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Timer Controls & External Problem Launcher */}
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 p-1 rounded-xl bg-surface-subtle border border-border">
+            {[25, 45, 15].map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => startSession({ durationMinutes: m })}
+                className="px-2.5 py-1 rounded-lg text-xs font-semibold text-text-secondary hover:text-text hover:bg-surface transition-colors cursor-pointer"
+              >
+                {m}m
+              </button>
+            ))}
+          </div>
+
+          <Button
+            onClick={togglePlayPause}
+            variant={isRunning ? 'secondary' : 'default'}
+            size="sm"
+            className="rounded-xl gap-1.5 text-xs font-semibold"
+          >
+            {isRunning ? (
+              <>
+                <Pause size={14} className="fill-current" /> Pause
+              </>
+            ) : (
+              <>
+                <Play size={14} className="fill-current" /> Start Focus
+              </>
+            )}
+          </Button>
+
+          <Button
+            onClick={resetTimer}
+            variant="outline"
+            size="sm"
+            className="rounded-xl text-xs"
+            title="Reset Pomodoro"
+          >
+            <RotateCcw size={14} />
+          </Button>
+
+          <Button
+            onClick={() => setShowPomodoroModal(true)}
+            variant="outline"
+            size="sm"
+            className="rounded-xl gap-1.5 text-xs text-primary border-primary/30 hover:bg-primary/5 font-semibold"
+          >
+            <Timer size={14} />
+            Solve from Another Website
           </Button>
         </div>
       </div>
@@ -639,6 +757,101 @@ export function PracticeTrackerPage() {
             </div>
           </form>
         </div>
+      </Modal>
+
+      {/* Modal: Solve from Another Website with Pomodoro */}
+      <Modal isOpen={showPomodoroModal} onClose={() => setShowPomodoroModal(false)}>
+        <Card className="w-full max-w-md border border-border bg-surface p-6 shadow-popover">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xl">🍅</span>
+            <h2 className="text-lg font-bold text-text">Solve from Another Website</h2>
+          </div>
+          <p className="text-xs text-text-secondary mb-4">
+            Practice problems on LeetCode, Codeforces, HackerRank, or any platform while Gyanix tracks your deep focus time.
+          </p>
+
+          <form onSubmit={handleStartExternalPomodoro} className="space-y-4 text-xs">
+            <div>
+              <label className="block font-semibold text-text-secondary mb-1">
+                Platform / Website Name (Optional)
+              </label>
+              <div className="flex flex-wrap gap-1.5 mb-2">
+                {['LeetCode', 'Codeforces', 'HackerRank', 'GeeksforGeeks', 'CodeChef'].map((p) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setExtWebsiteName(p)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
+                      extWebsiteName === p
+                        ? 'border-primary bg-primary text-white font-semibold'
+                        : 'border-border bg-surface-subtle text-text-secondary hover:text-text'
+                    }`}
+                  >
+                    {p}
+                  </button>
+                ))}
+              </div>
+              <Input
+                placeholder="Or custom site name..."
+                value={extWebsiteName}
+                onChange={(e) => setExtWebsiteName(e.target.value)}
+                className="text-xs"
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold text-text-secondary mb-1">
+                Problem Name or URL (Optional)
+              </label>
+              <Input
+                placeholder="e.g. Two Sum, 3Sum, LRU Cache or https://..."
+                value={extProblemName}
+                onChange={(e) => setExtProblemName(e.target.value)}
+                className="text-xs"
+              />
+            </div>
+
+            <div>
+              <label className="block font-semibold text-text-secondary mb-1">
+                Focus Sprint Duration
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { m: 25, label: '25m (Standard)' },
+                  { m: 45, label: '45m (Deep)' },
+                  { m: 60, label: '60m (Intense)' },
+                ].map(({ m, label }) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setPomodoroMins(m)}
+                    className={`p-2 rounded-xl border text-center text-xs transition-all cursor-pointer ${
+                      pomodoroMins === m
+                        ? 'border-primary bg-primary/10 text-primary font-bold'
+                        : 'border-border bg-surface-subtle text-text-secondary hover:text-text'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2 border-t border-border">
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowPomodoroModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" className="bg-primary text-white">
+                Start Pomodoro Sprint
+              </Button>
+            </div>
+          </form>
+        </Card>
       </Modal>
     </div>
   );
