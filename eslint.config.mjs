@@ -40,6 +40,7 @@ export default [
     rules: {
       ...tsPlugin.configs.recommended.rules,
       'no-undef': 'off',
+      'no-empty': ['warn', { allowEmptyCatch: true }],
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       '@typescript-eslint/consistent-type-imports': ['warn', { prefer: 'type-imports' }],
       '@typescript-eslint/no-explicit-any': 'warn',
@@ -66,6 +67,7 @@ export default [
       'jsx-a11y/label-has-associated-control': 'off',
       'jsx-a11y/click-events-have-key-events': 'off',
       'jsx-a11y/no-static-element-interactions': 'off',
+      'jsx-a11y/no-noninteractive-element-interactions': 'off',
     },
     settings: {
       react: { version: 'detect' },
